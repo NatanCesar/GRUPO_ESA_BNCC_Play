@@ -46,7 +46,7 @@ export default function About() {
                 <div className="about-section">
                     <h2>Instituição</h2>
                     <p>Universidade Federal da Paraíba (UFPB) — Campus IV, Rio Tinto, 2026</p>
-                    <p>Estágio Supervisionado — Ciência da Computação</p>
+                    <p>Engenharia de Software Aplicada — Licenciatura Ciência da Computação</p>
                 </div>
 
                 <button className="btn btn-about btn-back" onClick={() => navigate('/')}>
