@@ -10,11 +10,11 @@ CREATE TABLE "Session" (
     "code" TEXT NOT NULL,
     "status" "SessionStatus" NOT NULL DEFAULT 'WAITING',
     "difficulty" TEXT NOT NULL,
-    "totalCalls" INTEGER NOT NULL,
-    "timePerCall" INTEGER NOT NULL,
+    "totalQuestions" INTEGER NOT NULL,
+    "timePerQuestion" INTEGER NOT NULL,
     "lives" INTEGER NOT NULL,
     "levelName" TEXT NOT NULL,
-    "callIndices" INTEGER[],
+    "questionIndices" INTEGER[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "startedAt" TIMESTAMP(3),
     "endedAt" TIMESTAMP(3),
@@ -41,9 +41,9 @@ CREATE TABLE "Player" (
 -- CreateTable
 CREATE TABLE "Answer" (
     "id" TEXT NOT NULL,
-    "callIndex" INTEGER NOT NULL,
-    "chosenRole" TEXT NOT NULL,
-    "correctRole" TEXT NOT NULL,
+    "questionIndex" INTEGER NOT NULL,
+    "chosenAxis" TEXT NOT NULL,
+    "correctAxis" TEXT NOT NULL,
     "isCorrect" BOOLEAN NOT NULL,
     "timeSpent" INTEGER NOT NULL,
     "answeredAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -63,3 +63,4 @@ ALTER TABLE "Player" ADD CONSTRAINT "Player_sessionId_fkey" FOREIGN KEY ("sessio
 
 -- AddForeignKey
 ALTER TABLE "Answer" ADD CONSTRAINT "Answer_playerId_fkey" FOREIGN KEY ("playerId") REFERENCES "Player"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
