@@ -54,7 +54,7 @@ function AppRoutes() {
 
 export default function App() {
     return (
-        <BrowserRouter basename="/Tech-Squad-Manager">
+        <BrowserRouter basename="/BNCC-Play">
             <AppRoutes />
         </BrowserRouter>
     );

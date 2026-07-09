@@ -20,7 +20,7 @@ export default function MainMenu() {
     return (
         <div className="menu-page">
             <div className="menu-container">
-                <img src="/Tech-Squad-Manager/logo.png" alt="Tech Squad Manager" className="logo" />
+                <img src={`${import.meta.env.BASE_URL}logo.png`} alt="BNCC Play" className="logo" />
 
                 <div className="input-group">
                     <label htmlFor="playerName">Nome do jogador</label>
