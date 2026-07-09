@@ -36,7 +36,7 @@ export default function MainMenu() {
 
                 <div className="button-group">
                     <button className="btn btn-start" onClick={handleStart}>
-                        Iniciar Turno
+                        Jogar
                     </button>
                     <button className="btn btn-join" onClick={() => navigate('/join')}>
                         Entrar em Turma

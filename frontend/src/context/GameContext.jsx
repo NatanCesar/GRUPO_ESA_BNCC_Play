@@ -18,7 +18,7 @@ export function GameProvider({ children }) {
     const [isClassMode, setIsClassMode] = useState(false);
     const [sessionCode, setSessionCode] = useState(null);
     const [playerId, setPlayerId] = useState(null);
-    const [callIndices, setCallIndices] = useState(null);
+    const [questionIndices, setQuestionIndices] = useState(null);
     const [sessionRankings, setSessionRankings] = useState([]);
 
     function addRankingEntry(entry) {
@@ -40,7 +40,7 @@ export function GameProvider({ children }) {
         setIsClassMode(false);
         setSessionCode(null);
         setPlayerId(null);
-        setCallIndices(null);
+        setQuestionIndices(null);
         setSessionRankings([]);
     }
 
@@ -53,7 +53,7 @@ export function GameProvider({ children }) {
             isClassMode, setIsClassMode,
             sessionCode, setSessionCode,
             playerId, setPlayerId,
-            callIndices, setCallIndices,
+            questionIndices, setQuestionIndices,
             sessionRankings, setSessionRankings,
             resetClassMode,
         }}>

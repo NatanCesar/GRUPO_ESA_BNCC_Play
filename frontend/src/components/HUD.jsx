@@ -1,4 +1,4 @@
-export default function HUD({ levelName, callProgress, timeLeft, score, lives }) {
+export default function HUD({ levelName, questionProgress, timeLeft, score, lives }) {
     return (
         <header className="hud">
             <div className="hud-stat">
@@ -7,8 +7,8 @@ export default function HUD({ levelName, callProgress, timeLeft, score, lives })
             </div>
             <div className="hud-divider" />
             <div className="hud-stat">
-                <span className="hud-value">{callProgress}</span>
-                <span className="hud-label">Chamado</span>
+                <span className="hud-value">{questionProgress}</span>
+                <span className="hud-label">Questão</span>
             </div>
             <div className="hud-divider" />
             <div className="hud-stat">
