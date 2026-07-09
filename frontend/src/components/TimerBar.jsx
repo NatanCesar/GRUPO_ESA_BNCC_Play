@@ -3,7 +3,7 @@ import { useRef, useEffect } from 'react';
 export default function TimerBar({ timeLeft, totalTime, resetSignal }) {
     const barRef = useRef(null);
 
-    // Reset sem animação ao carregar novo chamado
+    // Reset sem animação ao carregar nova questão
     useEffect(() => {
         const bar = barRef.current;
         if (!bar) return;
