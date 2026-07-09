@@ -17,7 +17,7 @@ export default function Ranking() {
             <div className="ranking-container">
                 <div className="ranking-header">
                     <h1>Ranking</h1>
-                    <p className="ranking-subtitle">Os melhores gestores de TI</p>
+                    <p className="ranking-subtitle">Os melhores jogadores do BNCC Play</p>
                 </div>
 
                 <RankingTable rankings={rankings} />

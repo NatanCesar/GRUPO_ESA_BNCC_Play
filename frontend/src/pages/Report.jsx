@@ -2,9 +2,9 @@ import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext.jsx';
 
 function getClassification(accuracy) {
-    if (accuracy >= 90) return { label: 'Nível Sênior', message: 'Desempenho excepcional!', tier: 'senior' };
-    if (accuracy >= 70) return { label: 'Nível Pleno',  message: 'Bom trabalho, continue evoluindo.', tier: 'pleno' };
-    if (accuracy >= 50) return { label: 'Nível Júnior', message: 'Você está no caminho certo.', tier: 'junior' };
+    if (accuracy >= 90) return { label: 'Medalha de Ouro',   message: 'Desempenho excepcional!', tier: 'ouro' };
+    if (accuracy >= 70) return { label: 'Medalha de Prata',  message: 'Bom trabalho, continue evoluindo.', tier: 'prata' };
+    if (accuracy >= 50) return { label: 'Medalha de Bronze', message: 'Você está no caminho certo.', tier: 'bronze' };
     return { label: 'Continue Praticando', message: 'Cada erro é um aprendizado.', tier: 'novato' };
 }
 
@@ -21,7 +21,7 @@ export default function Report() {
             <div className="report-container">
                 <div className="report-header">
                     <h1>Relatório de Desempenho</h1>
-                    <p className="report-subtitle">Resumo da sua gestão</p>
+                    <p className="report-subtitle">Resumo do seu desempenho</p>
                 </div>
 
                 <div className={`report-badge report-badge--${tier}`}>
@@ -40,7 +40,7 @@ export default function Report() {
                     </div>
                     <div className="report-stat">
                         <span className="report-stat-value">{correctAnswers}/{totalAnswered}</span>
-                        <span className="report-stat-label">Resolvidos</span>
+                        <span className="report-stat-label">Acertos</span>
                     </div>
                 </div>
 

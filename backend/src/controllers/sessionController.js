@@ -1,10 +1,10 @@
 import prisma from '../lib/prisma.js';
-import { generateUniqueCode, generateCallIndices } from '../lib/sessionCode.js';
+import { generateUniqueCode, generateQuestionIndices } from '../lib/sessionCode.js';
 
 const levelConfigs = {
-    junior: { levelName: 'Júnior', totalCalls: 5,  timePerCall: 30, lives: 5 },
-    pleno:  { levelName: 'Pleno',  totalCalls: 8,  timePerCall: 20, lives: 3 },
-    senior: { levelName: 'Sênior', totalCalls: 12, timePerCall: 15, lives: 2 },
+    facil:   { levelName: 'Fácil',   totalQuestions: 5,  timePerQuestion: 30, lives: 5 },
+    medio:   { levelName: 'Médio',   totalQuestions: 8,  timePerQuestion: 20, lives: 3 },
+    dificil: { levelName: 'Difícil', totalQuestions: 12, timePerQuestion: 15, lives: 2 },
 };
 
 // POST /sessions
@@ -13,17 +13,17 @@ export async function createSession(req, res) {
 
     const config = levelConfigs[difficulty];
     if (!config) {
-        return res.status(400).json({ error: 'Dificuldade inválida. Use: junior, pleno ou senior' });
+        return res.status(400).json({ error: 'Dificuldade inválida. Use: facil, medio ou dificil' });
     }
 
     const code = await generateUniqueCode();
-    const callIndices = generateCallIndices(config.totalCalls);
+    const questionIndices = generateQuestionIndices(difficulty, config.totalQuestions);
 
     const session = await prisma.session.create({
         data: {
             code,
             difficulty,
-            callIndices,
+            questionIndices,
             ...config,
         },
     });
@@ -33,8 +33,8 @@ export async function createSession(req, res) {
         code: session.code,
         difficulty: session.difficulty,
         levelName: session.levelName,
-        totalCalls: session.totalCalls,
-        timePerCall: session.timePerCall,
+        totalQuestions: session.totalQuestions,
+        timePerQuestion: session.timePerQuestion,
         lives: session.lives,
     });
 }
@@ -55,8 +55,8 @@ export async function getSession(req, res) {
         status: session.status,
         difficulty: session.difficulty,
         levelName: session.levelName,
-        totalCalls: session.totalCalls,
-        timePerCall: session.timePerCall,
+        totalQuestions: session.totalQuestions,
+        timePerQuestion: session.timePerQuestion,
         lives: session.lives,
         players: session.players,
     });
@@ -101,11 +101,11 @@ export async function joinSession(req, res) {
         playerId: player.id,
         name: player.name,
         sessionId: session.id,
-        callIndices: session.callIndices,
+        questionIndices: session.questionIndices,
         config: {
             levelName: session.levelName,
-            totalCalls: session.totalCalls,
-            timePerCall: session.timePerCall,
+            totalQuestions: session.totalQuestions,
+            timePerQuestion: session.timePerQuestion,
             lives: session.lives,
         },
     });
@@ -135,7 +135,7 @@ export async function startSession(req, res) {
 
     req.io.to(session.code).emit('session:started', {
         startedAt,
-        callIndices: session.callIndices,
+        questionIndices: session.questionIndices,
     });
 
     res.json({ status: 'PLAYING', startedAt });
@@ -182,13 +182,13 @@ export async function getSessionReport(req, res) {
 
     if (!session) return res.status(404).json({ error: 'Sessão não encontrada' });
 
-    const roles = ['frontend', 'backend', 'devops', 'ux', 'qa', 'data'];
+    const axes = ['pensamento-computacional', 'mundo-digital', 'cultura-digital'];
 
     const players = session.players.map(p => {
         const byCategory = Object.fromEntries(
-            roles.map(role => {
-                const relevant = p.answers.filter(a => a.correctRole === role);
-                return [role, {
+            axes.map(axis => {
+                const relevant = p.answers.filter(a => a.correctAxis === axis);
+                return [axis, {
                     correct: relevant.filter(a => a.isCorrect).length,
                     total: relevant.length,
                 }];
@@ -203,17 +203,17 @@ export async function getSessionReport(req, res) {
         };
     });
 
-    // Média da turma por categoria
+    // Média da turma por eixo
     const classAvgByCategory = Object.fromEntries(
-        roles.map(role => {
+        axes.map(axis => {
             const totals = players.reduce(
                 (acc, p) => ({
-                    correct: acc.correct + p.byCategory[role].correct,
-                    total: acc.total + p.byCategory[role].total,
+                    correct: acc.correct + p.byCategory[axis].correct,
+                    total: acc.total + p.byCategory[axis].total,
                 }),
                 { correct: 0, total: 0 }
             );
-            return [role, totals];
+            return [axis, totals];
         })
     );
 

@@ -10,7 +10,7 @@ export default function JoinSession() {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
 
-    const { setPlayerName, setPlayerId, setSessionCode, setCallIndices,
+    const { setPlayerName, setPlayerId, setSessionCode, setQuestionIndices,
             setGameConfig, setIsClassMode } = useGame();
     const navigate = useNavigate();
 
@@ -30,7 +30,7 @@ export default function JoinSession() {
             setPlayerName(trimName);
             setPlayerId(data.playerId);
             setSessionCode(trimCode);
-            setCallIndices(data.callIndices);
+            setQuestionIndices(data.questionIndices);
             setGameConfig(data.config);
             setIsClassMode(true);
 

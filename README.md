@@ -220,7 +220,7 @@ npm run dev
 Frontend disponível em:
 
 ```text id="65q3xr"
-http://localhost:5173
+http://localhost:5173/BNCC-Play/
 ```
 
 ---

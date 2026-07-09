@@ -8,20 +8,20 @@ datasource db {
 }
 
 model Session {
-  id          String        @id @default(cuid())
-  code        String        @unique
-  status      SessionStatus @default(WAITING)
-  difficulty  String
-  totalCalls  Int
-  timePerCall Int
-  lives       Int
-  levelName   String
-  callIndices Int[]
-  createdAt   DateTime      @default(now())
-  startedAt   DateTime?
-  endedAt     DateTime?
+  id              String        @id @default(cuid())
+  code            String        @unique
+  status          SessionStatus @default(WAITING)
+  difficulty      String
+  totalQuestions  Int
+  timePerQuestion Int
+  lives           Int
+  levelName       String
+  questionIndices Int[]
+  createdAt       DateTime      @default(now())
+  startedAt       DateTime?
+  endedAt         DateTime?
 
-  players     Player[]
+  players         Player[]
 }
 
 enum SessionStatus {
@@ -55,14 +55,14 @@ enum PlayerStatus {
 }
 
 model Answer {
-  id          String   @id @default(cuid())
-  callIndex   Int
-  chosenRole  String
-  correctRole String
-  isCorrect   Boolean
-  timeSpent   Int
-  answeredAt  DateTime @default(now())
+  id            String   @id @default(cuid())
+  questionIndex Int
+  chosenAxis    String
+  correctAxis   String
+  isCorrect     Boolean
+  timeSpent     Int
+  answeredAt    DateTime @default(now())
 
-  playerId    String
-  player      Player   @relation(fields: [playerId], references: [id])
+  playerId      String
+  player        Player   @relation(fields: [playerId], references: [id])
 }

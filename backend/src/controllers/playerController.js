@@ -26,9 +26,9 @@ export async function finishPlayer(req, res) {
             finishedAt,
             answers: {
                 create: answers.map(a => ({
-                    callIndex: a.callIndex,
-                    chosenRole: a.chosenRole,
-                    correctRole: a.correctRole,
+                    questionIndex: a.questionIndex,
+                    chosenAxis: a.chosenAxis,
+                    correctAxis: a.correctAxis,
                     isCorrect: a.isCorrect,
                     timeSpent: a.timeSpent,
                 })),

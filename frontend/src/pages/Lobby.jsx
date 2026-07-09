@@ -4,7 +4,7 @@ import { useGame } from '../context/GameContext.jsx';
 import { getSocket } from '../services/socket.js';
 
 export default function Lobby() {
-    const { sessionCode, playerName, setCallIndices } = useGame();
+    const { sessionCode, playerName, setQuestionIndices } = useGame();
     const navigate = useNavigate();
     const [players, setPlayers] = useState([]);
 
@@ -27,8 +27,8 @@ export default function Lobby() {
             setPlayers(prev => prev.filter(p => p.id !== playerId));
         });
 
-        socket.on('session:started', ({ callIndices }) => {
-            if (callIndices) setCallIndices(callIndices);
+        socket.on('session:started', ({ questionIndices }) => {
+            if (questionIndices) setQuestionIndices(questionIndices);
             navigate('/game');
         });
 

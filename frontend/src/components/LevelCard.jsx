@@ -1,16 +1,16 @@
-export default function LevelCard({ levelKey, title, description, calls, timePerCall, lives, onSelect }) {
+export default function LevelCard({ levelKey, title, description, questions, timePerQuestion, lives, onSelect }) {
     return (
         <div className={`level-card level-card--${levelKey}`}>
             <h2>{title}</h2>
             <p className="level-card-desc">{description}</p>
             <div className="level-stats">
                 <div className="level-stat">
-                    <span className="stat-value">{calls}</span>
-                    <span className="stat-label">chamados</span>
+                    <span className="stat-value">{questions}</span>
+                    <span className="stat-label">questões</span>
                 </div>
                 <div className="level-stat">
-                    <span className="stat-value">{timePerCall}s</span>
-                    <span className="stat-label">por chamado</span>
+                    <span className="stat-value">{timePerQuestion}s</span>
+                    <span className="stat-label">por questão</span>
                 </div>
                 <div className="level-stat">
                     <span className="stat-value">{lives}</span>

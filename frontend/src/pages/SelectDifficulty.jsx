@@ -3,26 +3,29 @@ import { useGame } from '../context/GameContext.jsx';
 import LevelCard from '../components/LevelCard.jsx';
 
 const levelConfigs = {
-    junior: {
-        levelName: 'Júnior',
-        totalCalls: 5,
-        timePerCall: 30,
+    facil: {
+        levelName: 'Fácil',
+        totalQuestions: 5,
+        timePerQuestion: 30,
         lives: 5,
-        description: 'Ideal para quem está começando a conhecer as áreas de TI.',
+        poolSize: 10,
+        description: 'Ideal para começar a conhecer os eixos da BNCC Computação.',
     },
-    pleno: {
-        levelName: 'Pleno',
-        totalCalls: 8,
-        timePerCall: 20,
+    medio: {
+        levelName: 'Médio',
+        totalQuestions: 8,
+        timePerQuestion: 20,
         lives: 3,
-        description: 'Para quem já tem alguma familiaridade com os papéis de TI.',
+        poolSize: 20,
+        description: 'Para quem já conhece os eixos e quer um desafio maior.',
     },
-    senior: {
-        levelName: 'Sênior',
-        totalCalls: 12,
-        timePerCall: 15,
+    dificil: {
+        levelName: 'Difícil',
+        totalQuestions: 12,
+        timePerQuestion: 15,
         lives: 2,
-        description: 'Desafio máximo — rápido, muitos chamados e poucas chances.',
+        poolSize: 30,
+        description: 'Desafio máximo — rápido, muitas questões e poucas chances.',
     },
 };
 
@@ -50,8 +53,8 @@ export default function SelectDifficulty() {
                             levelKey={key}
                             title={config.levelName}
                             description={config.description}
-                            calls={config.totalCalls}
-                            timePerCall={config.timePerCall}
+                            questions={config.totalQuestions}
+                            timePerQuestion={config.timePerQuestion}
                             lives={config.lives}
                             onSelect={() => handleSelect(key)}
                         />

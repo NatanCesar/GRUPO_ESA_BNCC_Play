@@ -1,30 +1,24 @@
 import { useReducer, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext.jsx';
-import { allCalls } from '../data/calls.js';
+import { allQuestions } from '../data/questions.js';
 import { api } from '../services/api.js';
 import HUD from '../components/HUD.jsx';
 import TimerBar from '../components/TimerBar.jsx';
-import CallCard from '../components/CallCard.jsx';
+import QuestionCard from '../components/QuestionCard.jsx';
 import DropZone from '../components/DropZone.jsx';
 import FeedbackModal from '../components/FeedbackModal.jsx';
 
-const roleLabels = {
-    frontend: 'Frontend',
-    backend: 'Backend',
-    devops: 'DevOps',
-    ux: 'UX/UI',
-    qa: 'QA',
-    data: 'Dados',
+const axisLabels = {
+    'pensamento-computacional': 'Pensamento Computacional',
+    'mundo-digital': 'Mundo Digital',
+    'cultura-digital': 'Cultura Digital',
 };
 
 const dropZones = [
-    { role: 'frontend', label: 'Frontend' },
-    { role: 'backend',  label: 'Backend'  },
-    { role: 'devops',   label: 'DevOps'   },
-    { role: 'ux',       label: 'UX/UI'    },
-    { role: 'qa',       label: 'QA'       },
-    { role: 'data',     label: 'Dados'    },
+    { axis: 'pensamento-computacional', label: 'Pensamento Computacional' },
+    { axis: 'mundo-digital',            label: 'Mundo Digital' },
+    { axis: 'cultura-digital',          label: 'Cultura Digital' },
 ];
 
 function shuffle(array) {
@@ -36,38 +30,39 @@ function shuffle(array) {
     return arr;
 }
 
-function buildInitialState(config, orderedCalls) {
+function buildInitialState(config, orderedQuestions) {
     return {
         score: 0,
         lives: config.lives,
-        remainingCalls: config.totalCalls,
-        timeLeft: config.timePerCall,
-        currentCall: null,
-        shuffledCalls: orderedCalls || shuffle(allCalls),
-        callIndex: 0,
+        remainingQuestions: config.totalQuestions,
+        timeLeft: config.timePerQuestion,
+        currentQuestion: null,
+        shuffledQuestions: orderedQuestions
+            || shuffle(allQuestions.slice(0, config.poolSize || allQuestions.length)),
+        questionIndex: 0,
         feedback: null,       // { isCorrect, title, message, reason }
         gameOver: false,
-        resetSignal: 0,       // incrementado a cada novo chamado para resetar TimerBar
+        resetSignal: 0,       // incrementado a cada nova questão para resetar TimerBar
         answersLog: [],       // respostas acumuladas para envio no modo turma
     };
 }
 
 function reducer(state, action) {
     switch (action.type) {
-        case 'LOAD_CALL': {
-            let { shuffledCalls, callIndex } = state;
-            if (callIndex >= shuffledCalls.length) {
-                shuffledCalls = shuffle(allCalls);
-                callIndex = 0;
+        case 'LOAD_QUESTION': {
+            let { shuffledQuestions, questionIndex } = state;
+            if (questionIndex >= shuffledQuestions.length) {
+                shuffledQuestions = shuffle(shuffledQuestions);
+                questionIndex = 0;
             }
-            const currentCall = shuffledCalls[callIndex];
+            const currentQuestion = shuffledQuestions[questionIndex];
             return {
                 ...state,
-                currentCall,
-                shuffledCalls,
-                callIndex: callIndex + 1,
-                remainingCalls: state.remainingCalls - 1,
-                timeLeft: action.timePerCall,
+                currentQuestion,
+                shuffledQuestions,
+                questionIndex: questionIndex + 1,
+                remainingQuestions: state.remainingQuestions - 1,
+                timeLeft: action.timePerQuestion,
                 feedback: null,
                 resetSignal: state.resetSignal + 1,
             };
@@ -79,17 +74,17 @@ function reducer(state, action) {
                 ...state,
                 score: state.score + 100,
                 answersLog: [...state.answersLog, {
-                    callIndex: action.callIndex,
-                    chosenRole: action.chosenRole,
-                    correctRole: state.currentCall.role,
+                    questionIndex: action.questionIndex,
+                    chosenAxis: action.chosenAxis,
+                    correctAxis: state.currentQuestion.axis,
                     isCorrect: true,
                     timeSpent: action.timeSpent,
                 }],
                 feedback: {
                     isCorrect: true,
                     title: 'Boa decisão!',
-                    message: `O ${roleLabels[state.currentCall.role]} é responsável por esse tipo de chamado.`,
-                    reason: state.currentCall.reason,
+                    message: `Essa situação pertence ao eixo ${axisLabels[state.currentQuestion.axis]}.`,
+                    reason: state.currentQuestion.reason,
                 },
             };
         case 'WRONG_ANSWER':
@@ -97,17 +92,17 @@ function reducer(state, action) {
                 ...state,
                 lives: state.lives - 1,
                 answersLog: [...state.answersLog, {
-                    callIndex: action.callIndex,
-                    chosenRole: action.chosenRole ?? null,
-                    correctRole: state.currentCall.role,
+                    questionIndex: action.questionIndex,
+                    chosenAxis: action.chosenAxis ?? null,
+                    correctAxis: state.currentQuestion.axis,
                     isCorrect: false,
                     timeSpent: action.timeSpent,
                 }],
                 feedback: {
                     isCorrect: false,
                     title: 'Atenção!',
-                    message: `Quem deveria resolver isso é o ${roleLabels[state.currentCall.role]}.`,
-                    reason: state.currentCall.reason,
+                    message: `O eixo correto era ${axisLabels[state.currentQuestion.axis]}.`,
+                    reason: state.currentQuestion.reason,
                 },
             };
         case 'CLOSE_FEEDBACK':
@@ -121,54 +116,54 @@ function reducer(state, action) {
 
 export default function Game() {
     const { gameConfig, setReportData, addRankingEntry, playerName,
-            isClassMode, playerId, sessionCode, callIndices, setSessionRankings } = useGame();
+            isClassMode, playerId, sessionCode, questionIndices, setSessionRankings } = useGame();
     const navigate = useNavigate();
 
-    const orderedCalls = callIndices ? callIndices.map(i => allCalls[i]) : null;
-    const [state, dispatch] = useReducer(reducer, null, () => buildInitialState(gameConfig, orderedCalls));
+    const orderedQuestions = questionIndices ? questionIndices.map(i => allQuestions[i]) : null;
+    const [state, dispatch] = useReducer(reducer, null, () => buildInitialState(gameConfig, orderedQuestions));
     const timerRef = useRef(null);
-    const callCardRef = useRef(null);
+    const questionCardRef = useRef(null);
     const touchCloneRef = useRef(null);
 
-    const { score, lives, remainingCalls, timeLeft, currentCall, feedback, gameOver, resetSignal, answersLog, callIndex } = state;
+    const { score, lives, remainingQuestions, timeLeft, currentQuestion, feedback, gameOver, resetSignal, answersLog, questionIndex } = state;
 
-    // Carrega primeiro chamado (ref evita duplo disparo do StrictMode em dev)
+    // Carrega primeira questão (ref evita duplo disparo do StrictMode em dev)
     const initialLoadDone = useRef(false);
     useEffect(() => {
         if (initialLoadDone.current) return;
         initialLoadDone.current = true;
-        dispatch({ type: 'LOAD_CALL', timePerCall: gameConfig.timePerCall });
-    }, [gameConfig.timePerCall]);
+        dispatch({ type: 'LOAD_QUESTION', timePerQuestion: gameConfig.timePerQuestion });
+    }, [gameConfig.timePerQuestion]);
 
     // Timer
     useEffect(() => {
-        if (!currentCall || feedback || gameOver) return;
+        if (!currentQuestion || feedback || gameOver) return;
         timerRef.current = setInterval(() => {
             dispatch({ type: 'TICK' });
         }, 1000);
         return () => clearInterval(timerRef.current);
-    }, [currentCall, feedback, gameOver, resetSignal]);
+    }, [currentQuestion, feedback, gameOver, resetSignal]);
 
     // Timeout
     useEffect(() => {
-        if (timeLeft <= 0 && currentCall && !feedback) {
+        if (timeLeft <= 0 && currentQuestion && !feedback) {
             clearInterval(timerRef.current);
-            const currentCallIndex = (callIndices ?? [])[callIndex - 1] ?? (callIndex - 1);
-            dispatch({ type: 'WRONG_ANSWER', chosenRole: null, callIndex: currentCallIndex, timeSpent: gameConfig.timePerCall });
+            const currentQuestionIndex = (questionIndices ?? [])[questionIndex - 1] ?? (questionIndex - 1);
+            dispatch({ type: 'WRONG_ANSWER', chosenAxis: null, questionIndex: currentQuestionIndex, timeSpent: gameConfig.timePerQuestion });
         }
-    }, [timeLeft, currentCall, feedback]);
+    }, [timeLeft, currentQuestion, feedback]);
 
     // Fim de jogo — só dispara quando não há feedback pendente
     useEffect(() => {
         if (gameOver || feedback) return;
-        if (lives <= 0 || (remainingCalls <= 0 && !currentCall)) {
+        if (lives <= 0 || (remainingQuestions <= 0 && !currentQuestion)) {
             dispatch({ type: 'END_GAME' });
         }
-    }, [lives, remainingCalls, feedback, currentCall, gameOver]);
+    }, [lives, remainingQuestions, feedback, currentQuestion, gameOver]);
 
     useEffect(() => {
         if (!gameOver) return;
-        const totalAnswered = gameConfig.totalCalls - remainingCalls;
+        const totalAnswered = gameConfig.totalQuestions - remainingQuestions;
         const correctAnswers = score / 100;
         const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
         const data = { score, totalAnswered, correctAnswers, levelName: gameConfig.levelName };
@@ -198,38 +193,37 @@ export default function Game() {
     }, [gameOver]);
 
     // Resposta via drop
-    const handleDrop = useCallback((role) => {
-        if (!currentCall || feedback) return;
+    const handleDrop = useCallback((axis) => {
+        if (!currentQuestion || feedback) return;
         clearInterval(timerRef.current);
-        const timeSpent = gameConfig.timePerCall - timeLeft;
-        const currentCallIndex = (callIndices ?? [])[callIndex - 1] ?? (callIndex - 1);
-        if (role === currentCall.role) {
-            dispatch({ type: 'CORRECT_ANSWER', chosenRole: role, callIndex: currentCallIndex, timeSpent });
+        const timeSpent = gameConfig.timePerQuestion - timeLeft;
+        const currentQuestionIndex = (questionIndices ?? [])[questionIndex - 1] ?? (questionIndex - 1);
+        if (axis === currentQuestion.axis) {
+            dispatch({ type: 'CORRECT_ANSWER', chosenAxis: axis, questionIndex: currentQuestionIndex, timeSpent });
         } else {
-            dispatch({ type: 'WRONG_ANSWER', chosenRole: role, callIndex: currentCallIndex, timeSpent });
+            dispatch({ type: 'WRONG_ANSWER', chosenAxis: axis, questionIndex: currentQuestionIndex, timeSpent });
         }
-    }, [currentCall, feedback, timeLeft, gameConfig.timePerCall, callIndex, callIndices]);
+    }, [currentQuestion, feedback, timeLeft, gameConfig.timePerQuestion, questionIndex, questionIndices]);
 
     // Continuar após feedback
     function handleContinue() {
-        const afterLives = feedback?.isCorrect ? lives : lives - 0; // já decrementado no reducer
-        if (lives <= 0 || remainingCalls <= 0) {
+        if (lives <= 0 || remainingQuestions <= 0) {
             dispatch({ type: 'END_GAME' });
         } else {
-            dispatch({ type: 'LOAD_CALL', timePerCall: gameConfig.timePerCall });
+            dispatch({ type: 'LOAD_QUESTION', timePerQuestion: gameConfig.timePerQuestion });
         }
     }
 
     // Touch support
     useEffect(() => {
-        const card = callCardRef.current;
-        if (!card || !currentCall) return;
+        const card = questionCardRef.current;
+        if (!card || !currentQuestion) return;
 
         let offsetX = 0;
         let offsetY = 0;
 
         function onTouchStart(e) {
-            if (!currentCall) return;
+            if (!currentQuestion) return;
             e.preventDefault();
             const touch = e.touches[0];
             const rect = card.getBoundingClientRect();
@@ -274,7 +268,7 @@ export default function Game() {
             touchCloneRef.current = null;
 
             const zone = el?.closest('.drop-zone');
-            if (zone) handleDrop(zone.dataset.role);
+            if (zone) handleDrop(zone.dataset.axis);
         }
 
         card.addEventListener('touchstart', onTouchStart, { passive: false });
@@ -286,17 +280,17 @@ export default function Game() {
             document.removeEventListener('touchmove', onTouchMove);
             document.removeEventListener('touchend', onTouchEnd);
         };
-    }, [currentCall, handleDrop]);
+    }, [currentQuestion, handleDrop]);
 
-    if (!currentCall) return null;
+    if (!currentQuestion) return null;
 
-    const callNumber = gameConfig.totalCalls - remainingCalls;
+    const questionNumber = gameConfig.totalQuestions - remainingQuestions;
 
     return (
         <main className="game-container">
             <HUD
                 levelName={gameConfig.levelName}
-                callProgress={`${callNumber} de ${gameConfig.totalCalls}`}
+                questionProgress={`${questionNumber} de ${gameConfig.totalQuestions}`}
                 timeLeft={timeLeft}
                 score={score}
                 lives={lives}
@@ -304,17 +298,17 @@ export default function Game() {
 
             <TimerBar
                 timeLeft={timeLeft}
-                totalTime={gameConfig.timePerCall}
+                totalTime={gameConfig.timePerQuestion}
                 resetSignal={resetSignal}
             />
 
-            <section className="call-area">
-                <CallCard ref={callCardRef} text={currentCall.text} />
+            <section className="question-area">
+                <QuestionCard ref={questionCardRef} text={currentQuestion.text} />
             </section>
 
-            <section className="team-area">
-                {dropZones.map(({ role, label }) => (
-                    <DropZone key={role} role={role} label={label} onDrop={handleDrop} />
+            <section className="axes-area">
+                {dropZones.map(({ axis, label }) => (
+                    <DropZone key={axis} axis={axis} label={label} onDrop={handleDrop} />
                 ))}
             </section>
 

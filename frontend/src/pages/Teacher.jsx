@@ -4,20 +4,21 @@ import { api } from '../services/api.js';
 import { connectToSession, disconnectSocket, getSocket } from '../services/socket.js';
 
 const DIFFICULTIES = [
-    { key: 'junior', label: 'Júnior',  desc: '5 chamados · 30s · 5 vidas' },
-    { key: 'pleno',  label: 'Pleno',   desc: '8 chamados · 20s · 3 vidas' },
-    { key: 'senior', label: 'Sênior',  desc: '12 chamados · 15s · 2 vidas' },
+    { key: 'facil',   label: 'Fácil',   desc: '5 questões · 30s · 5 vidas' },
+    { key: 'medio',   label: 'Médio',   desc: '8 questões · 20s · 3 vidas' },
+    { key: 'dificil', label: 'Difícil', desc: '12 questões · 15s · 2 vidas' },
 ];
 
-const roleLabels = {
-    frontend: 'Frontend', backend: 'Backend', devops: 'DevOps',
-    ux: 'UX/UI', qa: 'QA', data: 'Dados',
+const axisLabels = {
+    'pensamento-computacional': 'Pensamento Computacional',
+    'mundo-digital': 'Mundo Digital',
+    'cultura-digital': 'Cultura Digital',
 };
 
 export default function Teacher() {
     const navigate = useNavigate();
     const [view, setView]             = useState('home');   // home | lobby | playing | report
-    const [difficulty, setDifficulty] = useState('junior');
+    const [difficulty, setDifficulty] = useState('facil');
     const [session, setSession]       = useState(null);     // { code, sessionId, ... }
     const [players, setPlayers]       = useState([]);
     const [rankings, setRankings]     = useState([]);
@@ -155,7 +156,7 @@ export default function Teacher() {
                     {session.code}
                 </p>
                 <p style={{ color: '#475569', fontSize: '0.85rem', marginBottom: '24px' }}>
-                    {session.levelName} · {session.totalCalls} chamados · {session.timePerCall}s · {session.lives} vidas
+                    {session.levelName} · {session.totalQuestions} questões · {session.timePerQuestion}s · {session.lives} vidas
                 </p>
 
                 {error && <p className="error-msg">{error}</p>}
@@ -197,8 +198,8 @@ export default function Teacher() {
 
                 <div className="teacher-session-info">
                     <span>{session.levelName}</span>
-                    <span>{session.totalCalls} chamados</span>
-                    <span>{session.timePerCall}s por chamado</span>
+                    <span>{session.totalQuestions} questões</span>
+                    <span>{session.timePerQuestion}s por questão</span>
                     <span>{session.lives} vidas</span>
                 </div>
 
@@ -278,16 +279,16 @@ export default function Teacher() {
                                 <span className="teacher-player-card__score">{p.score} pts · {p.accuracy}%</span>
                             </div>
                             <div className="teacher-category-grid">
-                                {Object.entries(p.byCategory).map(([role, stats]) => {
+                                {Object.entries(p.byCategory).map(([axis, stats]) => {
                                     const isEmpty = stats.total === 0;
                                     const isAll   = !isEmpty && stats.correct === stats.total;
                                     const isNone  = !isEmpty && stats.correct === 0;
                                     return (
                                         <div
-                                            key={role}
+                                            key={axis}
                                             className={`teacher-cat${isEmpty ? ' teacher-cat--empty' : isAll ? ' teacher-cat--ok' : isNone ? ' teacher-cat--fail' : ' teacher-cat--partial'}`}
                                         >
-                                            <span className="teacher-cat__role">{roleLabels[role]}</span>
+                                            <span className="teacher-cat__axis">{axisLabels[axis]}</span>
                                             <span className="teacher-cat__score">{stats.correct}/{stats.total}</span>
                                         </div>
                                     );
