@@ -119,6 +119,12 @@ O projeto considera princípios de UX/UI para garantir:
 
 ---
 
+# Protótipo navegável
+
+[Figma](https://www.figma.com/proto/hhFOiR5NpPadzcjIk1ZBzy/BNCC-Play?node-id=35-3&p=f&m=draw&scaling=scale-down&content-scaling=fixed&page-id=0%3A1&starting-point-node-id=35%3A3&show-proto-sidebar=1&t=0LGuvAwcEHhD9MhU-1)
+
+---
+
 # Como Executar o Projeto
 
 ## Pré-requisitos
