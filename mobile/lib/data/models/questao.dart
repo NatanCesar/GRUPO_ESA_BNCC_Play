@@ -13,6 +13,7 @@ class Questao {
     required this.respostaCorreta,
     required this.eixo,
     required this.dificuldade,
+    this.categoria = 'Geral',
     required this.professorId,
     required this.criadoEm,
     required this.atualizadoEm,
@@ -27,6 +28,7 @@ class Questao {
   final String respostaCorreta; // 'A', 'B', 'C' ou 'D'
   final EixoBNCC eixo;
   final Dificuldade dificuldade;
+  final String categoria;
   final int professorId;
   final DateTime criadoEm;
   final DateTime atualizadoEm;
@@ -41,6 +43,7 @@ class Questao {
       'resposta_correta': respostaCorreta,
       'eixo': eixo.valor,
       'dificuldade': dificuldade.valor,
+      'categoria': categoria,
       'professor_id': professorId,
       'criado_em': criadoEm.toUtc().toIso8601String(),
       'atualizado_em': atualizadoEm.toUtc().toIso8601String(),
@@ -58,6 +61,7 @@ class Questao {
       respostaCorreta: linha['resposta_correta'] as String,
       eixo: EixoBNCC.dePersistencia(linha['eixo'] as String),
       dificuldade: Dificuldade.dePersistencia(linha['dificuldade'] as String),
+      categoria: linha['categoria'] as String? ?? 'Geral',
       professorId: linha['professor_id'] as int,
       criadoEm: DateTime.parse(linha['criado_em'] as String),
       atualizadoEm: DateTime.parse(linha['atualizado_em'] as String),
@@ -73,6 +77,7 @@ class Questao {
     String? respostaCorreta,
     EixoBNCC? eixo,
     Dificuldade? dificuldade,
+    String? categoria,
     DateTime? atualizadoEm,
   }) {
     return Questao(
@@ -85,6 +90,7 @@ class Questao {
       respostaCorreta: respostaCorreta ?? this.respostaCorreta,
       eixo: eixo ?? this.eixo,
       dificuldade: dificuldade ?? this.dificuldade,
+      categoria: categoria ?? this.categoria,
       professorId: professorId,
       criadoEm: criadoEm,
       atualizadoEm: atualizadoEm ?? this.atualizadoEm,
@@ -103,7 +109,7 @@ class Questao {
       case 'D':
         return opcaoD;
       default:
-        throw StateError('Resposta invalida: $respostaCorreta');
+        throw StateError('Resposta inválida: $respostaCorreta');
     }
   }
 }

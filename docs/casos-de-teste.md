@@ -16,6 +16,7 @@ omitidos.
 | Automatizado | Existe teste automatizado que executa o caso |
 | Manual | Executado a mão, sem automação |
 | Pendente (ciclo N) | Depende de funcionalidade ainda não implementada |
+| Parcial (MVP local) | Fluxo local implementado, mas falta a contraparte de servidor |
 | N/A (versão local) | Não exercitável sem servidor |
 
 ## Como executar
@@ -62,30 +63,32 @@ flutter test integration_test/                # fluxo ponta a ponta
 | CT10 Remoção de questão | Não funcional (permissões) | Aluno autenticado | Tentativa de exclusão | Bloqueado para alunos | `test/unit/session_scope_test.dart::Permission.requireRole` | Automatizado |
 | CT12 Listagem de questões por nível de dificuldade | Funcional | Questões cadastradas | Filtro por dificuldade | Somente questões da dificuldade | `test/data/questao_repository_test.dart::QuestaoRepository.filtrar > CT12 funcional: filtra por dificuldade`, `> filtra por eixo e dificuldade combinados` | Automatizado |
 
-## Ciclos seguintes
+## Ciclos 3 e 4
 
-| CT | Tipo | Resultado esperado | Status |
-|---|---|---|---|
-| CT13 Sistema gamificado | Funcional | Resposta registrada e feedback apresentado | Pendente (ciclo 3) |
-| CT13 Sistema gamificado | Não funcional | 100 alunos simultâneos sem travamento | N/A (versão local): depende de servidor. |
-| CT14 Pontuação e recompensas | Funcional | Pontos adicionados | Pendente (ciclo 3) |
-| CT14 Pontuação e recompensas | Não funcional (integridade) | Alteração manual rejeitada | Pendente (ciclo 3) |
-| CT15 Ranking de jogadores | Funcional | Ranking ordenado corretamente | Pendente (ciclo 3) |
-| CT15 Ranking de jogadores | Não funcional (anonimização) | Somente apelidos aparecem | Pendente (ciclo 3) |
-| CT16 Multiplayer em sala | Funcional | Todos entram na mesma sessão | Pendente (ciclo 3) |
-| CT16 Multiplayer em sala | Não funcional | 50 conexões simultâneas | N/A (versão local): depende de servidor. |
-| CT17 Dashboard pedagógico | Funcional | Dashboard carregado corretamente | Pendente (ciclo 4) |
-| CT17 Dashboard pedagógico | Não funcional (controle de acesso) | Aluno tem acesso negado | Pendente (ciclo 4) |
-| CT18 Relatórios de desempenho | Funcional | Relatório disponível | Pendente (ciclo 4) |
-| CT18 Relatórios de desempenho | Não funcional (autorização) | Acesso impedido e tentativa registrada | Pendente (ciclo 4) |
+| CT | Tipo | Resultado esperado | Automação | Status |
+|---|---|---|---|---|
+| CT13 Sistema gamificado | Funcional | Resposta registrada e feedback apresentado | `test/data/ciclo4_repository_test.dart`; fluxo em `GameController` | Automatizado |
+| CT13 Sistema gamificado | Não funcional | 100 alunos simultâneos sem travamento | — | N/A (versão local): depende de servidor. |
+| CT14 Pontuação e recompensas | Funcional | Pontos adicionados | `test/data/ciclo4_repository_test.dart` | Automatizado |
+| CT14 Pontuação e recompensas | Não funcional (integridade) | Alteração manual rejeitada | — | Pendente: exige autoridade no servidor. |
+| CT15 Ranking de jogadores | Funcional | Ranking ordenado corretamente | `test/data/ciclo4_repository_test.dart` | Automatizado |
+| CT15 Ranking de jogadores | Não funcional (anonimização) | Somente apelidos aparecem | `test/data/ciclo4_repository_test.dart` | Automatizado |
+| CT16 Multiplayer em sala | Funcional | Todos entram na mesma sessão | `test/features/multiplayer_gateway_test.dart` | Parcial (MVP local): participantes simulados. |
+| CT16 Multiplayer em sala | Não funcional | 50 conexões simultâneas | — | N/A (versão local): depende de servidor. |
+| CT17 Dashboard pedagógico | Funcional | Dashboard carregado corretamente | `test/data/ciclo4_repository_test.dart` | Automatizado |
+| CT17 Dashboard pedagógico | Não funcional (controle de acesso) | Aluno tem acesso negado | `test/unit/session_scope_test.dart` | Automatizado |
+| CT18 Relatórios de desempenho | Funcional | Relatório disponível | `test/data/ciclo4_repository_test.dart` | Automatizado |
+| CT18 Relatórios de desempenho | Não funcional (autorização) | Acesso impedido e tentativa registrada | Validação de vínculo na tela | Parcial: bloqueia acesso, mas não registra auditoria. |
 
 ## Resumo
 
 | Situação | Casos |
 |---|---|
-| Automatizado (Ciclo 1) | 12 |
-| Automatizado (Ciclo 2) | 9 |
+| Automatizado (Ciclo 1) | 11 |
+| Automatizado (Ciclo 2) | 8 |
 | Manual (Ciclo 2) | 1 |
-| Pendente (ciclos 3 a 4) | 20 |
-| N/A (versão local) | 4 |
-| **Total** | **46** |
+| Automatizado (Ciclos 3 e 4) | 7 |
+| Parcial (MVP local) | 2 |
+| Pendente | 1 |
+| N/A (versão local) | 7 |
+| **Total** | **37** |

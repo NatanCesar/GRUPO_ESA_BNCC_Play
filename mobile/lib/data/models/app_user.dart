@@ -15,6 +15,7 @@ class AppUser {
     this.escola,
     this.turma,
     this.avatar,
+    this.professorId,
     required this.criadoEm,
     required this.atualizadoEm,
   });
@@ -27,6 +28,7 @@ class AppUser {
   final String? escola;
   final String? turma;
   final String? avatar;
+  final int? professorId;
   final DateTime criadoEm;
   final DateTime atualizadoEm;
 
@@ -44,6 +46,7 @@ class AppUser {
       'escola': escola,
       'turma': turma,
       'avatar': avatar,
+      'professor_id': professorId,
       'criado_em': criadoEm.toUtc().toIso8601String(),
       'atualizado_em': atualizadoEm.toUtc().toIso8601String(),
     };
@@ -59,6 +62,7 @@ class AppUser {
       escola: linha['escola'] as String?,
       turma: linha['turma'] as String?,
       avatar: linha['avatar'] as String?,
+      professorId: linha['professor_id'] as int?,
       criadoEm: DateTime.parse(linha['criado_em'] as String),
       atualizadoEm: DateTime.parse(linha['atualizado_em'] as String),
     );
@@ -71,6 +75,7 @@ class AppUser {
     String? escola,
     String? turma,
     String? avatar,
+    int? professorId,
     DateTime? atualizadoEm,
   }) {
     return AppUser(
@@ -82,6 +87,7 @@ class AppUser {
       escola: escola ?? this.escola,
       turma: turma ?? this.turma,
       avatar: avatar ?? this.avatar,
+      professorId: professorId ?? this.professorId,
       criadoEm: criadoEm,
       atualizadoEm: atualizadoEm ?? this.atualizadoEm,
     );

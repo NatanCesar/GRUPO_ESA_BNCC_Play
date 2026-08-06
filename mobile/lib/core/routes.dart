@@ -21,6 +21,7 @@ import '../features/questions/question_form_screen.dart';
 import '../features/ranking/ranking_screen.dart';
 import '../features/sala/sala_screen.dart';
 import '../data/models/partida.dart';
+import '../data/models/eixo_bncc.dart';
 
 /// Nomes de rota do app.
 abstract final class Rotas {
@@ -47,43 +48,39 @@ abstract final class Rotas {
   static const sala = '/sala';
 
   static Map<String, WidgetBuilder> tabela() => <String, WidgetBuilder>{
-        splash: (_) => const SplashScreen(),
-        login: (_) => const LoginScreen(),
-        registerType: (_) => const RegisterTypeScreen(),
-        registerTeacher: (_) => const RegisterTeacherScreen(),
-        registerStudent: (_) => const RegisterStudentScreen(),
-        homeTeacher: (_) => const HomeTeacherScreen(),
-        homeStudent: (_) => const HomeStudentScreen(),
-        profileTeacher: (_) => const ProfileTeacherScreen(),
-        profileStudent: (_) => const ProfileStudentScreen(),
-        editProfile: (_) => const EditProfileScreen(),
-        forgotPassword: (_) => const ForgotPasswordScreen(),
-        axisSelection: (_) => const AxisSelectionScreen(),
-        questionList: (_) => const QuestionListScreen(),
-        questionCreate: (_) => const QuestionFormScreen(),
-        questionEdit: (ctx) => QuestionFormScreen(
-          questaoId: ModalRoute.of(ctx)!.settings.arguments as int?,
-        ),
-        ranking: (ctx) {
-          final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
-          return RankingScreen(
-            alunoId: args?['alunoId'] as int? ?? 0,
-          );
-        },
-        sala: (_) => const SalaScreen(),
-        dashboard: (ctx) {
-          final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
-          return DashboardScreen(
-            professorId: args?['professorId'] as int? ?? 0,
-          );
-        },
-        relatorioAluno: (ctx) {
-          final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
-          return RelatorioAlunoScreen(
-            alunoId: args?['alunoId'] as int? ?? 0,
-          );
-        },
-      };
+    splash: (_) => const SplashScreen(),
+    login: (_) => const LoginScreen(),
+    registerType: (_) => const RegisterTypeScreen(),
+    registerTeacher: (_) => const RegisterTeacherScreen(),
+    registerStudent: (_) => const RegisterStudentScreen(),
+    homeTeacher: (_) => const HomeTeacherScreen(),
+    homeStudent: (_) => const HomeStudentScreen(),
+    profileTeacher: (_) => const ProfileTeacherScreen(),
+    profileStudent: (_) => const ProfileStudentScreen(),
+    editProfile: (_) => const EditProfileScreen(),
+    forgotPassword: (_) => const ForgotPasswordScreen(),
+    axisSelection: (_) => const AxisSelectionScreen(),
+    questionList: (_) => const QuestionListScreen(),
+    questionCreate: (ctx) => QuestionFormScreen(
+      eixoInicial: ModalRoute.of(ctx)!.settings.arguments as EixoBNCC?,
+    ),
+    questionEdit: (ctx) => QuestionFormScreen(
+      questaoId: ModalRoute.of(ctx)!.settings.arguments as int?,
+    ),
+    ranking: (ctx) {
+      final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
+      return RankingScreen(alunoId: args?['alunoId'] as int? ?? 0);
+    },
+    sala: (_) => const SalaScreen(),
+    dashboard: (ctx) {
+      final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
+      return DashboardScreen(professorId: args?['professorId'] as int? ?? 0);
+    },
+    relatorioAluno: (ctx) {
+      final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
+      return RelatorioAlunoScreen(alunoId: args?['alunoId'] as int? ?? 0);
+    },
+  };
 
   /// Rota para a tela de jogo — passa argumentos via arguments.
   static Route<dynamic> gerarRotaJogar(RouteSettings settings) {

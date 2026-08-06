@@ -28,7 +28,8 @@ Future<void> pumpTela(WidgetTester tester) async {
         theme: AppTheme.light,
         home: const RegisterTeacherScreen(),
         routes: {
-          Rotas.homeTeacher: (_) => const Scaffold(body: Text('home do professor')),
+          Rotas.homeTeacher: (_) =>
+              const Scaffold(body: Text('home do professor')),
           Rotas.login: (_) => const Scaffold(body: Text('tela de login')),
         },
       ),
@@ -61,8 +62,9 @@ void main() {
   tearDown(() async => ambiente.banco.fechar());
 
   group('CT03 - Cadastro de Professor', () {
-    testWidgets('nao funcional: minimizacao, so os cinco campos previstos',
-        (tester) async {
+    testWidgets('nao funcional: minimizacao, so os cinco campos previstos', (
+      tester,
+    ) async {
       await pumpTela(tester);
 
       expect(find.byType(TextField), findsNWidgets(5));
@@ -73,8 +75,9 @@ void main() {
       expect(find.text('Senha'), findsOneWidget);
     });
 
-    testWidgets('funcional: cadastro valido grava e abre a home',
-        (tester) async {
+    testWidgets('funcional: cadastro valido grava e abre a home', (
+      tester,
+    ) async {
       await pumpTela(tester);
       await preencher(tester);
 
@@ -98,7 +101,7 @@ void main() {
 
       expect(find.text('Informe seu nome'), findsOneWidget);
       expect(find.text('Informe seu e-mail'), findsOneWidget);
-      expect(find.text('Informe seu nome de usuario'), findsOneWidget);
+      expect(find.text('Informe seu nome de usuário'), findsOneWidget);
       expect(find.text('Informe sua escola'), findsOneWidget);
       expect(find.text('Informe sua senha'), findsOneWidget);
     });
@@ -110,7 +113,7 @@ void main() {
       await tester.tap(find.text('Criar Conta'));
       await tester.pumpAndSettle();
 
-      expect(find.text('E-mail invalido'), findsOneWidget);
+      expect(find.text('E-mail inválido'), findsOneWidget);
       expect(find.text('home do professor'), findsNothing);
     });
 
@@ -127,19 +130,21 @@ void main() {
       );
     });
 
-    testWidgets('nao funcional: recusa nome de usuario com caractere especial',
-        (tester) async {
-      await pumpTela(tester);
-      await preencher(tester, usuario: 'maria silha');
+    testWidgets(
+      'nao funcional: recusa nome de usuario com caractere especial',
+      (tester) async {
+        await pumpTela(tester);
+        await preencher(tester, usuario: 'maria silha');
 
-      await tester.tap(find.text('Criar Conta'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Criar Conta'));
+        await tester.pumpAndSettle();
 
-      expect(
-        find.text('Use apenas letras, numeros, ponto e sublinhado'),
-        findsOneWidget,
-      );
-    });
+        expect(
+          find.text('Use apenas letras, números, ponto e sublinhado'),
+          findsOneWidget,
+        );
+      },
+    );
 
     testWidgets('nao funcional: recusa nome longo demais', (tester) async {
       await pumpTela(tester);
@@ -166,7 +171,7 @@ void main() {
       await tester.tap(find.text('Criar Conta'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Este e-mail ja esta cadastrado'), findsOneWidget);
+      expect(find.text('Este e-mail já está cadastrado'), findsOneWidget);
       expect(find.text('home do professor'), findsNothing);
     });
 

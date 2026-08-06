@@ -12,50 +12,46 @@ sealed class ErroDeDominio implements Exception {
 }
 
 class EmailJaCadastradoException extends ErroDeDominio {
-  const EmailJaCadastradoException()
-      : super('Este e-mail ja esta cadastrado');
+  const EmailJaCadastradoException() : super('Este e-mail já está cadastrado');
 }
 
 class UsuarioJaCadastradoException extends ErroDeDominio {
   const UsuarioJaCadastradoException()
-      : super('Este nome de usuario ja esta em uso');
+    : super('Este nome de usuário já está em uso');
 }
 
 class CredenciaisInvalidasException extends ErroDeDominio {
-  const CredenciaisInvalidasException()
-      : super('E-mail ou senha incorretos');
+  const CredenciaisInvalidasException() : super('E-mail ou senha incorretos');
 }
 
 class LoginBloqueadoException extends ErroDeDominio {
   const LoginBloqueadoException(this.segundosRestantes)
-      : super('Muitas tentativas. Tente novamente em alguns instantes');
+    : super('Muitas tentativas. Tente novamente em alguns instantes');
 
   final int segundosRestantes;
 }
 
 class SessaoExpiradaException extends ErroDeDominio {
   const SessaoExpiradaException()
-      : super('Sua sessao expirou. Entre novamente');
+    : super('Sua sessão expirou. Entre novamente');
 }
 
 class FalhaDePersistenciaException extends ErroDeDominio {
   const FalhaDePersistenciaException()
-      : super('Nao foi possivel salvar. Tente novamente');
+    : super('Não foi possível salvar. Tente novamente');
 }
 
 class PermissionDeniedException extends ErroDeDominio {
   const PermissionDeniedException()
-      : super('Voce nao tem permissao para esta acao');
+    : super('Você não tem permissão para esta ação');
 }
 
 // Erros do ciclo 2 - Questoes
 
 class QuestaoNaoEncontradaException extends ErroDeDominio {
-  const QuestaoNaoEncontradaException()
-      : super('Questao nao encontrada');
+  const QuestaoNaoEncontradaException() : super('Questão não encontrada');
 }
 
 class QuestaoInvalidaException extends ErroDeDominio {
-  const QuestaoInvalidaException(String mensagem)
-      : super(mensagem);
+  const QuestaoInvalidaException(String mensagem) : super(mensagem);
 }

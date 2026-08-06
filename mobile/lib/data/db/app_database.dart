@@ -13,7 +13,8 @@ class AppDatabase {
   /// Ciclo 1: users, login_attempts.
   /// Ciclo 2: questoes.
   /// Ciclo 3: partidas, ranking, participacoes.
-  static const int versaoAtual = 3;
+  /// Ciclo 4: categorias, respostas e vinculo aluno-professor.
+  static const int versaoAtual = 4;
   static const String _arquivo = 'bncc_play.db';
 
   final Database _db;
@@ -33,6 +34,7 @@ class AppDatabase {
         await _criarVersao1(db);
         await _criarVersao2(db);
         await _criarVersao3(db);
+        await _criarVersao4(db);
       },
       onUpgrade: (db, anterior, atual) async {
         if (anterior < 2) {
@@ -41,15 +43,20 @@ class AppDatabase {
         if (anterior < 3) {
           await _criarVersao3(db);
         }
+        if (anterior < 4) {
+          await _criarVersao4(db);
+        }
       },
     );
 
-    // Popula com seed se nao houver questoes.
+    // Popula com seed se não houver questões.
     final count = Sqflite.firstIntValue(
       await banco.rawQuery('SELECT COUNT(*) FROM questoes'),
     );
     if (count == 0) {
       await popularBancoSeed(AppDatabase._(banco));
+    } else {
+      await corrigirAcentuacaoSeed(AppDatabase._(banco));
     }
 
     return AppDatabase._(banco);
@@ -71,6 +78,7 @@ class AppDatabase {
         await _criarVersao1(db);
         await _criarVersao2(db);
         await _criarVersao3(db);
+        await _criarVersao4(db);
       },
     );
     return AppDatabase._(banco);
@@ -125,12 +133,13 @@ class AppDatabase {
       )
     ''');
 
+    await db.execute('CREATE INDEX idx_questoes_eixo ON questoes(eixo)');
     await db.execute(
-        'CREATE INDEX idx_questoes_eixo ON questoes(eixo)');
+      'CREATE INDEX idx_questoes_dificuldade ON questoes(dificuldade)',
+    );
     await db.execute(
-        'CREATE INDEX idx_questoes_dificuldade ON questoes(dificuldade)');
-    await db.execute(
-        'CREATE INDEX idx_questoes_professor ON questoes(professor_id)');
+      'CREATE INDEX idx_questoes_professor ON questoes(professor_id)',
+    );
   }
 
   // --- Ciclo 3 -----------------------------------------------------------
@@ -150,8 +159,7 @@ class AppDatabase {
       )
     ''');
 
-    await db.execute(
-        'CREATE INDEX idx_partidas_aluno ON partidas(aluno_id)');
+    await db.execute('CREATE INDEX idx_partidas_aluno ON partidas(aluno_id)');
 
     await db.execute('''
       CREATE TABLE ranking (
@@ -174,6 +182,41 @@ class AppDatabase {
         pontuacao       INTEGER NOT NULL DEFAULT 0,
         entrou_em       TEXT    NOT NULL
       )
+    ''');
+  }
+
+  // --- Ciclo 4 -----------------------------------------------------------
+
+  static Future<void> _criarVersao4(Database db) async {
+    await db.execute(
+      "ALTER TABLE questoes ADD COLUMN categoria TEXT NOT NULL DEFAULT 'Geral'",
+    );
+    await db.execute('''
+      ALTER TABLE users ADD COLUMN professor_id INTEGER
+        REFERENCES users(id) ON DELETE SET NULL
+    ''');
+    await db.execute('''
+      CREATE TABLE respostas (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        partida_id      INTEGER NOT NULL REFERENCES partidas(id) ON DELETE CASCADE,
+        questao_id      INTEGER NOT NULL REFERENCES questoes(id) ON DELETE CASCADE,
+        resposta_aluno  TEXT    NOT NULL,
+        correta         INTEGER NOT NULL CHECK (correta IN (0, 1)),
+        respondida_em   TEXT    NOT NULL
+      )
+    ''');
+    await db.execute(
+      'CREATE INDEX idx_respostas_partida ON respostas(partida_id)',
+    );
+    await db.execute(
+      'CREATE INDEX idx_respostas_questao ON respostas(questao_id)',
+    );
+    await db.execute('''
+      UPDATE users
+      SET professor_id = (
+        SELECT id FROM users WHERE papel = 'professor' ORDER BY id LIMIT 1
+      )
+      WHERE papel = 'aluno' AND professor_id IS NULL
     ''');
   }
 

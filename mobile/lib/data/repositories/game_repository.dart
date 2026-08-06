@@ -1,25 +1,18 @@
-import 'dart:math';
-
 import 'package:bncc_play_mobile/data/db/app_database.dart';
 import 'package:bncc_play_mobile/data/models/partida.dart';
-import 'package:bncc_play_mobile/data/models/questao.dart';
+import 'package:bncc_play_mobile/data/models/resposta.dart';
 import 'package:bncc_play_mobile/data/repositories/ranking_repository.dart';
 
 /// Acesso a dados de partidas de jogo.
 ///
 /// Cuida do loop de jogo: iniciar partida, registrar resposta e encerrar.
 class GameRepository {
-  GameRepository({
-    required AppDatabase banco,
-    RankingRepository? ranking,
-    Random? random,
-  })  : _banco = banco,
-        _ranking = ranking ?? RankingRepository(banco: banco),
-        _random = random ?? Random();
+  GameRepository({required AppDatabase banco, RankingRepository? ranking})
+    : _banco = banco,
+      _ranking = ranking ?? RankingRepository(banco: banco);
 
   final AppDatabase _banco;
   final RankingRepository _ranking;
-  final Random _random;
 
   static const int questoesPorPartida = 5;
   static const int xpPorAcerto = 100;
@@ -27,14 +20,10 @@ class GameRepository {
 
   /// Inicia uma nova partida para o aluno.
   ///
-  /// Seleciona [questoesPorPartida] questoes aleatorias do eixo
-  /// (ou de qualquer eixo se eixo for null).
+  /// Valida se há questões disponíveis e cria a sessão persistida.
   Future<Partida> iniciarPartida(int alunoId, {String? eixo}) async {
     String sql = '''
-      SELECT id, enunciado, opcao_a, opcao_b, opcao_c, opcao_d,
-             resposta_correta, eixo, dificuldade, professor_id,
-             criado_em, atualizado_em
-      FROM questoes
+      SELECT id FROM questoes
     ''';
     List<Object?> args = [];
 
@@ -49,10 +38,6 @@ class GameRepository {
       throw const PartidaSemQuestoesException();
     }
 
-    final todas = linhas.map(Questao.deLinha).toList();
-    final shuffled = List<Questao>.from(todas)..shuffle(_random);
-    final escolhidas = shuffled.take(questoesPorPartida).toList();
-
     final agora = DateTime.now().toUtc();
 
     final partida = Partida(
@@ -65,10 +50,7 @@ class GameRepository {
       iniciadaEm: agora,
     );
 
-    final id = await _banco.db.insert(
-      'partidas',
-      partida.paraLinha(),
-    );
+    final id = await _banco.db.insert('partidas', partida.paraLinha());
 
     return (await porId(id))!;
   }
@@ -76,6 +58,7 @@ class GameRepository {
   /// Registra a resposta de uma questao e atualiza pontuacao/streak.
   Future<Partida> registrarResposta({
     required int partidaId,
+    required int questaoId,
     required String respostaAluno,
     required bool acertou,
   }) async {
@@ -109,12 +92,21 @@ class GameRepository {
       acertos: partida.acertos + (acertou ? 1 : 0),
     );
 
-    await _banco.db.update(
-      'partidas',
-      atualizada.paraLinha(),
-      where: 'id = ?',
-      whereArgs: [partidaId],
-    );
+    await _banco.db.transaction((txn) async {
+      await txn.update(
+        'partidas',
+        atualizada.paraLinha(),
+        where: 'id = ?',
+        whereArgs: [partidaId],
+      );
+      await txn.insert('respostas', {
+        'partida_id': partidaId,
+        'questao_id': questaoId,
+        'resposta_aluno': respostaAluno,
+        'correta': acertou ? 1 : 0,
+        'respondida_em': DateTime.now().toUtc().toIso8601String(),
+      });
+    });
 
     return atualizada;
   }
@@ -146,13 +138,7 @@ class GameRepository {
     );
 
     // Atualiza o ranking com os stats da partida.
-    await _ranking.atualizarRanking(
-      alunoId: partida.alunoId,
-      apelido: apelido,
-      xpAdicional: partida.pontuacao,
-      acertos: partida.acertos,
-      total: partida.respondidas,
-    );
+    await _ranking.atualizarRanking(alunoId: partida.alunoId, apelido: apelido);
 
     return encerrada;
   }
@@ -193,6 +179,26 @@ class GameRepository {
     );
     return linhas.map(Partida.deLinha).toList();
   }
+
+  Future<List<RespostaDetalhada>> historicoRespostas(
+    int alunoId, {
+    int limite = 100,
+  }) async {
+    final linhas = await _banco.db.rawQuery(
+      '''
+      SELECT r.partida_id, r.questao_id, r.resposta_aluno, r.correta,
+             r.respondida_em, q.enunciado, q.resposta_correta
+      FROM respostas r
+      JOIN partidas p ON p.id = r.partida_id
+      JOIN questoes q ON q.id = r.questao_id
+      WHERE p.aluno_id = ?
+      ORDER BY r.respondida_em DESC
+      LIMIT ?
+      ''',
+      [alunoId, limite],
+    );
+    return linhas.map(RespostaDetalhada.deLinha).toList();
+  }
 }
 
 /// excecao lancada quando nao ha questoes para iniciar uma partida.
@@ -200,7 +206,7 @@ class PartidaSemQuestoesException implements Exception {
   const PartidaSemQuestoesException();
 
   @override
-  String toString() => 'Nenhuma questao disponivel para jogar';
+  String toString() => 'Nenhuma questão disponível para jogar';
 }
 
 /// excecao lancada quando a partida nao e encontrada.
@@ -208,7 +214,7 @@ class PartidaNaoEncontradaException implements Exception {
   const PartidaNaoEncontradaException();
 
   @override
-  String toString() => 'Partida nao encontrada';
+  String toString() => 'Partida não encontrada';
 }
 
 /// excecao lancada quando tenta registrar resposta em partida ja encerrada.
@@ -216,5 +222,5 @@ class PartidaJaEncerradaException implements Exception {
   const PartidaJaEncerradaException();
 
   @override
-  String toString() => 'Partida ja encerrada';
+  String toString() => 'Partida já encerrada';
 }

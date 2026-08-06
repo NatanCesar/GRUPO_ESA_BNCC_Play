@@ -13,9 +13,9 @@ class QuestionFormController extends ChangeNotifier {
     required QuestaoRepository repository,
     required int professorId,
     Questao? questaoEdicao,
-  })  : _repository = repository,
-        _professorId = professorId,
-        _questaoEdicao = questaoEdicao {
+  }) : _repository = repository,
+       _professorId = professorId,
+       _questaoEdicao = questaoEdicao {
     if (questaoEdicao != null) {
       _enunciado = questaoEdicao.enunciado;
       _opcaoA = questaoEdicao.opcaoA;
@@ -25,6 +25,7 @@ class QuestionFormController extends ChangeNotifier {
       _respostaCorreta = questaoEdicao.respostaCorreta;
       _eixo = questaoEdicao.eixo;
       _dificuldade = questaoEdicao.dificuldade;
+      _categoria = questaoEdicao.categoria;
     }
   }
 
@@ -105,6 +106,14 @@ class QuestionFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  String _categoria = 'Geral';
+  String get categoria => _categoria;
+  void setCategoria(String v) {
+    _categoria = v;
+    _erros['categoria'] = v.trim().isEmpty ? 'Informe a categoria' : null;
+    notifyListeners();
+  }
+
   final Map<String, String?> _erros = {};
   Map<String, String?> get erros => Map.unmodifiable(_erros);
 
@@ -115,9 +124,16 @@ class QuestionFormController extends ChangeNotifier {
     _erros['opcaoB'] = Validators.opcaoQuestao(_opcaoB);
     _erros['opcaoC'] = Validators.opcaoQuestao(_opcaoC);
     _erros['opcaoD'] = Validators.opcaoQuestao(_opcaoD);
-    _erros['resposta'] = _respostaCorreta == null ? 'Selecione a resposta correta' : null;
+    _erros['resposta'] = _respostaCorreta == null
+        ? 'Selecione a resposta correta'
+        : null;
     _erros['eixo'] = _eixo == null ? 'Selecione o eixo' : null;
-    _erros['dificuldade'] = _dificuldade == null ? 'Selecione a dificuldade' : null;
+    _erros['dificuldade'] = _dificuldade == null
+        ? 'Selecione a dificuldade'
+        : null;
+    _erros['categoria'] = _categoria.trim().isEmpty
+        ? 'Informe a categoria'
+        : null;
     notifyListeners();
     return _erros.values.every((e) => e == null);
   }
@@ -141,6 +157,7 @@ class QuestionFormController extends ChangeNotifier {
           respostaCorreta: _respostaCorreta!,
           eixo: _eixo!,
           dificuldade: _dificuldade!,
+          categoria: _categoria,
         );
         await _repository.atualizar(atualizada);
       } else {
@@ -153,6 +170,7 @@ class QuestionFormController extends ChangeNotifier {
           respostaCorreta: _respostaCorreta!,
           eixo: _eixo!,
           dificuldade: _dificuldade!,
+          categoria: _categoria,
           professorId: _professorId,
         );
       }

@@ -25,8 +25,16 @@ class QuestaoRepository {
     required EixoBNCC eixo,
     required Dificuldade dificuldade,
     required int professorId,
+    String categoria = 'Geral',
   }) async {
-    final erros = _validarCampos(enunciado, opcaoA, opcaoB, opcaoC, opcaoD, respostaCorreta);
+    final erros = _validarCampos(
+      enunciado,
+      opcaoA,
+      opcaoB,
+      opcaoC,
+      opcaoD,
+      respostaCorreta,
+    );
     if (erros.isNotEmpty) {
       throw QuestaoInvalidaException(erros.join('; '));
     }
@@ -42,6 +50,9 @@ class QuestaoRepository {
       respostaCorreta: respostaCorreta,
       eixo: eixo,
       dificuldade: dificuldade,
+      categoria: Sanitizer.limpar(
+        categoria.trim().isEmpty ? 'Geral' : categoria,
+      ),
       professorId: professorId,
       criadoEm: agora,
       atualizadoEm: agora,
@@ -74,7 +85,7 @@ class QuestaoRepository {
     return linhas.map(Questao.deLinha).toList();
   }
 
-  /// Lista questoes filtradas por eixo e/ou dificuldade.
+  /// Lista questoes filtradas por eixo, dificuldade e/ou categoria.
   ///
   /// Se [professorId] for null, lista todas as questoes (ignora professor).
   /// Se [eixo] for null, nao filtra por eixo.
@@ -83,6 +94,7 @@ class QuestaoRepository {
     int? professorId,
     EixoBNCC? eixo,
     Dificuldade? dificuldade,
+    String? categoria,
   }) async {
     final condicoes = <String>[];
     final args = <Object?>[];
@@ -99,6 +111,10 @@ class QuestaoRepository {
       condicoes.add('dificuldade = ?');
       args.add(dificuldade.valor);
     }
+    if (categoria != null && categoria.isNotEmpty) {
+      condicoes.add('categoria = ?');
+      args.add(categoria);
+    }
 
     final linhas = await _banco.db.query(
       'questoes',
@@ -107,6 +123,31 @@ class QuestaoRepository {
       orderBy: 'criado_em DESC',
     );
     return linhas.map(Questao.deLinha).toList();
+  }
+
+  Future<List<String>> listarCategorias({
+    int? professorId,
+    EixoBNCC? eixo,
+  }) async {
+    final condicoes = <String>[];
+    final args = <Object?>[];
+    if (professorId != null) {
+      condicoes.add('professor_id = ?');
+      args.add(professorId);
+    }
+    if (eixo != null) {
+      condicoes.add('eixo = ?');
+      args.add(eixo.valor);
+    }
+    final linhas = await _banco.db.query(
+      'questoes',
+      columns: ['categoria'],
+      distinct: true,
+      where: condicoes.isEmpty ? null : condicoes.join(' AND '),
+      whereArgs: args.isEmpty ? null : args,
+      orderBy: 'categoria ASC',
+    );
+    return linhas.map((linha) => linha['categoria'] as String).toList();
   }
 
   /// Atualiza uma questao existente.
@@ -165,21 +206,20 @@ class QuestaoRepository {
       throw const QuestaoNaoEncontradaException();
     }
 
-    await _banco.db.delete(
-      'questoes',
-      where: 'id = ?',
-      whereArgs: [id],
-    );
+    await _banco.db.delete('questoes', where: 'id = ?', whereArgs: [id]);
   }
 
   /// Conta questoes por eixo para um professor.
   Future<Map<EixoBNCC, int>> contarPorEixo(int professorId) async {
-    final linhas = await _banco.db.rawQuery('''
+    final linhas = await _banco.db.rawQuery(
+      '''
       SELECT eixo, COUNT(*) as total
       FROM questoes
       WHERE professor_id = ?
       GROUP BY eixo
-    ''', [professorId]);
+    ''',
+      [professorId],
+    );
 
     final resultado = <EixoBNCC, int>{};
     for (final eixo in EixoBNCC.values) {
@@ -206,16 +246,16 @@ class QuestaoRepository {
       erros.add(Validators.enunciado(enunciado)!);
     }
     if (Validators.opcaoQuestao(opcaoA) != null) {
-      erros.add('Opcao A: ${Validators.opcaoQuestao(opcaoA)}');
+      erros.add('Opção A: ${Validators.opcaoQuestao(opcaoA)}');
     }
     if (Validators.opcaoQuestao(opcaoB) != null) {
-      erros.add('Opcao B: ${Validators.opcaoQuestao(opcaoB)}');
+      erros.add('Opção B: ${Validators.opcaoQuestao(opcaoB)}');
     }
     if (Validators.opcaoQuestao(opcaoC) != null) {
-      erros.add('Opcao C: ${Validators.opcaoQuestao(opcaoC)}');
+      erros.add('Opção C: ${Validators.opcaoQuestao(opcaoC)}');
     }
     if (Validators.opcaoQuestao(opcaoD) != null) {
-      erros.add('Opcao D: ${Validators.opcaoQuestao(opcaoD)}');
+      erros.add('Opção D: ${Validators.opcaoQuestao(opcaoD)}');
     }
     if (!['A', 'B', 'C', 'D'].contains(respostaCorreta)) {
       erros.add('Selecione a resposta correta (A, B, C ou D)');

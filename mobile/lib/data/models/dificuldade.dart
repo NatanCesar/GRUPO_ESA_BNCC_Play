@@ -1,8 +1,8 @@
 /// Nivel de dificuldade de uma questao.
 enum Dificuldade {
-  facil('facil', 'Facil'),
-  medio('medio', 'Medio'),
-  dificil('dificil', 'Dificil');
+  facil('facil', 'Fácil'),
+  medio('medio', 'Médio'),
+  dificil('dificil', 'Difícil');
 
   const Dificuldade(this.valor, this.rotulo);
 

@@ -14,10 +14,9 @@ void main() {
 
   group('AppDatabase', () {
     test('abre na versao atual', () async {
-      final version = (await banco.db.rawQuery('PRAGMA user_version'))
-          .first
-          .values
-          .first as int;
+      final version =
+          (await banco.db.rawQuery('PRAGMA user_version')).first.values.first
+              as int;
       expect(version, AppDatabase.versaoAtual);
     });
 
@@ -32,6 +31,32 @@ void main() {
 
       expect(nomes, contains('users'));
       expect(nomes, contains('login_attempts'));
+    });
+
+    test('cria o schema do ciclo 4', () async {
+      final tabelas = await banco.db.query(
+        'sqlite_master',
+        columns: ['name'],
+        where: 'type = ?',
+        whereArgs: ['table'],
+      );
+      final nomes = tabelas.map((tabela) => tabela['name']).toSet();
+      final colunasQuestoes = await banco.db.rawQuery(
+        'PRAGMA table_info(questoes)',
+      );
+      final colunasUsuarios = await banco.db.rawQuery(
+        'PRAGMA table_info(users)',
+      );
+
+      expect(nomes, contains('respostas'));
+      expect(
+        colunasQuestoes.map((coluna) => coluna['name']),
+        contains('categoria'),
+      );
+      expect(
+        colunasUsuarios.map((coluna) => coluna['name']),
+        contains('professor_id'),
+      );
     });
 
     test('recusa papel fora de professor e aluno', () async {
@@ -52,15 +77,15 @@ void main() {
 
     test('recusa e-mail repetido', () async {
       Map<String, Object?> linha(String usuario) => {
-            'nome': 'Fulano',
-            'email': 'fulano@x.com',
-            'usuario': usuario,
-            'senha_hash': 'h',
-            'salt': 's',
-            'papel': 'aluno',
-            'criado_em': '2026-07-31T12:00:00.000Z',
-            'atualizado_em': '2026-07-31T12:00:00.000Z',
-          };
+        'nome': 'Fulano',
+        'email': 'fulano@x.com',
+        'usuario': usuario,
+        'senha_hash': 'h',
+        'salt': 's',
+        'papel': 'aluno',
+        'criado_em': '2026-07-31T12:00:00.000Z',
+        'atualizado_em': '2026-07-31T12:00:00.000Z',
+      };
 
       await banco.db.insert('users', linha('fulano'));
 
@@ -69,19 +94,22 @@ void main() {
 
     test('recusa nome de usuario repetido', () async {
       Map<String, Object?> linha(String email) => {
-            'nome': 'Fulano',
-            'email': email,
-            'usuario': 'fulano',
-            'senha_hash': 'h',
-            'salt': 's',
-            'papel': 'aluno',
-            'criado_em': '2026-07-31T12:00:00.000Z',
-            'atualizado_em': '2026-07-31T12:00:00.000Z',
-          };
+        'nome': 'Fulano',
+        'email': email,
+        'usuario': 'fulano',
+        'senha_hash': 'h',
+        'salt': 's',
+        'papel': 'aluno',
+        'criado_em': '2026-07-31T12:00:00.000Z',
+        'atualizado_em': '2026-07-31T12:00:00.000Z',
+      };
 
       await banco.db.insert('users', linha('a@x.com'));
 
-      expect(() => banco.db.insert('users', linha('b@x.com')), throwsA(anything));
+      expect(
+        () => banco.db.insert('users', linha('b@x.com')),
+        throwsA(anything),
+      );
     });
   });
 }

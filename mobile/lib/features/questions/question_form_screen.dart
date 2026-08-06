@@ -15,9 +15,10 @@ import 'package:bncc_play_mobile/data/models/questao.dart';
 
 /// Tela de formulario para criar ou editar questao (CT06).
 class QuestionFormScreen extends StatefulWidget {
-  const QuestionFormScreen({super.key, this.questaoId});
+  const QuestionFormScreen({super.key, this.questaoId, this.eixoInicial});
 
   final int? questaoId;
+  final EixoBNCC? eixoInicial;
 
   @override
   State<QuestionFormScreen> createState() => _QuestionFormScreenState();
@@ -31,6 +32,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
   late final TextEditingController _opcaoBController;
   late final TextEditingController _opcaoCController;
   late final TextEditingController _opcaoDController;
+  late final TextEditingController _categoriaController;
 
   String? _respostaCorreta;
   EixoBNCC? _eixo;
@@ -50,6 +52,8 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
     _opcaoBController = TextEditingController();
     _opcaoCController = TextEditingController();
     _opcaoDController = TextEditingController();
+    _categoriaController = TextEditingController(text: 'Geral');
+    _eixo = widget.eixoInicial;
 
     if (widget.questaoId != null) {
       _carregarQuestao();
@@ -63,6 +67,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
     _opcaoBController.dispose();
     _opcaoCController.dispose();
     _opcaoDController.dispose();
+    _categoriaController.dispose();
     super.dispose();
   }
 
@@ -81,6 +86,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
           _respostaCorreta = questao.respostaCorreta;
           _eixo = questao.eixo;
           _dificuldade = questao.dificuldade;
+          _categoriaController.text = questao.categoria;
         });
       }
     } catch (_) {
@@ -117,6 +123,9 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
     if (_dificuldade == null) {
       erros['dificuldade'] = 'Selecione a dificuldade';
     }
+    if (_categoriaController.text.trim().isEmpty) {
+      erros['categoria'] = 'Informe a categoria';
+    }
 
     if (erros.isNotEmpty) {
       setState(() => _erros = erros);
@@ -135,7 +144,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
     if (usuario == null) {
       setState(() {
         _salvando = false;
-        _erroGeral = 'Sessao expirada';
+        _erroGeral = 'Sessão expirada';
       });
       return;
     }
@@ -152,6 +161,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
           respostaCorreta: _respostaCorreta!,
           eixo: _eixo!,
           dificuldade: _dificuldade!,
+          categoria: _categoriaController.text.trim(),
         );
         await repository.atualizar(atualizada);
       } else {
@@ -166,6 +176,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
           eixo: _eixo!,
           dificuldade: _dificuldade!,
           professorId: usuario.id!,
+          categoria: _categoriaController.text.trim(),
         );
       }
       _sucesso = true;
@@ -192,7 +203,10 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
               const SizedBox(height: 24),
               Text(
                 editando ? 'Questão atualizada!' : 'Questão cadastrada!',
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               const SizedBox(height: 32),
               AppButton(
@@ -220,7 +234,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  editando ? 'Altere os dados' : 'Cadastre uma questao',
+                  editando ? 'Altere os dados' : 'Cadastre uma questão',
                   style: AppTheme.headerSubtitle,
                 ),
               ],
@@ -243,8 +257,16 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                     AppTextField(
                       controller: _enunciadoController,
                       label: 'Enunciado',
-                      hint: 'Digite a pergunta da questao',
+                      hint: 'Digite a pergunta da questão',
                       errorText: _erros['enunciado'],
+                    ),
+                    const SizedBox(height: 20),
+
+                    AppTextField(
+                      controller: _categoriaController,
+                      label: 'Categoria',
+                      hint: 'Ex.: Algoritmos, Cidadania digital',
+                      errorText: _erros['categoria'],
                     ),
                     const SizedBox(height: 20),
 
@@ -264,7 +286,8 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                       controller: _opcaoAController,
                       error: _erros['opcaoA'],
                       correta: _respostaCorreta == 'A',
-                      onCorretaChanged: () => setState(() => _respostaCorreta = 'A'),
+                      onCorretaChanged: () =>
+                          setState(() => _respostaCorreta = 'A'),
                     ),
                     const SizedBox(height: 12),
                     _OpcaoField(
@@ -272,7 +295,8 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                       controller: _opcaoBController,
                       error: _erros['opcaoB'],
                       correta: _respostaCorreta == 'B',
-                      onCorretaChanged: () => setState(() => _respostaCorreta = 'B'),
+                      onCorretaChanged: () =>
+                          setState(() => _respostaCorreta = 'B'),
                     ),
                     const SizedBox(height: 12),
                     _OpcaoField(
@@ -280,7 +304,8 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                       controller: _opcaoCController,
                       error: _erros['opcaoC'],
                       correta: _respostaCorreta == 'C',
-                      onCorretaChanged: () => setState(() => _respostaCorreta = 'C'),
+                      onCorretaChanged: () =>
+                          setState(() => _respostaCorreta = 'C'),
                     ),
                     const SizedBox(height: 12),
                     _OpcaoField(
@@ -288,13 +313,17 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                       controller: _opcaoDController,
                       error: _erros['opcaoD'],
                       correta: _respostaCorreta == 'D',
-                      onCorretaChanged: () => setState(() => _respostaCorreta = 'D'),
+                      onCorretaChanged: () =>
+                          setState(() => _respostaCorreta = 'D'),
                     ),
                     if (_erros['resposta'] != null) ...[
                       const SizedBox(height: 4),
                       Text(
                         _erros['resposta']!,
-                        style: const TextStyle(color: AppColors.danger, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppColors.danger,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 24),
@@ -326,7 +355,10 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _erros['eixo']!,
-                        style: const TextStyle(color: AppColors.danger, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppColors.danger,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 24),
@@ -351,7 +383,8 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                               onTap: () => setState(() => _dificuldade = dif),
                             ),
                           ),
-                          if (dif != Dificuldade.values.last) const SizedBox(width: 8),
+                          if (dif != Dificuldade.values.last)
+                            const SizedBox(width: 8),
                         ],
                       ],
                     ),
@@ -359,7 +392,10 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                       const SizedBox(height: 4),
                       Text(
                         _erros['dificuldade']!,
-                        style: const TextStyle(color: AppColors.danger, fontSize: 12),
+                        style: const TextStyle(
+                          color: AppColors.danger,
+                          fontSize: 12,
+                        ),
                       ),
                     ],
                     const SizedBox(height: 32),
@@ -368,7 +404,9 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: AppButton(
-                        label: editando ? 'Salvar Alterações' : 'Cadastrar Questão',
+                        label: editando
+                            ? 'Salvar Alterações'
+                            : 'Cadastrar Questão',
                         onPressed: _salvando ? null : _salvar,
                         loading: _salvando,
                       ),

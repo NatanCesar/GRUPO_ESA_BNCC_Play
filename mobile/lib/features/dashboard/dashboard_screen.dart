@@ -5,6 +5,7 @@ import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/data/models/papel.dart';
+import 'package:bncc_play_mobile/data/models/estatistica.dart';
 import 'package:bncc_play_mobile/data/repositories/estatistica_repository.dart';
 import 'package:bncc_play_mobile/features/dashboard/dashboard_controller.dart';
 
@@ -201,6 +202,30 @@ class _DashboardBody extends StatelessWidget {
               const SizedBox(height: 24),
             ],
 
+            if (ctrl.questoesFaceis.isNotEmpty) ...[
+              _Secao(
+                titulo: 'Questões com mais acertos',
+                child: Column(
+                  children: ctrl.questoesFaceis
+                      .map((questao) => _QuestaoTaxaTile(questao: questao))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
+            if (ctrl.questoesDificeis.isNotEmpty) ...[
+              _Secao(
+                titulo: 'Questões com mais dificuldade',
+                child: Column(
+                  children: ctrl.questoesDificeis
+                      .map((questao) => _QuestaoTaxaTile(questao: questao))
+                      .toList(),
+                ),
+              ),
+              const SizedBox(height: 24),
+            ],
+
             // Top alunos
             if (ctrl.melhoresAlunos.isNotEmpty) ...[
               _Secao(
@@ -215,6 +240,35 @@ class _DashboardBody extends StatelessWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _QuestaoTaxaTile extends StatelessWidget {
+  const _QuestaoTaxaTile({required this.questao});
+
+  final EstatisticaQuestao questao;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              questao.enunciado,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '${questao.taxaAcerto.toStringAsFixed(0)}%',
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
@@ -241,10 +295,7 @@ class _StatCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8),
         ],
       ),
       child: Column(
@@ -261,10 +312,7 @@ class _StatCard extends StatelessWidget {
           ),
           Text(
             label,
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
           ),
         ],
       ),
@@ -285,10 +333,7 @@ class _Secao extends StatelessWidget {
       children: [
         Text(
           titulo,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Container(
@@ -330,10 +375,7 @@ class _BarraEixo extends StatelessWidget {
       children: [
         SizedBox(
           width: 100,
-          child: Text(
-            label,
-            style: const TextStyle(fontSize: 12),
-          ),
+          child: Text(label, style: const TextStyle(fontSize: 12)),
         ),
         Expanded(
           child: Stack(
@@ -363,10 +405,7 @@ class _BarraEixo extends StatelessWidget {
           width: 30,
           child: Text(
             '$valor',
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
             textAlign: TextAlign.right,
           ),
         ),
@@ -416,10 +455,7 @@ class _AlunoTile extends StatelessWidget {
               const SizedBox(width: 12),
               Text(
                 '${aluno.taxa.toStringAsFixed(0)}%',
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
               const SizedBox(width: 8),
               Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 20),

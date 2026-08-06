@@ -4,12 +4,11 @@ import 'package:provider/provider.dart';
 import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/core/widgets/alternativa_button.dart';
-import 'package:bncc_play_mobile/core/widgets/top_bar.dart';
 import 'package:bncc_play_mobile/data/repositories/game_repository.dart';
 import 'package:bncc_play_mobile/data/repositories/questao_repository.dart';
 import 'package:bncc_play_mobile/features/game/game_controller.dart';
 
-/// Tela de jogo — loop de questao com feedback visual即时.
+/// Tela de jogo: loop de questão com feedback visual imediato.
 class GameScreen extends StatelessWidget {
   const GameScreen({
     super.key,
@@ -116,10 +115,7 @@ class _GameScreenBody extends StatelessWidget {
         Navigator.pushReplacementNamed(
           context,
           Rotas.resultado,
-          arguments: {
-            'partida': ctrl.partida,
-            'apelido': apelido,
-          },
+          arguments: {'partida': ctrl.partida, 'apelido': apelido},
         );
       });
       return const Center(child: CircularProgressIndicator());
@@ -159,8 +155,9 @@ class _QuestaoCard extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: ctrl.progresso / ctrl.totalQuestoes,
                     backgroundColor: AppColors.purple.withValues(alpha: 0.15),
-                    valueColor:
-                        const AlwaysStoppedAnimation<Color>(AppColors.purple),
+                    valueColor: const AlwaysStoppedAnimation<Color>(
+                      AppColors.purple,
+                    ),
                     minHeight: 8,
                   ),
                 ),

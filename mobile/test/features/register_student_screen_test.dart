@@ -60,8 +60,9 @@ void main() {
   tearDown(() async => ambiente.banco.fechar());
 
   group('CT04 - Cadastro de Aluno', () {
-    testWidgets('nao funcional: minimizacao, so os cinco campos previstos',
-        (tester) async {
+    testWidgets('nao funcional: minimizacao, so os cinco campos previstos', (
+      tester,
+    ) async {
       await pumpTela(tester);
 
       expect(find.byType(TextField), findsNWidgets(5));
@@ -87,8 +88,9 @@ void main() {
       expect(gravado.escola, isNull);
     });
 
-    testWidgets('nao funcional: script no nome nao chega ao banco',
-        (tester) async {
+    testWidgets('nao funcional: script no nome nao chega ao banco', (
+      tester,
+    ) async {
       await pumpTela(tester);
       await preencher(tester, nome: 'Joao<script>alert(1)</script>Santos');
 
@@ -99,8 +101,9 @@ void main() {
       expect(gravado!.nome, 'JoaoSantos');
     });
 
-    testWidgets('nao funcional: recusa texto longo demais na turma',
-        (tester) async {
+    testWidgets('nao funcional: recusa texto longo demais na turma', (
+      tester,
+    ) async {
       await pumpTela(tester);
       await preencher(tester, turma: 'a' * 81);
 
@@ -119,7 +122,7 @@ void main() {
 
       expect(find.text('Informe seu nome'), findsOneWidget);
       expect(find.text('Informe seu e-mail'), findsOneWidget);
-      expect(find.text('Informe seu nome de usuario'), findsOneWidget);
+      expect(find.text('Informe seu nome de usuário'), findsOneWidget);
       expect(find.text('Informe sua turma'), findsOneWidget);
       expect(find.text('Informe sua senha'), findsOneWidget);
     });
@@ -139,7 +142,7 @@ void main() {
       await tester.tap(find.text('Criar Conta'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Este nome de usuario ja esta em uso'), findsOneWidget);
+      expect(find.text('Este nome de usuário já está em uso'), findsOneWidget);
     });
   });
 

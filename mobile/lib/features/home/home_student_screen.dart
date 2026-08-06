@@ -41,7 +41,7 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
       id: 'home',
       icone: Icons.home_outlined,
       iconeAtivo: Icons.home,
-      rotulo: 'Inicio',
+      rotulo: 'Início',
     ),
     _Aba(
       id: 'jogar',
@@ -167,11 +167,7 @@ class _BottomNavAluno extends StatelessWidget {
 }
 
 class _ItemNav extends StatelessWidget {
-  const _ItemNav({
-    required this.aba,
-    required this.ativo,
-    required this.onTap,
-  });
+  const _ItemNav({required this.aba, required this.ativo, required this.onTap});
 
   final _Aba aba;
   final bool ativo;
@@ -285,8 +281,9 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                                     Text(
                                       'Olá,',
                                       style: TextStyle(
-                                        color: Colors.white
-                                            .withValues(alpha: 0.9),
+                                        color: Colors.white.withValues(
+                                          alpha: 0.9,
+                                        ),
                                         fontSize: 14,
                                       ),
                                     ),
@@ -306,8 +303,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                                 height: 48,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white
-                                      .withValues(alpha: 0.2),
+                                  color: Colors.white.withValues(alpha: 0.2),
                                 ),
                                 child: const Icon(
                                   Icons.person,
@@ -376,7 +372,9 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                         child: _StatTile(
                           icone: Icons.emoji_events,
                           cor: AppColors.green,
-                          valor: _minhaPosicao != null ? '#$_minhaPosicao' : '-',
+                          valor: _minhaPosicao != null
+                              ? '#$_minhaPosicao'
+                              : '-',
                           label: 'Ranking',
                         ),
                       ),
@@ -385,7 +383,8 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                         child: _StatTile(
                           icone: Icons.percent,
                           cor: Colors.blue,
-                          valor: '${(_minhaEntrada?.taxaAcerto ?? 0).toStringAsFixed(0)}%',
+                          valor:
+                              '${(_minhaEntrada?.taxaAcerto ?? 0).toStringAsFixed(0)}%',
                           label: 'Acerto',
                         ),
                       ),
@@ -398,10 +397,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     'Ações Rápidas',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -427,10 +423,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                       icone: Icons.group,
                       titulo: 'Sala Multiplayer',
                       cor: Colors.orange,
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        Rotas.sala,
-                      ),
+                      onTap: () => Navigator.pushNamed(context, Rotas.sala),
                     ),
                   ],
                 ),
@@ -527,10 +520,7 @@ class _StatTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8),
         ],
       ),
       child: Column(
@@ -541,10 +531,7 @@ class _StatTile extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             valor,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 2),
           Text(
@@ -679,7 +666,7 @@ class _AbaJogarAluno extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '5 perguntas aleatorias',
+                        '5 perguntas aleatórias',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.9),
                           fontSize: 14,
@@ -832,9 +819,7 @@ class _AbaPerfilAluno extends StatelessWidget {
       ),
       child: Container(
         color: AppColors.background,
-        child: const SingleChildScrollView(
-          child: ConteudoPerfilAluno(),
-        ),
+        child: const SingleChildScrollView(child: ConteudoPerfilAluno()),
       ),
     );
   }

@@ -83,11 +83,7 @@ class _AxisSelectionScreenState extends State<AxisSelectionScreen> {
   }
 
   void _selecionarEixo(BuildContext context, EixoBNCC eixo) {
-    Navigator.pushNamed(
-      context,
-      Rotas.questionList,
-      arguments: eixo,
-    );
+    Navigator.pushNamed(context, Rotas.questionList, arguments: eixo);
   }
 }
 
@@ -145,7 +141,7 @@ class _EixoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$quantidade ${quantidade == 1 ? 'questão' : 'questoes'}',
+                      '$quantidade ${quantidade == 1 ? 'questão' : 'questões'}',
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.textMuted,
@@ -154,10 +150,7 @@ class _EixoCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.textMuted,
-              ),
+              const Icon(Icons.chevron_right, color: AppColors.textMuted),
             ],
           ),
         ),

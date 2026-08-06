@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/core/widgets/app_button.dart';
+import 'package:bncc_play_mobile/data/db/app_database.dart';
 import 'package:bncc_play_mobile/data/models/partida.dart';
 import 'package:bncc_play_mobile/data/repositories/ranking_repository.dart';
 
@@ -13,10 +14,12 @@ class ResultadoScreen extends StatefulWidget {
     super.key,
     required this.partida,
     required this.apelido,
+    this.carregarPosicao,
   });
 
   final Partida partida;
   final String apelido;
+  final Future<int?> Function(int alunoId)? carregarPosicao;
 
   @override
   State<ResultadoScreen> createState() => _ResultadoScreenState();
@@ -32,8 +35,12 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
   }
 
   Future<void> _carregarPosicao() async {
-    final ranking = RankingRepository(banco: Provider.of(context));
-    final pos = await ranking.posicaoOrdinal(widget.partida.alunoId);
+    final loader = widget.carregarPosicao;
+    final pos = loader != null
+        ? await loader(widget.partida.alunoId)
+        : await RankingRepository(
+            banco: Provider.of<AppDatabase>(context, listen: false),
+          ).posicaoOrdinal(widget.partida.alunoId);
     if (mounted) {
       setState(() => _posicao = pos);
     }
@@ -62,10 +69,7 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
 
               const Text(
                 'Partida Finalizada!',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 32),
 
@@ -139,10 +143,14 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
-                  Navigator.popUntil(context, (route) => route.isFirst);
+                  Navigator.pushNamedAndRemoveUntil(
+                    context,
+                    Rotas.homeStudent,
+                    (route) => false,
+                  );
                 },
                 child: Text(
-                  'Inicio',
+                  'Início',
                   style: TextStyle(color: AppColors.purple),
                 ),
               ),

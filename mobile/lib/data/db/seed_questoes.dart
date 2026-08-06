@@ -13,57 +13,83 @@ import 'package:bncc_play_mobile/data/repositories/questao_repository.dart';
 /// usuario ja tem o app instalado com a versao antiga do seed).
 Future<void> popularBancoSeed(AppDatabase banco) async {
   final repository = QuestaoRepository(banco: banco);
-
-  // Professor padrao para as questoes seed (criado primeiro).
-  // Assumimos que ja existe um professor com id 1 no banco.
-  const professorId = 1;
-
-  // Tenta inserir as questoes (vai falhar por validacao se ja existirem).
-  final inseridas = <Questao>[];
-  for (var i = 0; i < questoesSeed.length; i++) {
-    try {
-      final q = await repository.cadastrar(
-        enunciado: questoesSeed[i].enunciado,
-        opcaoA: questoesSeed[i].opcaoA,
-        opcaoB: questoesSeed[i].opcaoB,
-        opcaoC: questoesSeed[i].opcaoC,
-        opcaoD: questoesSeed[i].opcaoD,
-        respostaCorreta: questoesSeed[i].respostaCorreta,
-        eixo: questoesSeed[i].eixo,
-        dificuldade: questoesSeed[i].dificuldade,
-        professorId: professorId,
-      );
-      inseridas.add(q);
-    } catch (_) {
-      // Ignora - provavelmente ja existia.
-    }
-  }
-
-  // Se nada foi inserido agora, tenta atualizar as 30 primeiras do
-  // professor com id 1 (que provavelmente sao o seed antigo).
-  if (inseridas.isEmpty) {
+  final totalQuestoes = await banco.db.rawQuery(
+    'SELECT COUNT(*) AS total FROM questoes',
+  );
+  if ((totalQuestoes.single['total'] as int) > 0) {
     await _atualizarTextosSeed(banco);
+    return;
   }
+
+  final professorId = await _garantirProfessorSeed(banco);
+  for (var i = 0; i < questoesSeed.length; i++) {
+    await repository.cadastrar(
+      enunciado: questoesSeed[i].enunciado,
+      opcaoA: questoesSeed[i].opcaoA,
+      opcaoB: questoesSeed[i].opcaoB,
+      opcaoC: questoesSeed[i].opcaoC,
+      opcaoD: questoesSeed[i].opcaoD,
+      respostaCorreta: questoesSeed[i].respostaCorreta,
+      eixo: questoesSeed[i].eixo,
+      dificuldade: questoesSeed[i].dificuldade,
+      categoria: _categoriaSeed(i),
+      professorId: professorId,
+    );
+  }
+}
+
+Future<int> _garantirProfessorSeed(AppDatabase banco) async {
+  final professores = await banco.db.query(
+    'users',
+    columns: ['id'],
+    where: 'papel = ?',
+    whereArgs: ['professor'],
+    orderBy: 'id ASC',
+    limit: 1,
+  );
+  if (professores.isNotEmpty) return professores.single['id'] as int;
+
+  final agora = DateTime.now().toUtc().toIso8601String();
+  return banco.db.insert('users', {
+    'nome': 'Conteúdo BNCC Play',
+    'email': 'conteudo@bncc.play',
+    'usuario': 'conteudo_bncc',
+    'senha_hash': 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=',
+    'salt': 'AAAAAAAAAAAAAAAAAAAAAA==',
+    'papel': 'professor',
+    'escola': 'BNCC Play',
+    'criado_em': agora,
+    'atualizado_em': agora,
+  });
+}
+
+/// Corrige o seed gravado por versões anteriores do app.
+Future<void> corrigirAcentuacaoSeed(AppDatabase banco) async {
+  await _atualizarTextosSeed(banco);
 }
 
 /// Atualiza o texto das 30 primeiras questoes do professor seed para
 /// refletir o conteudo atual do array.
 ///
-/// Limitacao: a heuristica sobrescreve as primeiras 30 questoes do
-/// professor com id 1. Em uma versao completa do app, teriamos uma
-/// coluna `is_seed` ou guardariamos um hash do enunciado. Para
-/// esta versao, e uma aproximacao suficiente porque o seed roda
-/// antes do professor ter tempo de criar questoes proprias.
 Future<void> _atualizarTextosSeed(AppDatabase banco) async {
   final existentes = await banco.db.query(
     'questoes',
-    where: 'professor_id = ?',
-    whereArgs: [professorId],
     orderBy: 'criado_em ASC',
     limit: questoesSeed.length,
   );
 
   if (existentes.length < questoesSeed.length) return;
+
+  final marcadoresDoSeed = <int, Set<String>>{
+    0: {'O que é um algoritmo?', 'O que e um algoritmo?'},
+    10: {'O que é plágio na era digital?', 'O que é plagio na era digital?'},
+    20: {'O que é inclusão digital?', 'O que é inclusao digital?'},
+  };
+  final correspondeAoSeed = marcadoresDoSeed.entries.every(
+    (marcador) =>
+        marcador.value.contains(existentes[marcador.key]['enunciado']),
+  );
+  if (!correspondeAoSeed) return;
 
   for (var i = 0; i < questoesSeed.length; i++) {
     final original = Questao.deLinha(existentes[i]);
@@ -76,6 +102,7 @@ Future<void> _atualizarTextosSeed(AppDatabase banco) async {
       respostaCorreta: questoesSeed[i].respostaCorreta,
       eixo: questoesSeed[i].eixo,
       dificuldade: questoesSeed[i].dificuldade,
+      categoria: _categoriaSeed(i),
     );
     await banco.db.update(
       'questoes',
@@ -84,6 +111,22 @@ Future<void> _atualizarTextosSeed(AppDatabase banco) async {
       whereArgs: [original.id],
     );
   }
+}
+
+String _categoriaSeed(int indice) {
+  if (indice < 10) {
+    if ({4, 5}.contains(indice)) return 'Estruturas e algoritmos';
+    if ({7, 9}.contains(indice)) return 'Dados e programação';
+    return 'Fundamentos da computação';
+  }
+  if (indice < 20) {
+    if ({10, 11, 18}.contains(indice)) return 'Ética e autoria';
+    if ({12, 13, 17}.contains(indice)) return 'Segurança e cidadania';
+    return 'Informação digital';
+  }
+  if ({23, 24}.contains(indice)) return 'Inteligência artificial';
+  if ({22, 27, 28, 29}.contains(indice)) return 'Sustentabilidade';
+  return 'Inclusão e sociedade';
 }
 
 const List<_QuestaoSeed> questoesSeed = [
@@ -129,7 +172,8 @@ const List<_QuestaoSeed> questoesSeed = [
     dificuldade: Dificuldade.medio,
   ),
   _QuestaoSeed(
-    enunciado: 'Qual estrutura de dados funciona como uma fila de espera (FIFO)?',
+    enunciado:
+        'Qual estrutura de dados funciona como uma fila de espera (FIFO)?',
     opcaoA: 'Pilha (Stack)',
     opcaoB: 'Fila (Queue)',
     opcaoC: 'Árvore Binária',
@@ -263,7 +307,8 @@ const List<_QuestaoSeed> questoesSeed = [
   _QuestaoSeed(
     enunciado: 'O que é o direito ao esquecimento digital?',
     opcaoA: 'Apagar todos os arquivos do computador',
-    opcaoB: 'O direito de ter informações removidas da internet em certas circunstâncias',
+    opcaoB:
+        'O direito de ter informações removidas da internet em certas circunstâncias',
     opcaoC: 'Um tipo de backup',
     opcaoD: 'Um programa de segurança',
     respostaCorreta: 'B',
@@ -295,7 +340,8 @@ const List<_QuestaoSeed> questoesSeed = [
   _QuestaoSeed(
     enunciado: 'O que é inclusão digital?',
     opcaoA: 'Excluir pessoas do uso de tecnologia',
-    opcaoB: 'Garantir que todos tenham acesso e habilidades para usar tecnologia',
+    opcaoB:
+        'Garantir que todos tenham acesso e habilidades para usar tecnologia',
     opcaoC: 'Um tipo de curso de programação',
     opcaoD: 'Criar redes sociais',
     respostaCorreta: 'B',
@@ -303,7 +349,8 @@ const List<_QuestaoSeed> questoesSeed = [
     dificuldade: Dificuldade.facil,
   ),
   _QuestaoSeed(
-    enunciado: 'Qual é um exemplo de impacto positivo da tecnologia na sociedade?',
+    enunciado:
+        'Qual é um exemplo de impacto positivo da tecnologia na sociedade?',
     opcaoA: 'A dependência tecnológica',
     opcaoB: 'O acesso a informações e educação online',
     opcaoC: 'O aumento do cyberbullying',
@@ -333,7 +380,8 @@ const List<_QuestaoSeed> questoesSeed = [
     dificuldade: Dificuldade.dificil,
   ),
   _QuestaoSeed(
-    enunciado: 'Por que é importante discutir ética em inteligência artificial?',
+    enunciado:
+        'Por que é importante discutir ética em inteligência artificial?',
     opcaoA: 'Não tem importância',
     opcaoB: 'IA pode perpetuar vieses e afetar vidas humanas',
     opcaoC: 'Só empresas precisam se importar',
@@ -344,7 +392,7 @@ const List<_QuestaoSeed> questoesSeed = [
   ),
   _QuestaoSeed(
     enunciado: 'O que é a desigualdade digital?',
-    opcaoA: 'Todos terem acesso igual a tecnologia',
+    opcaoA: 'Todos terem acesso igual à tecnologia',
     opcaoB: 'A diferença no acesso e uso de tecnologia entre grupos sociais',
     opcaoC: 'Um tipo de programação',
     opcaoD: 'Um tipo de rede social',
@@ -353,8 +401,9 @@ const List<_QuestaoSeed> questoesSeed = [
     dificuldade: Dificuldade.facil,
   ),
   _QuestaoSeed(
-    enunciado: 'Qual é o papel da tecnologia na democratização do conhecimento?',
-    opcaoA: 'Restringir o acesso a informação',
+    enunciado:
+        'Qual é o papel da tecnologia na democratização do conhecimento?',
+    opcaoA: 'Restringir o acesso à informação',
     opcaoB: 'Tornar informação mais acessível a todas as pessoas',
     opcaoC: 'Apenas beneficiar grandes empresas',
     opcaoD: 'Eliminar bibliotecas',
@@ -383,7 +432,8 @@ const List<_QuestaoSeed> questoesSeed = [
     dificuldade: Dificuldade.facil,
   ),
   _QuestaoSeed(
-    enunciado: 'Quais são os riscos da exposição excessiva a telas para crianças?',
+    enunciado:
+        'Quais são os riscos da exposição excessiva a telas para crianças?',
     opcaoA: 'Não há riscos',
     opcaoB: 'Impactos no desenvolvimento, saúde ocular e sono',
     opcaoC: 'Só benefícios',
@@ -415,7 +465,3 @@ class _QuestaoSeed {
   final EixoBNCC eixo;
   final Dificuldade dificuldade;
 }
-
-/// Constante usada para referencia o id do professor seed.
-/// (a primeira tabela a contar a partir do esquema nunca e seed).
-const int professorId = 1;

@@ -25,13 +25,13 @@ void main() {
   tearDown(() async => banco.fechar());
 
   Future<AppUser> cadastrarProfessor() => repo.cadastrar(
-        nome: 'Maria Silva',
-        email: 'professor@escola.com',
-        usuario: 'mariasilva',
-        senha: 'Professor@123',
-        papel: Papel.professor,
-        escola: 'E.E. Monteiro Lobato',
-      );
+    nome: 'Maria Silva',
+    email: 'professor@escola.com',
+    usuario: 'mariasilva',
+    senha: 'Professor@123',
+    papel: Papel.professor,
+    escola: 'E.E. Monteiro Lobato',
+  );
 
   group('CT03 - Cadastro de Professor', () {
     test('funcional: cadastra e devolve o professor com id', () async {
@@ -64,20 +64,30 @@ void main() {
       expect(linhas.single['salt'], isNotNull);
     });
 
-    test('nao funcional: minimizacao, a linha so tem os campos previstos',
-        () async {
-      await cadastrarProfessor();
+    test(
+      'nao funcional: minimizacao, a linha so tem os campos previstos',
+      () async {
+        await cadastrarProfessor();
 
-      final linha = (await banco.db.query('users')).single;
+        final linha = (await banco.db.query('users')).single;
 
-      expect(
-        linha.keys.toSet(),
-        {
-          'id', 'nome', 'email', 'usuario', 'senha_hash', 'salt', 'papel',
-          'escola', 'turma', 'avatar', 'criado_em', 'atualizado_em',
-        },
-      );
-    });
+        expect(linha.keys.toSet(), {
+          'id',
+          'nome',
+          'email',
+          'usuario',
+          'senha_hash',
+          'salt',
+          'papel',
+          'escola',
+          'turma',
+          'avatar',
+          'criado_em',
+          'atualizado_em',
+          'professor_id',
+        });
+      },
+    );
 
     test('recusa e-mail ja cadastrado', () async {
       await cadastrarProfessor();
@@ -278,14 +288,14 @@ void main() {
 /// feita a mao aqui.
 abstract final class AppUserSemId {
   static AppUser de(AppUser origem) => AppUser(
-        nome: origem.nome,
-        email: origem.email,
-        usuario: origem.usuario,
-        papel: origem.papel,
-        escola: origem.escola,
-        turma: origem.turma,
-        avatar: origem.avatar,
-        criadoEm: origem.criadoEm,
-        atualizadoEm: origem.atualizadoEm,
-      );
+    nome: origem.nome,
+    email: origem.email,
+    usuario: origem.usuario,
+    papel: origem.papel,
+    escola: origem.escola,
+    turma: origem.turma,
+    avatar: origem.avatar,
+    criadoEm: origem.criadoEm,
+    atualizadoEm: origem.atualizadoEm,
+  );
 }

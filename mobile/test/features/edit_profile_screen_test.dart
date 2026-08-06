@@ -73,7 +73,10 @@ void main() {
     testWidgets('funcional: novo e-mail e salvo', (tester) async {
       final aluno = await prepararTela(tester, papel: Papel.aluno);
 
-      await tester.enterText(find.byType(TextField).at(1), 'joao.novo@email.com');
+      await tester.enterText(
+        find.byType(TextField).at(1),
+        'joao.novo@email.com',
+      );
       await tester.tap(find.text('Salvar'));
       await tester.pump();
       await tester.pump();
@@ -94,8 +97,9 @@ void main() {
       expect(ambiente.sessao.usuario!.nome, 'Joao Pedro Santos');
     });
 
-    testWidgets('os campos vem preenchidos com o cadastro atual',
-        (tester) async {
+    testWidgets('os campos vem preenchidos com o cadastro atual', (
+      tester,
+    ) async {
       await prepararTela(tester, papel: Papel.aluno);
 
       final campos = tester
@@ -103,7 +107,12 @@ void main() {
           .map((c) => c.controller!.text)
           .toList();
 
-      expect(campos, ['Joao Santos', 'joao@email.com', 'joaosantos', '9 ano B']);
+      expect(campos, [
+        'Joao Santos',
+        'joao@email.com',
+        'joaosantos',
+        '9 ano B',
+      ]);
     });
 
     testWidgets('o aluno edita turma, nao escola', (tester) async {
@@ -113,8 +122,9 @@ void main() {
       expect(find.text('Escola'), findsNothing);
     });
 
-    testWidgets('nao funcional: sem sessao a tela manda para o login',
-        (tester) async {
+    testWidgets('nao funcional: sem sessao a tela manda para o login', (
+      tester,
+    ) async {
       await prepararTela(tester, papel: Papel.aluno, abrirSessao: false);
 
       expect(find.text('tela de login'), findsOneWidget);
@@ -128,7 +138,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.text('E-mail invalido'), findsOneWidget);
+      expect(find.text('E-mail inválido'), findsOneWidget);
     });
 
     testWidgets('recusa e-mail de outra conta', (tester) async {
@@ -142,16 +152,20 @@ void main() {
       );
       await prepararTela(tester, papel: Papel.aluno);
 
-      await tester.enterText(find.byType(TextField).at(1), 'professor@escola.com');
+      await tester.enterText(
+        find.byType(TextField).at(1),
+        'professor@escola.com',
+      );
       await tester.tap(find.text('Salvar'));
       await tester.pump();
       await tester.pump();
 
-      expect(find.text('Este e-mail ja esta cadastrado'), findsOneWidget);
+      expect(find.text('Este e-mail já está cadastrado'), findsOneWidget);
     });
 
-    testWidgets('nao funcional: script no nome nao chega ao banco',
-        (tester) async {
+    testWidgets('nao funcional: script no nome nao chega ao banco', (
+      tester,
+    ) async {
       final aluno = await prepararTela(tester, papel: Papel.aluno);
 
       await tester.enterText(
@@ -170,7 +184,10 @@ void main() {
     testWidgets('funcional: nova instituicao e salva', (tester) async {
       final professor = await prepararTela(tester, papel: Papel.professor);
 
-      await tester.enterText(find.byType(TextField).at(3), 'E.E. Santos Dumont');
+      await tester.enterText(
+        find.byType(TextField).at(3),
+        'E.E. Santos Dumont',
+      );
       await tester.tap(find.text('Salvar'));
       await tester.pump();
       await tester.pump();
@@ -186,8 +203,9 @@ void main() {
       expect(find.text('Turma'), findsNothing);
     });
 
-    testWidgets('nao funcional: sessao expirada bloqueia a alteracao',
-        (tester) async {
+    testWidgets('nao funcional: sessao expirada bloqueia a alteracao', (
+      tester,
+    ) async {
       final professor = await prepararTela(tester, papel: Papel.professor);
 
       // Encerrar a sessao equivale, para a tela, a sessao expirada.

@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
-import 'package:bncc_play_mobile/core/theme/app_theme.dart';
-import 'package:bncc_play_mobile/core/widgets/top_bar.dart';
 import 'package:bncc_play_mobile/data/models/ranking.dart';
 import 'package:bncc_play_mobile/data/repositories/ranking_repository.dart';
 
@@ -54,7 +52,11 @@ class _RankingScreenState extends State<RankingScreen>
   Future<void> _carregarRanking() async {
     setState(() => _carregando = true);
     try {
-      final lista = await _repository.listarGeral(limite: 50);
+      const eixos = <String?>[null, 'tecnologia', 'cultura', 'impacto'];
+      final eixo = eixos[_tabController.index];
+      final lista = eixo == null
+          ? await _repository.listarGeral(limite: 50)
+          : await _repository.listarPorEixo(eixo, limite: 50);
       setState(() {
         _ranking = lista;
         _carregando = false;
@@ -92,21 +94,25 @@ class _RankingScreenState extends State<RankingScreen>
             ranking: _ranking,
             carregando: _carregando,
             alunoId: widget.alunoId,
+            onRefresh: _carregarRanking,
           ),
           _RankingTab(
             ranking: _ranking,
             carregando: _carregando,
             alunoId: widget.alunoId,
+            onRefresh: _carregarRanking,
           ),
           _RankingTab(
             ranking: _ranking,
             carregando: _carregando,
             alunoId: widget.alunoId,
+            onRefresh: _carregarRanking,
           ),
           _RankingTab(
             ranking: _ranking,
             carregando: _carregando,
             alunoId: widget.alunoId,
+            onRefresh: _carregarRanking,
           ),
         ],
       ),
@@ -119,11 +125,13 @@ class _RankingTab extends StatelessWidget {
     required this.ranking,
     required this.carregando,
     required this.alunoId,
+    required this.onRefresh,
   });
 
   final List<RankingEntry> ranking;
   final bool carregando;
   final int alunoId;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
@@ -155,9 +163,7 @@ class _RankingTab extends StatelessWidget {
     }
 
     return RefreshIndicator(
-      onRefresh: () async {
-        // TODO: recarregar ranking
-      },
+      onRefresh: onRefresh,
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
         itemCount: ranking.length,
@@ -208,10 +214,7 @@ class _RankingTile extends StatelessWidget {
       child: Row(
         children: [
           // Posicao
-          SizedBox(
-            width: 40,
-            child: _buildPosicao(),
-          ),
+          SizedBox(width: 40, child: _buildPosicao()),
           const SizedBox(width: 12),
 
           // Apelido
@@ -223,15 +226,21 @@ class _RankingTile extends StatelessWidget {
                   children: [
                     Text(
                       entry.apelido,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, 
-                        color: isCurrentUser ? AppColors.purple : Colors.black87,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                        color: isCurrentUser
+                            ? AppColors.purple
+                            : Colors.black87,
                       ),
                     ),
                     if (isCurrentUser) ...[
                       const SizedBox(width: 8),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 2),
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.purple,
                           borderRadius: BorderRadius.circular(4),
@@ -267,7 +276,11 @@ class _RankingTile extends StatelessWidget {
                   const SizedBox(width: 4),
                   Text(
                     '${entry.pontuacaoTotal}',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.purple),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: AppColors.purple,
+                    ),
                   ),
                 ],
               ),
@@ -294,7 +307,9 @@ class _RankingTile extends StatelessWidget {
     }
     return Text(
       '#$posicao',
-      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, 
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 16,
         color: Colors.grey.shade600,
       ),
     );

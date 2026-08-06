@@ -1,216 +1,248 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/core/widgets/app_button.dart';
 
-/// Tela de sala multiplayer (casca navegavel).
-///
-/// A logica real de multiplayer depende de servidor e fica para quando
-/// o backend estiver implementado.
-class SalaScreen extends StatelessWidget {
-  const SalaScreen({super.key});
+import 'multiplayer_gateway.dart';
+
+class SalaScreen extends StatefulWidget {
+  const SalaScreen({super.key, this.gateway});
+
+  final MultiplayerGateway? gateway;
+
+  @override
+  State<SalaScreen> createState() => _SalaScreenState();
+}
+
+class _SalaScreenState extends State<SalaScreen> {
+  late final MultiplayerGateway _gateway;
+  late final bool _gerenciaGateway;
+
+  @override
+  void initState() {
+    super.initState();
+    _gerenciaGateway = widget.gateway == null;
+    _gateway = widget.gateway ?? FakeMultiplayerGateway();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final apelido =
+          context.read<SessionScope>().usuario?.usuario ?? 'Jogador';
+      _gateway.abrirSala(apelido);
+    });
+  }
+
+  @override
+  void dispose() {
+    if (_gerenciaGateway) _gateway.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: AppColors.purple,
-        foregroundColor: Colors.white,
-        title: const Text('Sala Multiplayer'),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Info da sala
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                gradient: AppColors.headerGradient,
-                borderRadius: BorderRadius.circular(16),
+    return AnimatedBuilder(
+      animation: _gateway,
+      builder: (context, _) {
+        final local = _jogadorLocal;
+        return Scaffold(
+          backgroundColor: AppColors.background,
+          appBar: AppBar(
+            backgroundColor: AppColors.purple,
+            foregroundColor: Colors.white,
+            title: const Text('Sala Multiplayer'),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: Center(
+                  child: Text(
+                    _rotuloEstado,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ),
               ),
-              child: Column(
-                children: [
-                  const Icon(
-                    Icons.group,
-                    size: 48,
-                    color: Colors.white,
+            ],
+          ),
+          body: SafeArea(
+            top: false,
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                _CabecalhoSala(
+                  codigo: _gateway.codigo,
+                  jogadores: _gateway.jogadores.length,
+                ),
+                if (_gateway.estado == EstadoSala.jogando) ...[
+                  const SizedBox(height: 16),
+                  LinearProgressIndicator(
+                    value: _gateway.rodada / _gateway.totalRodadas,
+                    minHeight: 8,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Rodada ${_gateway.rodada} de ${_gateway.totalRodadas}',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+                const SizedBox(height: 24),
+                Text(
+                  _gateway.estado == EstadoSala.finalizada
+                      ? 'Classificação final'
+                      : 'Jogadores',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                for (var i = 0; i < _gateway.jogadores.length; i++)
+                  _JogadorTile(
+                    jogador: _gateway.jogadores[i],
+                    posicao: _gateway.estado == EstadoSala.finalizada
+                        ? i + 1
+                        : null,
+                  ),
+                const SizedBox(height: 24),
+                if (_gateway.estado == EstadoSala.aguardando) ...[
+                  OutlinedButton.icon(
+                    onPressed: _gateway.alternarPronto,
+                    icon: Icon(
+                      local?.pronto == true
+                          ? Icons.check_circle
+                          : Icons.hourglass_empty,
+                    ),
+                    label: Text(
+                      local?.pronto == true ? 'Pronto' : 'Ficar pronto',
+                    ),
                   ),
                   const SizedBox(height: 12),
-                  const Text(
-                    'Sala dos Desafiantes',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  AppButton(
+                    label: 'Iniciar Partida',
+                    icon: Icons.play_arrow,
+                    onPressed:
+                        local?.pronto == true && _gateway.jogadores.length >= 2
+                        ? _gateway.iniciarPartida
+                        : null,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Codigo: DESAFIO2026',
-                    style: TextStyle(color: Colors.white.withValues(alpha: 0.9)),
+                ] else if (_gateway.estado == EstadoSala.finalizada)
+                  AppButton(
+                    label: 'Nova Simulação',
+                    icon: Icons.refresh,
+                    onPressed: _gateway.reiniciar,
                   ),
-                ],
-              ),
+              ],
             ),
-            const SizedBox(height: 24),
+          ),
+        );
+      },
+    );
+  }
 
-            // Aviso
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.orange.shade50,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.orange.shade200),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.construction, color: Colors.orange.shade700),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Modo multiplayer em desenvolvimento. '
-                      'A logica de sala com server-side sync sera implementada.',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.orange.shade900,
-                      ),
-                    ),
+  JogadorSala? get _jogadorLocal {
+    for (final jogador in _gateway.jogadores) {
+      if (jogador.local) return jogador;
+    }
+    return null;
+  }
+
+  String get _rotuloEstado {
+    switch (_gateway.estado) {
+      case EstadoSala.aguardando:
+        return 'Aguardando';
+      case EstadoSala.jogando:
+        return 'Jogando';
+      case EstadoSala.finalizada:
+        return 'Finalizada';
+    }
+  }
+}
+
+class _CabecalhoSala extends StatelessWidget {
+  const _CabecalhoSala({required this.codigo, required this.jogadores});
+
+  final String codigo;
+  final int jogadores;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: AppColors.headerGradient,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.groups, color: Colors.white, size: 36),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  codigo,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
-              ),
+                ),
+                Text(
+                  '$jogadores participantes · Simulação local',
+                  style: const TextStyle(color: Colors.white70),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-
-            // Lista de jogadores (placeholder)
-            const Text(
-              'Jogadores na sala',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-            const SizedBox(height: 12),
-            _JogadorTile(
-              nome: 'MariaSilva',
-              avatar: 'person',
-              status: 'Pronto',
-              isReady: true,
-            ),
-            _JogadorTile(
-              nome: 'JoaoGames',
-              avatar: 'sports_esports',
-              status: 'Jogando',
-              isReady: true,
-            ),
-            _JogadorTile(
-              nome: 'AnaEstuda',
-              avatar: 'menu_book',
-              status: 'Aguardando',
-              isReady: false,
-            ),
-            _JogadorTile(
-              nome: 'Pedrinho',
-              avatar: 'person',
-              status: 'Aguardando',
-              isReady: false,
-            ),
-
-            const SizedBox(height: 32),
-
-            // Botao de entrada
-            AppButton(
-              label: 'Entrar na Partida',
-              icon: Icons.play_arrow,
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Multiplayer em desenvolvimento'),
-                    backgroundColor: Colors.orange,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _JogadorTile extends StatelessWidget {
-  const _JogadorTile({
-    required this.nome,
-    required this.avatar,
-    required this.status,
-    required this.isReady,
-  });
+  const _JogadorTile({required this.jogador, this.posicao});
 
-  final String nome;
-  final String avatar;
-  final String status;
-  final bool isReady;
+  final JogadorSala jogador;
+  final int? posicao;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 4,
-          ),
-        ],
+        color: jogador.local ? AppColors.purpleLight : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: jogador.local ? Border.all(color: AppColors.purple) : null,
       ),
       child: Row(
         children: [
-          Icon(_iconeDoAvatar(avatar), size: 28, color: AppColors.purple),
-          const SizedBox(width: 12),
+          SizedBox(
+            width: 30,
+            child: posicao == null
+                ? Icon(
+                    jogador.pronto ? Icons.check_circle : Icons.schedule,
+                    color: jogador.pronto ? Colors.green : AppColors.textMuted,
+                  )
+                : Text(
+                    '#$posicao',
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+          ),
+          const SizedBox(width: 10),
           Expanded(
             child: Text(
-              nome,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
+              jogador.local ? '${jogador.nome} (você)' : jogador.nome,
+              style: const TextStyle(fontWeight: FontWeight.w600),
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: isReady ? Colors.green.shade100 : Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              status,
-              style: TextStyle(
-                fontSize: 12,
-                color: isReady ? Colors.green.shade700 : Colors.grey.shade600,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
+          Text(
+            '${jogador.pontuacao} XP',
+            style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
       ),
     );
-  }
-
-  IconData _iconeDoAvatar(String nome) {
-    switch (nome) {
-      case 'person':
-        return Icons.person;
-      case 'sports_esports':
-        return Icons.sports_esports;
-      case 'menu_book':
-        return Icons.menu_book;
-      default:
-        return Icons.person;
-    }
   }
 }

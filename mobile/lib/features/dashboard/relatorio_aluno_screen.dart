@@ -3,7 +3,11 @@ import 'package:provider/provider.dart';
 
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/data/models/partida.dart';
+import 'package:bncc_play_mobile/data/models/resposta.dart';
 import 'package:bncc_play_mobile/data/repositories/game_repository.dart';
+import 'package:bncc_play_mobile/data/repositories/user_repository.dart';
+import 'package:bncc_play_mobile/core/session/session_scope.dart';
+import 'package:bncc_play_mobile/data/models/papel.dart';
 
 /// Tela de relatorio de desempenho de um aluno especifico (CT18).
 class RelatorioAlunoScreen extends StatefulWidget {
@@ -18,24 +22,52 @@ class RelatorioAlunoScreen extends StatefulWidget {
 class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
   late GameRepository _repository;
   List<Partida> _historico = [];
+  List<RespostaDetalhada> _respostas = [];
   bool _carregando = true;
+  bool _inicializado = false;
+  String? _erro;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_inicializado) return;
+    _inicializado = true;
     _repository = GameRepository(banco: Provider.of(context));
     _carregarHistorico();
   }
 
   Future<void> _carregarHistorico() async {
     try {
-      final historico = await _repository.historico(widget.alunoId);
+      final professor = context.read<SessionScope>().usuario;
+      final aluno = await context.read<UserRepository>().porId(widget.alunoId);
+      if (professor == null ||
+          professor.papel != Papel.professor ||
+          aluno?.professorId != professor.id) {
+        setState(() {
+          _erro = 'Você não tem permissão para acessar este relatório.';
+          _carregando = false;
+        });
+        return;
+      }
+      final resultados = await Future.wait([
+        _repository.historico(widget.alunoId),
+        _repository.historicoRespostas(widget.alunoId),
+      ]);
       setState(() {
-        _historico = historico;
+        _historico = resultados[0] as List<Partida>;
+        _respostas = resultados[1] as List<RespostaDetalhada>;
         _carregando = false;
       });
     } catch (e) {
-      setState(() => _carregando = false);
+      setState(() {
+        _erro = 'Não foi possível carregar o relatório.';
+        _carregando = false;
+      });
     }
   }
 
@@ -59,6 +91,10 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
       );
     }
 
+    if (_erro != null) {
+      return Center(child: Text(_erro!, textAlign: TextAlign.center));
+    }
+
     if (_historico.isEmpty) {
       return Center(
         child: Column(
@@ -79,9 +115,17 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
     final totalPartidas = _historico.length;
     final totalXp = _historico.fold<int>(0, (s, p) => s + p.pontuacao);
     final totalAcertos = _historico.fold<int>(0, (s, p) => s + p.acertos);
-    final totalRespondidas = _historico.fold<int>(0, (s, p) => s + p.respondidas);
-    final melhorStreak = _historico.fold<int>(0, (best, p) => p.streak > best ? p.streak : best);
-    final taxaMedia = totalRespondidas > 0 ? (totalAcertos / totalRespondidas) * 100 : 0.0;
+    final totalRespondidas = _historico.fold<int>(
+      0,
+      (s, p) => s + p.respondidas,
+    );
+    final melhorStreak = _historico.fold<int>(
+      0,
+      (best, p) => p.streak > best ? p.streak : best,
+    );
+    final taxaMedia = totalRespondidas > 0
+        ? (totalAcertos / totalRespondidas) * 100
+        : 0.0;
 
     return RefreshIndicator(
       onRefresh: _carregarHistorico,
@@ -98,11 +142,26 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
                 children: [
                   _StatRow(label: 'Total de partidas', valor: '$totalPartidas'),
                   _StatRow(label: 'Total de XP', valor: '$totalXp'),
-                  _StatRow(label: 'Taxa de acerto media', valor: '${taxaMedia.toStringAsFixed(1)}%'),
+                  _StatRow(
+                    label: 'Taxa de acerto média',
+                    valor: '${taxaMedia.toStringAsFixed(1)}%',
+                  ),
                   _StatRow(label: 'Melhor streak', valor: '$melhorStreak'),
                 ],
               ),
             ),
+            if (_respostas.isNotEmpty) ...[
+              const SizedBox(height: 24),
+              _Secao(
+                titulo: 'Respostas por questão',
+                child: Column(
+                  children: _respostas
+                      .take(50)
+                      .map((resposta) => _RespostaTile(resposta: resposta))
+                      .toList(),
+                ),
+              ),
+            ],
 
             const SizedBox(height: 24),
 
@@ -110,11 +169,57 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
             _Secao(
               titulo: 'Histórico de Partidas',
               child: Column(
-                children: _historico.take(20).map((p) => _PartidaTile(partida: p)).toList(),
+                children: _historico
+                    .take(20)
+                    .map((p) => _PartidaTile(partida: p))
+                    .toList(),
               ),
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _RespostaTile extends StatelessWidget {
+  const _RespostaTile({required this.resposta});
+
+  final RespostaDetalhada resposta;
+
+  @override
+  Widget build(BuildContext context) {
+    final cor = resposta.correta ? Colors.green : AppColors.danger;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            resposta.correta ? Icons.check_circle : Icons.cancel,
+            color: cor,
+            size: 20,
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  resposta.enunciado,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  resposta.correta
+                      ? 'Resposta: ${resposta.respostaAluno}'
+                      : 'Resposta: ${resposta.respostaAluno} · Correta: ${resposta.respostaCorreta}',
+                  style: TextStyle(fontSize: 12, color: cor),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -133,10 +238,7 @@ class _Secao extends StatelessWidget {
       children: [
         Text(
           titulo,
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 12),
         Container(

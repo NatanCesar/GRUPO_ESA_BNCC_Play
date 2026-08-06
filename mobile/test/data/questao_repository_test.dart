@@ -103,7 +103,10 @@ void main() {
     test('CT08 funcional: lista questoes de um professor', () async {
       await repository.cadastrar(
         enunciado: 'Questao Um para listar',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'A',
         eixo: EixoBNCC.tecnologia,
         dificuldade: Dificuldade.facil,
@@ -111,7 +114,10 @@ void main() {
       );
       await repository.cadastrar(
         enunciado: 'Questao Dois para listar',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'B',
         eixo: EixoBNCC.tecnologia,
         dificuldade: Dificuldade.medio,
@@ -138,10 +144,14 @@ void main() {
         for (final dif in Dificuldade.values) {
           await repository.cadastrar(
             enunciado: 'Questao ${eixo.valor} ${dif.valor}',
-            opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+            opcaoA: 'A',
+            opcaoB: 'B',
+            opcaoC: 'C',
+            opcaoD: 'D',
             respostaCorreta: 'A',
             eixo: eixo,
             dificuldade: dif,
+            categoria: 'Categoria ${dif.valor}',
             professorId: professorId,
           );
         }
@@ -180,6 +190,26 @@ void main() {
       expect(questoes.single.dificuldade, Dificuldade.dificil);
     });
 
+    test('US10 funcional: filtra e lista categorias dentro do eixo', () async {
+      final questoes = await repository.filtrar(
+        professorId: professorId,
+        eixo: EixoBNCC.tecnologia,
+        categoria: 'Categoria medio',
+      );
+      final categorias = await repository.listarCategorias(
+        professorId: professorId,
+        eixo: EixoBNCC.tecnologia,
+      );
+
+      expect(questoes, hasLength(1));
+      expect(questoes.single.categoria, 'Categoria medio');
+      expect(categorias, [
+        'Categoria dificil',
+        'Categoria facil',
+        'Categoria medio',
+      ]);
+    });
+
     test('sem filtro retorna todas do professor', () async {
       final todas = await repository.filtrar(professorId: professorId);
       expect(todas.length, 9); // 3 eixos x 3 dificuldades
@@ -199,7 +229,10 @@ void main() {
     test('CT09 funcional: atualiza enunciado e dificuldade', () async {
       final original = await repository.cadastrar(
         enunciado: 'Enunciado Original',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'A',
         eixo: EixoBNCC.tecnologia,
         dificuldade: Dificuldade.facil,
@@ -207,7 +240,10 @@ void main() {
       );
 
       final atualizada = await repository.atualizar(
-        original.copiarCom(enunciado: 'Enunciado Modificado', dificuldade: Dificuldade.dificil),
+        original.copiarCom(
+          enunciado: 'Enunciado Modificado',
+          dificuldade: Dificuldade.dificil,
+        ),
       );
 
       expect(atualizada.enunciado, 'Enunciado Modificado');
@@ -249,7 +285,10 @@ void main() {
     test('CT10 funcional: remove questao existente', () async {
       final questao = await repository.cadastrar(
         enunciado: 'Questao para remover',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'A',
         eixo: EixoBNCC.tecnologia,
         dificuldade: Dificuldade.facil,
@@ -282,7 +321,10 @@ void main() {
       // Cria 3 questoes: 2 de tecnologia, 1 de cultura
       await repository.cadastrar(
         enunciado: 'Questao de Tecnologia Facil',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'A',
         eixo: EixoBNCC.tecnologia,
         dificuldade: Dificuldade.facil,
@@ -290,7 +332,10 @@ void main() {
       );
       await repository.cadastrar(
         enunciado: 'Questao de Tecnologia Medio',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'A',
         eixo: EixoBNCC.tecnologia,
         dificuldade: Dificuldade.medio,
@@ -298,7 +343,10 @@ void main() {
       );
       await repository.cadastrar(
         enunciado: 'Questao de Cultura Digital',
-        opcaoA: 'A', opcaoB: 'B', opcaoC: 'C', opcaoD: 'D',
+        opcaoA: 'A',
+        opcaoB: 'B',
+        opcaoC: 'C',
+        opcaoD: 'D',
         respostaCorreta: 'A',
         eixo: EixoBNCC.culturaDigital,
         dificuldade: Dificuldade.facil,
@@ -334,7 +382,11 @@ Future<(QuestaoRepository, int)> _criarBancoComProfessor() async {
     'atualizado_em': DateTime.now().toUtc().toIso8601String(),
   });
 
-  final linhas = await banco.db.query('users', where: 'email = ?', whereArgs: ['prof$id@teste.com']);
+  final linhas = await banco.db.query(
+    'users',
+    where: 'email = ?',
+    whereArgs: ['prof$id@teste.com'],
+  );
   final professorId = linhas.single['id'] as int;
 
   return (QuestaoRepository(banco: banco), professorId);

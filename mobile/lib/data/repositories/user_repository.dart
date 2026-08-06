@@ -13,10 +13,7 @@ import 'package:bncc_play_mobile/data/errors.dart';
 /// Nao expõe hash nem salt: `AppUser` e construit a partir da linha sem
 /// esses campos.
 class UserRepository {
-  const UserRepository({
-    required this._banco,
-    required this._hasher,
-  });
+  const UserRepository({required this._banco, required this._hasher});
 
   final AppDatabase _banco;
   final PasswordHasher _hasher;
@@ -34,6 +31,7 @@ class UserRepository {
     required Papel papel,
     String? escola,
     String? turma,
+    int? professorId,
   }) async {
     final erros = <String>[];
 
@@ -65,6 +63,20 @@ class UserRepository {
 
     final normalizado = email.trim().toLowerCase();
     final agora = DateTime.now().toUtc();
+    var professorVinculado = professorId;
+    if (papel == Papel.aluno && professorVinculado == null) {
+      final professores = await _banco.db.query(
+        'users',
+        columns: ['id'],
+        where: 'papel = ? AND usuario != ?',
+        whereArgs: ['professor', 'conteudo_bncc'],
+        orderBy: 'id ASC',
+        limit: 1,
+      );
+      if (professores.isNotEmpty) {
+        professorVinculado = professores.single['id'] as int;
+      }
+    }
 
     final limpo = _limpar({
       'nome': nome,
@@ -82,9 +94,19 @@ class UserRepository {
         'senha_hash': cifrada.hash,
         'salt': cifrada.salt,
         'papel': papel.valor,
+        'professor_id': professorVinculado,
         'criado_em': agora.toIso8601String(),
         'atualizado_em': agora.toIso8601String(),
       });
+
+      if (papel == Papel.professor) {
+        await _banco.db.update(
+          'users',
+          {'professor_id': id},
+          where: 'papel = ? AND professor_id IS NULL',
+          whereArgs: ['aluno'],
+        );
+      }
 
       return (await porId(id))!;
     } on DatabaseException catch (e) {
@@ -129,12 +151,14 @@ class UserRepository {
     return linhas.map(AppUser.deLinha).toList();
   }
 
-  /// Lista alunos cadastrados.
-  Future<List<AppUser>> listarAlunos() async {
+  /// Lista alunos cadastrados, opcionalmente vinculados a um professor.
+  Future<List<AppUser>> listarAlunos({int? professorId}) async {
     final linhas = await _banco.db.query(
       'users',
-      where: 'papel = ?',
-      whereArgs: ['aluno'],
+      where: professorId == null
+          ? 'papel = ?'
+          : 'papel = ? AND professor_id = ?',
+      whereArgs: professorId == null ? ['aluno'] : ['aluno', professorId],
     );
     return linhas.map(AppUser.deLinha).toList();
   }

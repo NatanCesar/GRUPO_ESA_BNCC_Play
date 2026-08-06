@@ -1,17 +1,32 @@
-# bncc_play_mobile
+# BNCC Play Mobile
 
-A new Flutter project.
+Aplicativo Flutter local para professores e alunos praticarem os eixos da
+BNCC Computação por meio de questões e partidas gamificadas.
 
-## Getting Started
+## Funcionalidades
 
-This project is a starting point for a Flutter application.
+- autenticação e perfis de professor e aluno;
+- questões por eixo, dificuldade e categoria;
+- seed inicial com 30 questões revisadas e categorizadas;
+- partidas com pontuação, sequência de acertos e histórico de respostas;
+- ranking geral e por eixo;
+- dashboard e relatório de alunos isolados por professor;
+- sala multiplayer simulada por um gateway local substituível.
 
-A few resources to get you started if this is your first Flutter project:
+O multiplayer desta versão não conecta dispositivos reais. O contrato
+`MultiplayerGateway` permite trocar a simulação por uma implementação remota
+sem reescrever a tela da sala.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Execução
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+flutter pub get
+flutter run
+```
+
+## Verificação
+
+```bash
+flutter analyze
+flutter test
+```

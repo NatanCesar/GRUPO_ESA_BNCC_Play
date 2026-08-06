@@ -26,10 +26,21 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
   String? _erro;
   EixoBNCC? _eixoFiltro;
   Dificuldade? _dificuldadeFiltro;
+  String? _categoriaFiltro;
+  List<String> _categorias = [];
+  bool _rotaInicializada = false;
 
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_rotaInicializada) return;
+    _rotaInicializada = true;
+    _eixoFiltro = ModalRoute.of(context)?.settings.arguments as EixoBNCC?;
     _carregar();
   }
 
@@ -49,10 +60,16 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
         professorId: usuario.id!,
         eixo: _eixoFiltro,
         dificuldade: _dificuldadeFiltro,
+        categoria: _categoriaFiltro,
+      );
+      final categorias = await repository.listarCategorias(
+        professorId: usuario.id!,
+        eixo: _eixoFiltro,
       );
       if (mounted) {
         setState(() {
           _questoes = questoes;
+          _categorias = categorias;
           _carregando = false;
         });
       }
@@ -103,8 +120,6 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final eixo = ModalRoute.of(context)!.settings.arguments as EixoBNCC?;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: Column(
@@ -114,36 +129,56 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(eixo?.rotulo ?? 'Questões', style: AppTheme.headerTitle),
+                Text(
+                  _eixoFiltro?.rotulo ?? 'Questões',
+                  style: AppTheme.headerTitle,
+                ),
                 const SizedBox(height: 4),
-                Text(_eixoFiltro?.rotulo ?? 'Todas', style: AppTheme.headerSubtitle),
+                Text(
+                  _eixoFiltro?.rotulo ?? 'Todas',
+                  style: AppTheme.headerSubtitle,
+                ),
               ],
             ),
           ),
           _FiltrosBar(
             dificuldadeFiltro: _dificuldadeFiltro,
+            categoriaFiltro: _categoriaFiltro,
+            categorias: _categorias,
             onDificuldadeChanged: (d) {
               setState(() => _dificuldadeFiltro = d);
               _carregar();
             },
+            onCategoriaChanged: (categoria) {
+              setState(() => _categoriaFiltro = categoria);
+              _carregar();
+            },
             onLimpar: () {
-              setState(() => _dificuldadeFiltro = null);
+              setState(() {
+                _dificuldadeFiltro = null;
+                _categoriaFiltro = null;
+              });
               _carregar();
             },
           ),
-          Expanded(
-            child: _buildContent(),
-          ),
+          Expanded(child: _buildContent()),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
-          await Navigator.pushNamed(context, Rotas.questionCreate);
+          await Navigator.pushNamed(
+            context,
+            Rotas.questionCreate,
+            arguments: _eixoFiltro,
+          );
           _carregar();
         },
         backgroundColor: AppColors.purple,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Nova Questão', style: TextStyle(color: Colors.white)),
+        label: const Text(
+          'Nova Questão',
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }
@@ -162,7 +197,11 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.quiz_outlined, size: 64, color: AppColors.textHint),
+            const Icon(
+              Icons.quiz_outlined,
+              size: 64,
+              color: AppColors.textHint,
+            ),
             const SizedBox(height: 16),
             const Text(
               'Nenhuma questão encontrada',
@@ -203,12 +242,18 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
 class _FiltrosBar extends StatelessWidget {
   const _FiltrosBar({
     required this.dificuldadeFiltro,
+    required this.categoriaFiltro,
+    required this.categorias,
     required this.onDificuldadeChanged,
+    required this.onCategoriaChanged,
     required this.onLimpar,
   });
 
   final Dificuldade? dificuldadeFiltro;
+  final String? categoriaFiltro;
+  final List<String> categorias;
   final void Function(Dificuldade?) onDificuldadeChanged;
+  final ValueChanged<String?> onCategoriaChanged;
   final VoidCallback onLimpar;
 
   @override
@@ -216,35 +261,73 @@ class _FiltrosBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: Colors.white,
-      child: Row(
+      child: Column(
         children: [
-          const Text('Dificuldade:', style: TextStyle(color: AppColors.textMuted)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  for (final dif in Dificuldade.values) ...[
-                    _FiltroChip(
-                      label: dif.rotulo,
-                      selected: dificuldadeFiltro == dif,
-                      onTap: () => onDificuldadeChanged(
-                        dificuldadeFiltro == dif ? null : dif,
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                  ],
-                ],
+          Row(
+            children: [
+              const Text(
+                'Dificuldade:',
+                style: TextStyle(color: AppColors.textMuted),
               ),
-            ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      for (final dif in Dificuldade.values) ...[
+                        _FiltroChip(
+                          label: dif.rotulo,
+                          selected: dificuldadeFiltro == dif,
+                          onTap: () => onDificuldadeChanged(
+                            dificuldadeFiltro == dif ? null : dif,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              if (dificuldadeFiltro != null || categoriaFiltro != null)
+                IconButton(
+                  onPressed: onLimpar,
+                  icon: const Icon(Icons.clear, size: 20),
+                  color: AppColors.textMuted,
+                ),
+            ],
           ),
-          if (dificuldadeFiltro != null)
-            IconButton(
-              onPressed: onLimpar,
-              icon: const Icon(Icons.clear, size: 20),
-              color: AppColors.textMuted,
+          if (categorias.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Text(
+                  'Categoria:',
+                  style: TextStyle(color: AppColors.textMuted),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: DropdownButton<String?>(
+                    value: categoriaFiltro,
+                    isExpanded: true,
+                    underline: const SizedBox.shrink(),
+                    items: [
+                      const DropdownMenuItem<String?>(
+                        value: null,
+                        child: Text('Todas'),
+                      ),
+                      for (final categoria in categorias)
+                        DropdownMenuItem<String?>(
+                          value: categoria,
+                          child: Text(categoria),
+                        ),
+                    ],
+                    onChanged: onCategoriaChanged,
+                  ),
+                ),
+              ],
             ),
+          ],
         ],
       ),
     );
@@ -309,7 +392,10 @@ class _QuestaoCard extends StatelessWidget {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _corDificuldade(questao.dificuldade),
                     borderRadius: BorderRadius.circular(8),
@@ -319,6 +405,18 @@ class _QuestaoCard extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 11,
                       color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Flexible(
+                  child: Text(
+                    questao.categoria,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMuted,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -355,13 +453,29 @@ class _QuestaoCard extends StatelessWidget {
             const SizedBox(height: 12),
             Row(
               children: [
-                _OpcaoLetra(letra: 'A', texto: questao.opcaoA, correta: questao.respostaCorreta == 'A'),
+                _OpcaoLetra(
+                  letra: 'A',
+                  texto: questao.opcaoA,
+                  correta: questao.respostaCorreta == 'A',
+                ),
                 const SizedBox(width: 8),
-                _OpcaoLetra(letra: 'B', texto: questao.opcaoB, correta: questao.respostaCorreta == 'B'),
+                _OpcaoLetra(
+                  letra: 'B',
+                  texto: questao.opcaoB,
+                  correta: questao.respostaCorreta == 'B',
+                ),
                 const SizedBox(width: 8),
-                _OpcaoLetra(letra: 'C', texto: questao.opcaoC, correta: questao.respostaCorreta == 'C'),
+                _OpcaoLetra(
+                  letra: 'C',
+                  texto: questao.opcaoC,
+                  correta: questao.respostaCorreta == 'C',
+                ),
                 const SizedBox(width: 8),
-                _OpcaoLetra(letra: 'D', texto: questao.opcaoD, correta: questao.respostaCorreta == 'D'),
+                _OpcaoLetra(
+                  letra: 'D',
+                  texto: questao.opcaoD,
+                  correta: questao.respostaCorreta == 'D',
+                ),
               ],
             ),
           ],
@@ -401,7 +515,9 @@ class _OpcaoLetra extends StatelessWidget {
         decoration: BoxDecoration(
           color: correta ? AppColors.greenLight : AppColors.background,
           borderRadius: BorderRadius.circular(8),
-          border: correta ? Border.all(color: AppColors.green, width: 1.5) : null,
+          border: correta
+              ? Border.all(color: AppColors.green, width: 1.5)
+              : null,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

@@ -40,3 +40,22 @@ As Issues do GitHub devem ser criadas a partir dos itens deste backlog. Cada ite
 | 19 | Dashboard pedagógico | Painel para o professor visualizar o desempenho geral da turma. | Professor | P1 | Nome do aluno | US19 - Dashboard pedagógico |
 | 20 | Relatórios de desempenho | Gera relatório com histórico de respostas e pontuação dos alunos por sessão. | Professor | P2 | Nome do aluno | US20 - Relatórios de desempenho |
 
+## Status no MVP mobile local
+
+As 20 funcionalidades estão contempladas no aplicativo mobile. O escopo desta
+versão é local: os dados ficam em SQLite no dispositivo e a sala multiplayer é
+uma simulação determinística por meio de um gateway substituível.
+
+| Itens | Status | Observação |
+|---|---|---|
+| US01–US09 | Implementado | Autenticação, perfis, seleção de eixo e CRUD de questões. |
+| US10–US12 | Implementado | Categorias, filtro por eixo e filtro por dificuldade; o seed possui categorias iniciais. |
+| US13–US14 | Implementado | Edição dos perfis de professor e aluno. |
+| US15–US17 | Implementado | Quiz, respostas persistidas, pontuação e ranking geral/por eixo. |
+| US18 | MVP simulado | Sala local com entrada de jogadores simulados, estado de pronto, rodadas e ranking final. |
+| US19–US20 | Implementado | Dashboard isolado por professor e relatório com histórico de partidas e respostas por questão. |
+
+O multiplayer real ainda exige a implementação de um gateway remoto, servidor,
+identidade de sala compartilhada e sincronização entre dispositivos. Testes de
+carga, concorrência e comunicação segura também não são atendidos pela versão
+local.

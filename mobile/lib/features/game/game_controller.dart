@@ -17,12 +17,12 @@ class GameController extends ChangeNotifier {
     String? eixo,
     int questoesPorPartida = 5,
     Random? random,
-  })  : _game = game,
-        _questoes = questoes,
-        _alunoId = alunoId,
-        _eixo = eixo,
-        _questoesCount = questoesPorPartida,
-        _random = random ?? Random();
+  }) : _game = game,
+       _questoes = questoes,
+       _alunoId = alunoId,
+       _eixo = eixo,
+       _questoesCount = questoesPorPartida,
+       _random = random ?? Random();
 
   final GameRepository _game;
   final QuestaoRepository _questoes;
@@ -51,10 +51,9 @@ class GameController extends ChangeNotifier {
   String? get erro => _erro;
   bool get finalizado => _finalizado;
 
-  Questao? get questaoAtual =>
-      _indiceAtual < _questoesSelecionadas.length
-          ? _questoesSelecionadas[_indiceAtual]
-          : null;
+  Questao? get questaoAtual => _indiceAtual < _questoesSelecionadas.length
+      ? _questoesSelecionadas[_indiceAtual]
+      : null;
 
   int get progresso => _indiceAtual + 1;
 
@@ -67,7 +66,7 @@ class GameController extends ChangeNotifier {
     try {
       final todas = await _questoes.filtrar(
         professorId: null,
-        eixo: _eixo != null ? EixoBNCC.dePersistencia(_eixo!) : null,
+        eixo: _eixo != null ? EixoBNCC.dePersistencia(_eixo) : null,
       );
 
       if (todas.isEmpty) {
@@ -104,6 +103,7 @@ class GameController extends ChangeNotifier {
 
     _partida = await _game.registrarResposta(
       partidaId: _partida!.id!,
+      questaoId: q.id!,
       respostaAluno: resposta,
       acertou: _acertou!,
     );

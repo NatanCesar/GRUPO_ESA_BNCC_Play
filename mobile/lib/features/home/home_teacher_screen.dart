@@ -12,8 +12,6 @@ import '../../data/models/eixo_bncc.dart';
 import '../../data/models/questao.dart';
 import '../../data/models/dificuldade.dart';
 import '../dashboard/dashboard_screen.dart';
-import '../questions/axis_selection_screen.dart';
-import '../questions/question_list_screen.dart';
 import '../profile/widgets/conteudo_perfil_professor.dart';
 
 /// Item de aba na barra inferior.
@@ -54,7 +52,7 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
       id: 'home',
       icone: Icons.home_outlined,
       iconeAtivo: Icons.home,
-      rotulo: 'Inicio',
+      rotulo: 'Início',
     ),
     _Aba(
       id: 'questoes',
@@ -184,11 +182,7 @@ class _BottomNav extends StatelessWidget {
 }
 
 class _ItemNav extends StatelessWidget {
-  const _ItemNav({
-    required this.aba,
-    required this.ativo,
-    required this.onTap,
-  });
+  const _ItemNav({required this.aba, required this.ativo, required this.onTap});
 
   final _Aba aba;
   final bool ativo;
@@ -269,7 +263,7 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
 
     try {
       final todas = await questaoRepo.listarPorProfessor(usuario.id!);
-      final alunos = await users.listarAlunos();
+      final alunos = await users.listarAlunos(professorId: usuario.id!);
       final turmas = <String>{};
       for (final u in alunos) {
         if (u.turma != null && u.turma!.isNotEmpty) turmas.add(u.turma!);
@@ -362,18 +356,14 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
                     _AcaoRapida(
                       icone: Icons.filter_alt_outlined,
                       titulo: 'Selecionar Eixo',
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        Rotas.axisSelection,
-                      ),
+                      onTap: () =>
+                          Navigator.pushNamed(context, Rotas.axisSelection),
                     ),
                     _AcaoRapida(
                       icone: Icons.add_circle_outline,
                       titulo: 'Cadastrar Questão',
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        Rotas.questionCreate,
-                      ),
+                      onTap: () =>
+                          Navigator.pushNamed(context, Rotas.questionCreate),
                     ),
                     _AcaoRapida(
                       icone: Icons.list_alt_outlined,
@@ -401,7 +391,7 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
                 padding: EdgeInsets.fromLTRB(20, 24, 20, 8),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    'Questoes Recentes',
+                    'Questões Recentes',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -506,10 +496,7 @@ class _StatTile extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-          ),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8),
         ],
       ),
       child: Column(
@@ -611,11 +598,8 @@ class _QuestaoCard extends StatelessWidget {
       color: Colors.white,
       borderRadius: BorderRadius.circular(12),
       child: InkWell(
-        onTap: () => Navigator.pushNamed(
-          context,
-          Rotas.questionEdit,
-          arguments: q.id,
-        ),
+        onTap: () =>
+            Navigator.pushNamed(context, Rotas.questionEdit, arguments: q.id),
         borderRadius: BorderRadius.circular(12),
         child: Padding(
           padding: const EdgeInsets.all(12),
@@ -650,15 +634,25 @@ class _QuestaoCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        _Badge(label: _eixoLabel(q.eixo), cor: _eixoCor(q.eixo)),
+                        _Badge(
+                          label: _eixoLabel(q.eixo),
+                          cor: _eixoCor(q.eixo),
+                        ),
                         const SizedBox(width: 6),
-                        _Badge(label: _difLabel(q.dificuldade), cor: _difCor(q.dificuldade)),
+                        _Badge(
+                          label: _difLabel(q.dificuldade),
+                          cor: _difCor(q.dificuldade),
+                        ),
                       ],
                     ),
                   ],
                 ),
               ),
-              const Icon(Icons.edit_outlined, size: 18, color: AppColors.textMuted),
+              const Icon(
+                Icons.edit_outlined,
+                size: 18,
+                color: AppColors.textMuted,
+              ),
             ],
           ),
         ),
@@ -727,11 +721,7 @@ class _Badge extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontSize: 11,
-          color: cor,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(fontSize: 11, color: cor, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -780,10 +770,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                         SizedBox(height: 4),
                         Text(
                           'Selecione um eixo para gerenciar',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 14,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: 14),
                         ),
                       ],
                     ),
@@ -830,10 +817,8 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                   const SizedBox(height: 24),
                   Center(
                     child: TextButton.icon(
-                      onPressed: () => Navigator.pushNamed(
-                        context,
-                        Rotas.questionCreate,
-                      ),
+                      onPressed: () =>
+                          Navigator.pushNamed(context, Rotas.questionCreate),
                       icon: const Icon(Icons.add_circle_outline),
                       label: const Text('Cadastrar Nova Questão'),
                     ),
