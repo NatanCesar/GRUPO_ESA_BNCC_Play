@@ -38,7 +38,6 @@ class _AppButtonState extends State<AppButton> {
   Widget build(BuildContext context) {
     final isGreen = widget.variant == AppButtonVariant.green;
     final isPrimary = widget.variant == AppButtonVariant.primary;
-    final isGhost = widget.variant == AppButtonVariant.ghost;
 
     Color background;
     Color foreground;

@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
-import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/aviso_de_ciclo.dart';
 import '../../core/widgets/bottom_nav.dart';

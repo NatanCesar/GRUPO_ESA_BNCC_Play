@@ -8,7 +8,6 @@ import 'package:provider/provider.dart';
 import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/core/theme/app_theme.dart';
-import 'package:bncc_play_mobile/data/models/papel.dart';
 import 'package:bncc_play_mobile/data/repositories/auth_repository.dart';
 import 'package:bncc_play_mobile/data/repositories/user_repository.dart';
 import 'package:bncc_play_mobile/features/auth/login_screen.dart';
