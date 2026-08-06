@@ -4,11 +4,14 @@ import 'package:sqflite/sqflite.dart';
 /// Banco local do app.
 ///
 /// A versao sobe a cada ciclo; `onUpgrade` acrescentara tabela sem apagar o
-/// que ja existe. Ciclo 1 e a versao 1, Ciclo 2 e a versao 2.
+/// que ja existe.
 class AppDatabase {
   AppDatabase._(this._db);
 
-  static const int versaoAtual = 2;
+  /// Ciclo 1: users, login_attempts.
+  /// Ciclo 2: questoes.
+  /// Ciclo 3: partidas, ranking, participacoes.
+  static const int versaoAtual = 3;
   static const String _arquivo = 'bncc_play.db';
 
   final Database _db;
@@ -22,15 +25,19 @@ class AppDatabase {
       destino,
       version: versaoAtual,
       onConfigure: (db) async {
-        // Fora do onConfigure a constraint de chave estrangeira fica
-        // desligada no SQLite, e as tabelas dos ciclos seguintes dependem
-        // dela.
         await db.execute('PRAGMA foreign_keys = ON');
       },
-      onCreate: (db, _) async => _criarVersao1(db),
+      onCreate: (db, _) async {
+        await _criarVersao1(db);
+        await _criarVersao2(db);
+        await _criarVersao3(db);
+      },
       onUpgrade: (db, anterior, atual) async {
         if (anterior < 2) {
           await _criarVersao2(db);
+        }
+        if (anterior < 3) {
+          await _criarVersao3(db);
         }
       },
     );
@@ -42,7 +49,8 @@ class AppDatabase {
   ///
   /// Usado em `test/support/db_de_teste.dart`.
   static Future<AppDatabase> abrirTeste() async {
-    final caminho = '${inMemoryDatabasePath}_${DateTime.now().microsecondsSinceEpoch}';
+    final caminho =
+        '${inMemoryDatabasePath}_${DateTime.now().microsecondsSinceEpoch}';
     final banco = await openDatabase(
       caminho,
       version: versaoAtual,
@@ -52,10 +60,13 @@ class AppDatabase {
       onCreate: (db, _) async {
         await _criarVersao1(db);
         await _criarVersao2(db);
+        await _criarVersao3(db);
       },
     );
     return AppDatabase._(banco);
   }
+
+  // --- Ciclo 1 -----------------------------------------------------------
 
   static Future<void> _criarVersao1(Database db) async {
     await db.execute('''
@@ -84,6 +95,8 @@ class AppDatabase {
     ''');
   }
 
+  // --- Ciclo 2 -----------------------------------------------------------
+
   static Future<void> _criarVersao2(Database db) async {
     await db.execute('''
       CREATE TABLE questoes (
@@ -102,16 +115,55 @@ class AppDatabase {
       )
     ''');
 
+    await db.execute(
+        'CREATE INDEX idx_questoes_eixo ON questoes(eixo)');
+    await db.execute(
+        'CREATE INDEX idx_questoes_dificuldade ON questoes(dificuldade)');
+    await db.execute(
+        'CREATE INDEX idx_questoes_professor ON questoes(professor_id)');
+  }
+
+  // --- Ciclo 3 -----------------------------------------------------------
+
+  static Future<void> _criarVersao3(Database db) async {
     await db.execute('''
-      CREATE INDEX idx_questoes_eixo ON questoes(eixo)
+      CREATE TABLE partidas (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        aluno_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        eixo            TEXT,
+        pontuacao       INTEGER NOT NULL DEFAULT 0,
+        streak          INTEGER NOT NULL DEFAULT 0,
+        respondidas     INTEGER NOT NULL DEFAULT 0,
+        acertos         INTEGER NOT NULL DEFAULT 0,
+        iniciada_em     TEXT    NOT NULL,
+        terminada_em    TEXT
+      )
+    ''');
+
+    await db.execute(
+        'CREATE INDEX idx_partidas_aluno ON partidas(aluno_id)');
+
+    await db.execute('''
+      CREATE TABLE ranking (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        aluno_id        INTEGER NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+        apelido         TEXT    NOT NULL,
+        pontuacao_total INTEGER NOT NULL DEFAULT 0,
+        total_jogos     INTEGER NOT NULL DEFAULT 0,
+        taxa_acerto     REAL    NOT NULL DEFAULT 0,
+        atualizado_em   TEXT    NOT NULL
+      )
     ''');
 
     await db.execute('''
-      CREATE INDEX idx_questoes_dificuldade ON questoes(dificuldade)
-    ''');
-
-    await db.execute('''
-      CREATE INDEX idx_questoes_professor ON questoes(professor_id)
+      CREATE TABLE participacoes (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        partida_id      INTEGER NOT NULL REFERENCES partidas(id) ON DELETE CASCADE,
+        aluno_id        INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        apelido         TEXT    NOT NULL,
+        pontuacao       INTEGER NOT NULL DEFAULT 0,
+        entrou_em       TEXT    NOT NULL
+      )
     ''');
   }
 

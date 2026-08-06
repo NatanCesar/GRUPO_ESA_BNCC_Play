@@ -6,6 +6,8 @@ import '../features/auth/register_student_screen.dart';
 import '../features/auth/register_teacher_screen.dart';
 import '../features/auth/register_type_screen.dart';
 import '../features/auth/splash_screen.dart';
+import '../features/game/game_screen.dart';
+import '../features/game/resultado_screen.dart';
 import '../features/home/home_student_screen.dart';
 import '../features/home/home_teacher_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
@@ -14,11 +16,11 @@ import '../features/profile/profile_teacher_screen.dart';
 import '../features/questions/axis_selection_screen.dart';
 import '../features/questions/question_list_screen.dart';
 import '../features/questions/question_form_screen.dart';
+import '../features/ranking/ranking_screen.dart';
+import '../features/sala/sala_screen.dart';
+import '../data/models/partida.dart';
 
 /// Nomes de rota do app.
-///
-/// A tabela cresce a cada tarefa do ciclo; manter aqui a lista inteira
-/// evita string de rota espalhada pelas telas.
 abstract final class Rotas {
   static const splash = '/';
   static const login = '/login';
@@ -35,6 +37,10 @@ abstract final class Rotas {
   static const questionList = '/professor/questoes';
   static const questionCreate = '/professor/questao/nova';
   static const questionEdit = '/professor/questao/editar';
+  static const jogar = '/jogar';
+  static const resultado = '/resultado';
+  static const ranking = '/ranking';
+  static const sala = '/sala';
 
   static Map<String, WidgetBuilder> tabela() => <String, WidgetBuilder>{
         splash: (_) => const SplashScreen(),
@@ -54,5 +60,35 @@ abstract final class Rotas {
         questionEdit: (ctx) => QuestionFormScreen(
           questaoId: ModalRoute.of(ctx)!.settings.arguments as int?,
         ),
+        ranking: (ctx) {
+          final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
+          return RankingScreen(
+            alunoId: args?['alunoId'] as int? ?? 0,
+          );
+        },
+        sala: (_) => const SalaScreen(),
       };
+
+  /// Rota para a tela de jogo — passa argumentos via arguments.
+  static Route<dynamic> gerarRotaJogar(RouteSettings settings) {
+    final args = settings.arguments as Map<String, dynamic>;
+    return MaterialPageRoute(
+      builder: (_) => GameScreen(
+        alunoId: args['alunoId'] as int,
+        apelido: args['apelido'] as String,
+        eixo: args['eixo'] as String?,
+      ),
+    );
+  }
+
+  /// Rota para a tela de resultado.
+  static Route<dynamic> gerarRotaResultado(RouteSettings settings) {
+    final args = settings.arguments as Map<String, dynamic>;
+    return MaterialPageRoute(
+      builder: (_) => ResultadoScreen(
+        partida: args['partida'] as Partida,
+        apelido: args['apelido'] as String,
+      ),
+    );
+  }
 }

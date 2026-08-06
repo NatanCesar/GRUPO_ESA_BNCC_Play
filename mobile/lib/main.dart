@@ -50,6 +50,15 @@ class BnccPlayApp extends StatelessWidget {
         theme: AppTheme.light,
         initialRoute: Rotas.splash,
         routes: Rotas.tabela(),
+        onGenerateRoute: (settings) {
+          if (settings.name == Rotas.jogar) {
+            return Rotas.gerarRotaJogar(settings);
+          }
+          if (settings.name == Rotas.resultado) {
+            return Rotas.gerarRotaResultado(settings);
+          }
+          return null;
+        },
       ),
     );
   }

@@ -75,14 +75,22 @@ class QuestaoRepository {
   }
 
   /// Lista questoes filtradas por eixo e/ou dificuldade.
+  ///
+  /// Se [professorId] for null, lista todas as questoes (ignora professor).
+  /// Se [eixo] for null, nao filtra por eixo.
+  /// Se [dificuldade] for null, nao filtra por dificuldade.
   Future<List<Questao>> filtrar({
-    required int professorId,
+    int? professorId,
     EixoBNCC? eixo,
     Dificuldade? dificuldade,
   }) async {
-    final condicoes = ['professor_id = ?'];
-    final args = <Object?>[professorId];
+    final condicoes = <String>[];
+    final args = <Object?>[];
 
+    if (professorId != null) {
+      condicoes.add('professor_id = ?');
+      args.add(professorId);
+    }
     if (eixo != null) {
       condicoes.add('eixo = ?');
       args.add(eixo.valor);
@@ -94,8 +102,8 @@ class QuestaoRepository {
 
     final linhas = await _banco.db.query(
       'questoes',
-      where: condicoes.join(' AND '),
-      whereArgs: args,
+      where: condicoes.isEmpty ? null : condicoes.join(' AND '),
+      whereArgs: args.isEmpty ? null : args,
       orderBy: 'criado_em DESC',
     );
     return linhas.map(Questao.deLinha).toList();
