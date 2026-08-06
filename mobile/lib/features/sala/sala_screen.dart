@@ -50,6 +50,10 @@ class _SalaScreenState extends State<SalaScreen> {
             backgroundColor: AppColors.purple,
             foregroundColor: Colors.white,
             title: const Text('Sala Multiplayer'),
+            leading: IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => Navigator.pop(context),
+            ),
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 16),

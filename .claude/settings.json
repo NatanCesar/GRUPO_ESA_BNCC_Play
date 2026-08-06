@@ -20,7 +20,8 @@
       "Bash(/snap/bin/dart --version)",
       "Bash(flutter build *)",
       "Bash(adb devices *)",
-      "Bash(adb uninstall *)"
+      "Bash(adb uninstall *)",
+      "Bash(gh issue *)"
     ]
   }
 }

@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/core/theme/app_theme.dart';
 import 'package:bncc_play_mobile/core/widgets/gradient_header.dart';
+import 'package:bncc_play_mobile/core/widgets/top_bar.dart';
 import 'package:bncc_play_mobile/core/widgets/app_button.dart';
 import 'package:bncc_play_mobile/core/widgets/app_text_field.dart';
 import 'package:bncc_play_mobile/core/widgets/aviso_de_erro.dart';
@@ -228,11 +229,11 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  editando ? 'Editar Questão' : 'Nova Questão',
-                  style: AppTheme.headerTitle,
+                TopBar(
+                  titulo: editando ? 'Editar Questão' : 'Nova Questão',
+                  onVoltar: () => Navigator.maybePop(context),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   editando ? 'Altere os dados' : 'Cadastre uma questão',
                   style: AppTheme.headerSubtitle,

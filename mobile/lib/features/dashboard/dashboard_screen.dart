@@ -84,6 +84,10 @@ class _DashboardBody extends StatelessWidget {
         backgroundColor: AppColors.purple,
         foregroundColor: Colors.white,
         title: const Text('Dashboard'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: _buildBody(context, ctrl),
     );

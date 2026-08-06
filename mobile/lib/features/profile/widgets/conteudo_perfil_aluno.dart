@@ -6,6 +6,7 @@ import '../../../core/session/session_scope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_badge.dart';
+import '../../../data/db/app_database.dart';
 import '../../../data/repositories/ranking_repository.dart';
 import 'perfil_widgets.dart';
 
@@ -44,7 +45,7 @@ class ConteudoPerfilAlunoState extends State<ConteudoPerfilAluno> {
     final usuario = sessao.usuario;
     if (usuario == null) return;
 
-    final repo = context.read<RankingRepository>();
+    final repo = RankingRepository(banco: context.read<AppDatabase>());
     try {
       final entrada = await repo.porAluno(usuario.id!);
       final pos = await repo.posicaoOrdinal(usuario.id!);
