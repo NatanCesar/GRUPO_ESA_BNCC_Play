@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
+import '../features/auth/register_student_screen.dart';
 import '../features/auth/register_teacher_screen.dart';
+import '../features/auth/register_type_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/home/home_student_screen.dart';
 import '../features/home/home_teacher_screen.dart';
@@ -30,7 +32,9 @@ abstract final class Rotas {
   static Map<String, WidgetBuilder> tabela() => <String, WidgetBuilder>{
         splash: (_) => const SplashScreen(),
         login: (_) => const LoginScreen(),
+        registerType: (_) => const RegisterTypeScreen(),
         registerTeacher: (_) => const RegisterTeacherScreen(),
+        registerStudent: (_) => const RegisterStudentScreen(),
         homeTeacher: (_) => const HomeTeacherScreen(),
         homeStudent: (_) => const HomeStudentScreen(),
         profileTeacher: (_) => const ProfileTeacherScreen(),
