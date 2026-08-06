@@ -4,11 +4,11 @@ import 'package:sqflite/sqflite.dart';
 /// Banco local do app.
 ///
 /// A versao sobe a cada ciclo; `onUpgrade` acrescentara tabela sem apagar o
-/// que ja existe. Ciclo 1 e a versao 1.
+/// que ja existe. Ciclo 1 e a versao 1, Ciclo 2 e a versao 2.
 class AppDatabase {
   AppDatabase._(this._db);
 
-  static const int versaoAtual = 1;
+  static const int versaoAtual = 2;
   static const String _arquivo = 'bncc_play.db';
 
   final Database _db;
@@ -29,11 +29,31 @@ class AppDatabase {
       },
       onCreate: (db, _) async => _criarVersao1(db),
       onUpgrade: (db, anterior, atual) async {
-        // Ciclo 1 nao tem migracao anterior. Os ciclos seguintes
-        // acrescentam aqui, em degraus de uma versao.
+        if (anterior < 2) {
+          await _criarVersao2(db);
+        }
       },
     );
 
+    return AppDatabase._(banco);
+  }
+
+  /// Cria banco de teste em memoria com todas as tabelas.
+  ///
+  /// Usado em `test/support/db_de_teste.dart`.
+  static Future<AppDatabase> abrirTeste() async {
+    final caminho = '${inMemoryDatabasePath}_${DateTime.now().microsecondsSinceEpoch}';
+    final banco = await openDatabase(
+      caminho,
+      version: versaoAtual,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
+      onCreate: (db, _) async {
+        await _criarVersao1(db);
+        await _criarVersao2(db);
+      },
+    );
     return AppDatabase._(banco);
   }
 
@@ -61,6 +81,37 @@ class AppDatabase {
         falhas        INTEGER NOT NULL DEFAULT 0,
         bloqueado_ate TEXT
       )
+    ''');
+  }
+
+  static Future<void> _criarVersao2(Database db) async {
+    await db.execute('''
+      CREATE TABLE questoes (
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        enunciado       TEXT    NOT NULL,
+        opcao_a         TEXT    NOT NULL,
+        opcao_b         TEXT    NOT NULL,
+        opcao_c         TEXT    NOT NULL,
+        opcao_d         TEXT    NOT NULL,
+        resposta_correta TEXT   NOT NULL CHECK (resposta_correta IN ('A', 'B', 'C', 'D')),
+        eixo            TEXT    NOT NULL CHECK (eixo IN ('tecnologia', 'cultura', 'impacto')),
+        dificuldade     TEXT    NOT NULL CHECK (dificuldade IN ('facil', 'medio', 'dificil')),
+        professor_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        criado_em       TEXT    NOT NULL,
+        atualizado_em   TEXT    NOT NULL
+      )
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_questoes_eixo ON questoes(eixo)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_questoes_dificuldade ON questoes(dificuldade)
+    ''');
+
+    await db.execute('''
+      CREATE INDEX idx_questoes_professor ON questoes(professor_id)
     ''');
   }
 

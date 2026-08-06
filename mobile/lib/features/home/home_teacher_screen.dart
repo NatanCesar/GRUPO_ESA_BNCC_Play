@@ -5,12 +5,13 @@ import 'package:provider/provider.dart';
 import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/aviso_de_ciclo.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/gradient_header.dart';
+import '../../data/repositories/questao_repository.dart';
+import '../../data/models/eixo_bncc.dart';
 
-/// Home do professor. Casca: saúda o usuario logado e leva ao perfil. Os
-/// destinos dos ciclos 2 a 4 avisam em vez de ficar mudos.
+/// Home do professor com acesso a gestao de questoes.
 class HomeTeacherScreen extends StatefulWidget {
   const HomeTeacherScreen({super.key});
 
@@ -19,10 +20,15 @@ class HomeTeacherScreen extends StatefulWidget {
 }
 
 class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
+  Map<EixoBNCC, int> _contagens = {};
+
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _verificarSessao());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _verificarSessao();
+      _carregarContagens();
+    });
   }
 
   void _verificarSessao() {
@@ -33,14 +39,27 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
     }
   }
 
+  Future<void> _carregarContagens() async {
+    final sessao = context.read<SessionScope>();
+    final usuario = sessao.usuario;
+    if (usuario == null) return;
+
+    final repository = context.read<QuestaoRepository>();
+    try {
+      final contagens = await repository.contarPorEixo(usuario.id!);
+      if (mounted) {
+        setState(() => _contagens = contagens);
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {});
+      }
+    }
+  }
+
   static const _itens = [
-    ItemDeNav(id: 'home', icone: Icons.home, rotulo: 'Início'),
-    ItemDeNav(
-      id: 'questoes',
-      icone: Icons.quiz,
-      rotulo: 'Questões',
-      habilitado: false,
-    ),
+    ItemDeNav(id: 'home', icone: Icons.home, rotulo: 'Inicio'),
+    ItemDeNav(id: 'questoes', icone: Icons.quiz, rotulo: 'Questoes'),
     ItemDeNav(
       id: 'dashboard',
       icone: Icons.bar_chart,
@@ -55,12 +74,16 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
       Navigator.pushNamed(context, Rotas.profileTeacher);
       return;
     }
+    if (id == 'questoes') {
+      Navigator.pushNamed(context, Rotas.axisSelection);
+      return;
+    }
     if (id == 'home') return;
 
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(
-        const SnackBar(content: Text('Disponível na próxima entrega.')),
+        const SnackBar(content: Text('Disponivel na proxima entrega.')),
       );
   }
 
@@ -80,40 +103,174 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              GradientHeader(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Olá, $primeiroNome!',
-                      style: AppTheme.headerTitle,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      usuario.escola ?? '',
-                      style: AppTheme.headerSubtitle,
-                    ),
-                  ],
+        body: RefreshIndicator(
+          onRefresh: _carregarContagens,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                GradientHeader(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Ola, $primeiroNome!',
+                        style: AppTheme.headerTitle,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        usuario.escola ?? '',
+                        style: AppTheme.headerSubtitle,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-                child: AvisoDeCiclo(
-                  texto:
-                      'Cadastro de questões, dashboard e relatórios chegam nas próximas entregas.',
+                Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Gerenciar Questoes',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Selecione um eixo para ver ou cadastrar questoes',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textMuted,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      _buildEixoCard(
+                        icone: '💻',
+                        titulo: 'Tecnologia e Computacao',
+                        quantidade: _contagens[EixoBNCC.tecnologia] ?? 0,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          Rotas.questionList,
+                          arguments: EixoBNCC.tecnologia,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildEixoCard(
+                        icone: '🌐',
+                        titulo: 'Cultura Digital',
+                        quantidade: _contagens[EixoBNCC.culturaDigital] ?? 0,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          Rotas.questionList,
+                          arguments: EixoBNCC.culturaDigital,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildEixoCard(
+                        icone: '⚖️',
+                        titulo: 'Impacto Social e Etica',
+                        quantidade: _contagens[EixoBNCC.impacto] ?? 0,
+                        onTap: () => Navigator.pushNamed(
+                          context,
+                          Rotas.questionList,
+                          arguments: EixoBNCC.impacto,
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.pushNamed(context, Rotas.axisSelection),
+                          icon: const Icon(Icons.add),
+                          label: const Text('Selecionar Eixo'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.purple,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
         bottomNavigationBar: BottomNav(
           itens: _itens,
           ativo: 'home',
           onSelecionar: _selecionar,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEixoCard({
+    required String icone,
+    required String titulo,
+    required int quantidade,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      elevation: 1,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: AppColors.purpleLight,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Center(
+                  child: Text(icone, style: const TextStyle(fontSize: 24)),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titulo,
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '$quantidade ${quantidade == 1 ? 'questao' : 'questoes'}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right,
+                color: AppColors.textMuted,
+              ),
+            ],
+          ),
         ),
       ),
     );

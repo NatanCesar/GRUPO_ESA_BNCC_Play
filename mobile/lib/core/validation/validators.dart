@@ -55,4 +55,23 @@ abstract final class Validators {
     if (v.length < 2 || v.length > 80) return tamanho;
     return null;
   }
+
+  // ===== Validadores para Questoes (Ciclo 2) =====
+
+  /// Enunciado da questao: 3 a 500 caracteres.
+  static String? enunciado(String? valor) {
+    final v = valor?.trim() ?? '';
+    if (v.isEmpty) return 'Informe o enunciado';
+    if (v.length < 3) return 'Enunciado muito curto';
+    if (v.length > 500) return 'Enunciado muito longo (max 500 caracteres)';
+    return null;
+  }
+
+  /// Opcao de resposta: 1 a 200 caracteres.
+  static String? opcaoQuestao(String? valor) {
+    final v = valor?.trim() ?? '';
+    if (v.isEmpty) return 'Informe a opcao';
+    if (v.length > 200) return 'Opcao muito longa (max 200 caracteres)';
+    return null;
+  }
 }

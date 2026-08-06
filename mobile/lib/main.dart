@@ -8,6 +8,7 @@ import 'core/theme/app_theme.dart';
 import 'data/db/app_database.dart';
 import 'data/repositories/auth_repository.dart';
 import 'data/repositories/user_repository.dart';
+import 'data/repositories/questao_repository.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,6 +38,9 @@ class BnccPlayApp extends StatelessWidget {
             usuarios: usuarios,
             hasher: const PasswordHasher(),
           ),
+        ),
+        Provider<QuestaoRepository>(
+          create: (_) => QuestaoRepository(banco: banco),
         ),
         ChangeNotifierProvider<SessionScope>(create: (_) => SessionScope()),
       ],

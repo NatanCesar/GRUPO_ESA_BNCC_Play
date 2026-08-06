@@ -11,6 +11,9 @@ import '../features/home/home_teacher_screen.dart';
 import '../features/profile/edit_profile_screen.dart';
 import '../features/profile/profile_student_screen.dart';
 import '../features/profile/profile_teacher_screen.dart';
+import '../features/questions/axis_selection_screen.dart';
+import '../features/questions/question_list_screen.dart';
+import '../features/questions/question_form_screen.dart';
 
 /// Nomes de rota do app.
 ///
@@ -28,6 +31,10 @@ abstract final class Rotas {
   static const profileTeacher = '/professor/perfil';
   static const profileStudent = '/aluno/perfil';
   static const editProfile = '/perfil/editar';
+  static const axisSelection = '/professor/eixo';
+  static const questionList = '/professor/questoes';
+  static const questionCreate = '/professor/questao/nova';
+  static const questionEdit = '/professor/questao/editar';
 
   static Map<String, WidgetBuilder> tabela() => <String, WidgetBuilder>{
         splash: (_) => const SplashScreen(),
@@ -41,5 +48,11 @@ abstract final class Rotas {
         profileStudent: (_) => const ProfileStudentScreen(),
         editProfile: (_) => const EditProfileScreen(),
         forgotPassword: (_) => const ForgotPasswordScreen(),
+        axisSelection: (_) => const AxisSelectionScreen(),
+        questionList: (_) => const QuestionListScreen(),
+        questionCreate: (_) => const QuestionFormScreen(),
+        questionEdit: (ctx) => QuestionFormScreen(
+          questaoId: ModalRoute.of(ctx)!.settings.arguments as int?,
+        ),
       };
 }

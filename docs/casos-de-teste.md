@@ -44,32 +44,38 @@ flutter test integration_test/                # fluxo ponta a ponta
 | CT12 Alteração de cadastro do professor | Funcional | Professor autenticado | Novo nome da instituição | Cadastro atualizado | `test/data/user_repository_test.dart::CT11 e CT12 ... > funcional: altera a escola do professor`; `test/features/edit_profile_screen_test.dart::CT12 ... > funcional: nova instituicao e salva` | Automatizado |
 | CT12 Alteração de cadastro do professor | Não funcional (autenticação) | Professor autenticado | Sessão expirada | Solicita novo login | `test/unit/session_scope_test.dart::CT12 - expiracao de sessao` (todos); `test/features/edit_profile_screen_test.dart::CT12 ... > nao funcional: sessao expirada bloqueia a alteracao` | Automatizado |
 
+## Ciclo 2 — seleção de eixo, CRUD de questões e filtros
+
+| CT | Tipo | Pré-condição | Dados de entrada | Resultado esperado | Automação | Status |
+|---|---|---|---|---|---|---|
+| CT05 Seleção do eixo da BNCC | Funcional | Professor autenticado | Toque em eixo | Navega para lista de questões do eixo | `test/features/axis_selection_screen_test.dart` (a criar) | Manual |
+| CT05 Seleção do eixo da BNCC | Não funcional (performance) | — | Troca de eixo em menos de 2 segundos | Resposta imediata | — | N/A (versão local): performance depende de dispositivo |
+| CT06 Cadastro de questões | Funcional | Professor autenticado, eixo selecionado | Enunciado, 4 opções, resposta correta, dificuldade | Questão salva no banco | `test/data/questao_repository_test.dart::QuestaoRepository.cadastrar > CT06 funcional: salva questao com todos os campos` | Automatizado |
+| CT06 Cadastro de questões | Não funcional (XSS) | — | `<script>alert(1)</script>` no enunciado | Script bloqueado/sanitizado | `test/data/questao_repository_test.dart::QuestaoRepository.cadastrar > CT06 nao funcional: sanitiza XSS no enunciado`; `test/unit/sanitizer_test.dart` | Automatizado |
+| CT07 Definição do nível de dificuldade | Funcional | Professor autenticado | Seleção de fácil/médio/difícil | Questão classificada corretamente | `test/data/questao_repository_test.dart::QuestaoRepository.cadastrar > salva com dificuldade` | Automatizado |
+| CT07 Definição do nível de dificuldade | Não funcional | — | Sem degradação perceptível | UI responsiva | — | N/A (versão local): performance depende de dispositivo |
+| CT08 Lista de questões por eixo | Funcional | Questões cadastradas | Filtro por eixo | Somente questões do eixo | `test/data/questao_repository_test.dart::QuestaoRepository.listarPorProfessor > CT08 funcional: lista questoes de um professor`; `test/data/questao_repository_test.dart::QuestaoRepository.filtrar > CT08 funcional: filtra por eixo` | Automatizado |
+| CT08 Lista de questões por eixo | Não funcional (performance) | — | Resposta abaixo de 3 segundos | Carregamento rápido | — | N/A (versão local): performance depende de dispositivo e volume de dados |
+| CT09 Alteração de questão | Funcional | Questão cadastrada | Nova resposta correta | Questão atualizada | `test/data/questao_repository_test.dart::QuestaoRepository.atualizar > CT09 funcional: atualiza enunciado e dificuldade`, `> CT09 funcional: resposta correta pode ser alterada` | Automatizado |
+| CT09 Alteração de questão | Não funcional (concorrência) | — | Sistema evita conflito de versões | — | — | N/A (versão local): um dispositivo, um usuário por vez |
+| CT10 Remoção de questão | Funcional | Questão cadastrada | Confirmação de exclusão | Questão deixa de aparecer na listagem | `test/data/questao_repository_test.dart::QuestaoRepository.remover > CT10 funcional: remove questao existente`, `> CT10 funcional: lanca excecao para questao inexistente` | Automatizado |
+| CT10 Remoção de questão | Não funcional (permissões) | Aluno autenticado | Tentativa de exclusão | Bloqueado para alunos | `test/unit/session_scope_test.dart::Permission.requireRole` | Automatizado |
+| CT12 Listagem de questões por nível de dificuldade | Funcional | Questões cadastradas | Filtro por dificuldade | Somente questões da dificuldade | `test/data/questao_repository_test.dart::QuestaoRepository.filtrar > CT12 funcional: filtra por dificuldade`, `> filtra por eixo e dificuldade combinados` | Automatizado |
+
 ## Ciclos seguintes
 
 | CT | Tipo | Resultado esperado | Status |
 |---|---|---|---|
-| CT05 Seleção do eixo da BNCC | Funcional | Questões referentes ao eixo escolhido | Pendente (ciclo 2) |
-| CT05 Seleção do eixo da BNCC | Não funcional | Troca de eixo em menos de 2 segundos | Pendente (ciclo 2) |
-| CT06 Cadastro de questões | Funcional | Questão salva no banco | Pendente (ciclo 2) |
-| CT06 Cadastro de questões | Não funcional (XSS) | Scripts são bloqueados | Pendente (ciclo 2) — o `Sanitizer` que atende este caso já existe e está coberto por `test/unit/sanitizer_test.dart` |
-| CT07 Definição do nível de dificuldade | Funcional | Questão classificada corretamente | Pendente (ciclo 2) |
-| CT07 Definição do nível de dificuldade | Não funcional | Sem degradação perceptível | Pendente (ciclo 2) |
-| CT08 Lista de questões por eixo | Funcional | Somente questões do eixo | Pendente (ciclo 2) |
-| CT08 Lista de questões por eixo | Não funcional | Resposta abaixo de 3 segundos | Pendente (ciclo 2) |
-| CT09 Alteração de questão | Funcional | Questão atualizada | Pendente (ciclo 2) |
-| CT09 Alteração de questão | Não funcional (concorrência) | Sistema evita conflito de versões | N/A (versão local): um dispositivo, um usuário por vez. Entra no ciclo com servidor. |
-| CT10 Remoção de questão | Funcional | Questão deixa de aparecer na listagem | Pendente (ciclo 2) |
-| CT10 Remoção de questão | Não funcional (permissões) | Aluno não consegue excluir | Pendente (ciclo 2) — a guarda `Permission.requireRole` já existe e está coberta por `test/unit/session_scope_test.dart::Permission.requireRole` |
 | CT13 Sistema gamificado | Funcional | Resposta registrada e feedback apresentado | Pendente (ciclo 3) |
 | CT13 Sistema gamificado | Não funcional | 100 alunos simultâneos sem travamento | N/A (versão local): depende de servidor. |
 | CT14 Pontuação e recompensas | Funcional | Pontos adicionados | Pendente (ciclo 3) |
 | CT14 Pontuação e recompensas | Não funcional (integridade) | Alteração manual rejeitada | Pendente (ciclo 3) |
 | CT15 Ranking de jogadores | Funcional | Ranking ordenado corretamente | Pendente (ciclo 3) |
 | CT15 Ranking de jogadores | Não funcional (anonimização) | Somente apelidos aparecem | Pendente (ciclo 3) |
-| CT16 Multiplayer em sala | Funcional | Todos entram na mesma sessão | Pendente (ciclo 3) — a sala é tela navegável sem lógica nesta fase |
+| CT16 Multiplayer em sala | Funcional | Todos entram na mesma sessão | Pendente (ciclo 3) |
 | CT16 Multiplayer em sala | Não funcional | 50 conexões simultâneas | N/A (versão local): depende de servidor. |
 | CT17 Dashboard pedagógico | Funcional | Dashboard carregado corretamente | Pendente (ciclo 4) |
-| CT17 Dashboard pedagógico | Não funcional (controle de acesso) | Aluno tem acesso negado | Pendente (ciclo 4) — a guarda de papel já existe |
+| CT17 Dashboard pedagógico | Não funcional (controle de acesso) | Aluno tem acesso negado | Pendente (ciclo 4) |
 | CT18 Relatórios de desempenho | Funcional | Relatório disponível | Pendente (ciclo 4) |
 | CT18 Relatórios de desempenho | Não funcional (autorização) | Acesso impedido e tentativa registrada | Pendente (ciclo 4) |
 
@@ -77,7 +83,9 @@ flutter test integration_test/                # fluxo ponta a ponta
 
 | Situação | Casos |
 |---|---|
-| Automatizado | 12 |
-| Pendente (ciclos 2 a 4) | 20 |
+| Automatizado (Ciclo 1) | 12 |
+| Automatizado (Ciclo 2) | 9 |
+| Manual (Ciclo 2) | 1 |
+| Pendente (ciclos 3 a 4) | 20 |
 | N/A (versão local) | 4 |
-| **Total** | **36** |
+| **Total** | **46** |

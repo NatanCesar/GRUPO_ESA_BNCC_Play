@@ -1,0 +1,7 @@
+Pra retomar: o ledger em .superpowers/sdd/2026-07-31-app-flutter-ciclo1/progress.md tem as instruções. Primeiro passo é revisar a Task 2 (BASE 734c703, HEAD 1aff8ee) — o agente foi interrompido escrevendo o relatório, então ele pode estar incompleto; revisar contra o brief e o diff resolve.
+
+Duas armadilhas registradas lá pra não se perderem:
+- Mensagens de erro dos validadores são sem acento. Tasks 7, 13, 14 e 17 casam essas strings literalmente.
+- Tasks 14/15/16 são delta sobre a tela irmã — 13 antes de 14, e 15/16 na ordem.
+
+Restam 18 tarefas. Se quiser acelerar numa próxima sessão, dá pra rodar as 3–9 (só lógica, sem tela) em sequência rápida — são as mais mecânicas do plano.

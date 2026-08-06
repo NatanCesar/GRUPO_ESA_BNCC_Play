@@ -108,4 +108,42 @@ void main() {
       expect(Validators.turma('a' * 81), 'A turma precisa de 2 a 80 caracteres');
     });
   });
+
+  group('Validators.enunciado (Ciclo 2)', () {
+    test('aceita enunciado valido', () {
+      expect(Validators.enunciado('Qual e a capital do Brasil?'), isNull);
+      expect(Validators.enunciado('a' * 500), isNull); // limite maximo
+    });
+
+    test('cobra o preenchimento', () {
+      expect(Validators.enunciado(''), 'Informe o enunciado');
+      expect(Validators.enunciado('   '), 'Informe o enunciado');
+      expect(Validators.enunciado(null), 'Informe o enunciado');
+    });
+
+    test('recusa enunciado curto', () {
+      expect(Validators.enunciado('ab'), 'Enunciado muito curto');
+    });
+
+    test('recusa enunciado longo', () {
+      expect(Validators.enunciado('a' * 501), 'Enunciado muito longo (max 500 caracteres)');
+    });
+  });
+
+  group('Validators.opcaoQuestao (Ciclo 2)', () {
+    test('aceita opcao valida', () {
+      expect(Validators.opcaoQuestao('Brasilia'), isNull);
+      expect(Validators.opcaoQuestao('a' * 200), isNull); // limite maximo
+    });
+
+    test('cobra o preenchimento', () {
+      expect(Validators.opcaoQuestao(''), 'Informe a opcao');
+      expect(Validators.opcaoQuestao('   '), 'Informe a opcao');
+      expect(Validators.opcaoQuestao(null), 'Informe a opcao');
+    });
+
+    test('recusa opcao longa demais', () {
+      expect(Validators.opcaoQuestao('a' * 201), 'Opcao muito longa (max 200 caracteres)');
+    });
+  });
 }

@@ -47,3 +47,15 @@ class PermissionDeniedException extends ErroDeDominio {
   const PermissionDeniedException()
       : super('Voce nao tem permissao para esta acao');
 }
+
+// Erros do ciclo 2 - Questoes
+
+class QuestaoNaoEncontradaException extends ErroDeDominio {
+  const QuestaoNaoEncontradaException()
+      : super('Questao nao encontrada');
+}
+
+class QuestaoInvalidaException extends ErroDeDominio {
+  const QuestaoInvalidaException(String mensagem)
+      : super(mensagem);
+}
