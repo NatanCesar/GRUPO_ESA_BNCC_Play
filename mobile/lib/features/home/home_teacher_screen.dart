@@ -1,25 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/gradient_header.dart';
-import '../../core/widgets/bottom_nav.dart';
 import '../../data/repositories/questao_repository.dart';
 import '../../data/repositories/user_repository.dart';
 import '../../data/models/eixo_bncc.dart';
 import '../../data/models/questao.dart';
 import '../../data/models/dificuldade.dart';
+import '../dashboard/dashboard_screen.dart';
+import '../questions/axis_selection_screen.dart';
+import '../questions/question_list_screen.dart';
+import '../profile/profile_teacher_screen.dart';
 
-/// Home do professor com layout conforme prototipo.
+/// Item de aba na barra inferior.
+class _Aba {
+  const _Aba({
+    required this.id,
+    required this.icone,
+    required this.iconeAtivo,
+    required this.rotulo,
+  });
+
+  final String id;
+  final IconData icone;
+  final IconData iconeAtivo;
+  final String rotulo;
+}
+
+/// Home do professor com 4 abas reais (PageView).
 ///
-/// Estrutura:
-/// - Header com saudacao e avatar
-/// - Cards de stats (Questoes, Alunos, Turmas)
-/// - Acoes rapidas (Selecionar Eixo, Cadastrar Questao, Minhas Questoes, Dashboard)
-/// - Lista de Questoes Recentes
+/// Abas:
+/// - 0: Home (visao geral)
+/// - 1: Questoes (lista por eixo)
+/// - 2: Dashboard
+/// - 3: Perfil
 class HomeTeacherScreen extends StatefulWidget {
   const HomeTeacherScreen({super.key});
 
@@ -28,20 +46,47 @@ class HomeTeacherScreen extends StatefulWidget {
 }
 
 class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
-  Map<EixoBNCC, int> _contagemPorEixo = {};
-  int _totalQuestoes = 0;
-  int _totalAlunos = 0;
-  int _totalTurmas = 0;
-  List<Questao> _questoesRecentes = [];
-  bool _carregando = true;
+  int _indiceAtual = 0;
+  late PageController _pageController;
+
+  static const _abas = [
+    _Aba(
+      id: 'home',
+      icone: Icons.home_outlined,
+      iconeAtivo: Icons.home,
+      rotulo: 'Inicio',
+    ),
+    _Aba(
+      id: 'questoes',
+      icone: Icons.quiz_outlined,
+      iconeAtivo: Icons.quiz,
+      rotulo: 'Questoes',
+    ),
+    _Aba(
+      id: 'dashboard',
+      icone: Icons.bar_chart_outlined,
+      iconeAtivo: Icons.bar_chart,
+      rotulo: 'Dashboard',
+    ),
+    _Aba(
+      id: 'perfil',
+      icone: Icons.person_outline,
+      iconeAtivo: Icons.person,
+      rotulo: 'Perfil',
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _verificarSessao();
-      _carregarTudo();
-    });
+    _pageController = PageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _verificarSessao());
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _verificarSessao() {
@@ -52,69 +97,13 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
     }
   }
 
-  Future<void> _carregarTudo() async {
-    if (!mounted) return;
-    final sessao = context.read<SessionScope>();
-    final usuario = sessao.usuario;
-    if (usuario == null) return;
-
-    final questaoRepo = context.read<QuestaoRepository>();
-
-    try {
-      // Stats de questoes.
-      final contagens = await questaoRepo.contarPorEixo(usuario.id!);
-      final todas = await questaoRepo.listarPorProfessor(usuario.id!);
-
-      // Stats de alunos.
-      final usuarios = context.read<UserRepository>();
-      final alunos = await usuarios.listarAlunos();
-      final turmasUnicas = <String>{};
-      for (final u in alunos) {
-        if (u.turma != null && u.turma!.isNotEmpty) {
-          turmasUnicas.add(u.turma!);
-        }
-      }
-
-      if (mounted) {
-        setState(() {
-          _contagemPorEixo = contagens;
-          _totalQuestoes = todas.length;
-          _totalAlunos = alunos.length;
-          _totalTurmas = turmasUnicas.length;
-          _questoesRecentes = todas.take(5).toList();
-          _carregando = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _carregando = false);
-    }
-  }
-
-  static const _itens = [
-    ItemDeNav(id: 'home', icone: Icons.home, rotulo: 'Inicio'),
-    ItemDeNav(id: 'questoes', icone: Icons.quiz, rotulo: 'Questoes'),
-    ItemDeNav(id: 'dashboard', icone: Icons.bar_chart, rotulo: 'Dashboard'),
-    ItemDeNav(id: 'perfil', icone: Icons.account_circle, rotulo: 'Perfil'),
-  ];
-
-  void _selecionar(String id) {
-    if (id == 'questoes') {
-      Navigator.pushNamed(context, Rotas.axisSelection);
-      return;
-    }
-    if (id == 'dashboard') {
-      final sessao = context.read<SessionScope>();
-      Navigator.pushNamed(
-        context,
-        Rotas.dashboard,
-        arguments: {'professorId': sessao.usuario!.id},
-      );
-      return;
-    }
-    if (id == 'perfil') {
-      Navigator.pushNamed(context, Rotas.profileTeacher);
-      return;
-    }
+  void _onTabSelecionada(int index) {
+    setState(() => _indiceAtual = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -126,177 +115,321 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
       return const Scaffold(body: SizedBox.shrink());
     }
 
-    final primeiroNome = usuario.nome.split(' ').first;
+    final telas = [
+      const _AbaHomeProfessor(),
+      const _AbaQuestoesProfessor(),
+      const DashboardScreenPlaceholder(),
+      const _AbaPerfilProfessor(),
+    ];
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: RefreshIndicator(
-        onRefresh: _carregarTudo,
-        child: CustomScrollView(
-          slivers: [
-            // Header com avatar
-            SliverToBoxAdapter(
-              child: _HeaderProfessor(
-                primeiroNome: primeiroNome,
-                perfilUrl: usuario.avatar,
-              ),
-            ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) => setState(() => _indiceAtual = index),
+        physics: const NeverScrollableScrollPhysics(),
+        children: telas,
+      ),
+      bottomNavigationBar: _BottomNav(
+        abas: _abas,
+        ativo: _indiceAtual,
+        onSelecionar: _onTabSelecionada,
+      ),
+    );
+  }
+}
 
-            // Cards de stats
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-                child: Row(
+class _BottomNav extends StatelessWidget {
+  const _BottomNav({
+    required this.abas,
+    required this.ativo,
+    required this.onSelecionar,
+  });
+
+  final List<_Aba> abas;
+  final int ativo;
+  final ValueChanged<int> onSelecionar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              for (var i = 0; i < abas.length; i++)
+                Expanded(
+                  child: _ItemNav(
+                    aba: abas[i],
+                    ativo: ativo == i,
+                    onTap: () => onSelecionar(i),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ItemNav extends StatelessWidget {
+  const _ItemNav({
+    required this.aba,
+    required this.ativo,
+    required this.onTap,
+  });
+
+  final _Aba aba;
+  final bool ativo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            ativo ? aba.iconeAtivo : aba.icone,
+            size: 24,
+            color: ativo ? AppColors.purple : AppColors.textMuted,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            aba.rotulo,
+            style: TextStyle(
+              fontFamily: AppTheme.inter,
+              fontSize: 11,
+              fontWeight: ativo ? FontWeight.w600 : FontWeight.w400,
+              color: ativo ? AppColors.purple : AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Widget wrapper para DashboardScreen com guarda de acesso.
+class DashboardScreenPlaceholder extends StatelessWidget {
+  const DashboardScreenPlaceholder({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final sessao = context.read<SessionScope>();
+    final usuario = sessao.usuario;
+    if (usuario == null) return const SizedBox.shrink();
+    return DashboardScreen(professorId: usuario.id!);
+  }
+}
+
+// ============================================================================
+// ABA 1: HOME - Visao geral com stats e acoes rapidas
+// ============================================================================
+
+class _AbaHomeProfessor extends StatefulWidget {
+  const _AbaHomeProfessor();
+
+  @override
+  State<_AbaHomeProfessor> createState() => _AbaHomeProfessorState();
+}
+
+class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
+  int _totalQuestoes = 0;
+  int _totalAlunos = 0;
+  int _totalTurmas = 0;
+  List<Questao> _questoesRecentes = [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _carregar());
+  }
+
+  Future<void> _carregar() async {
+    if (!mounted) return;
+    final sessao = context.read<SessionScope>();
+    final usuario = sessao.usuario;
+    if (usuario == null) return;
+
+    final questaoRepo = context.read<QuestaoRepository>();
+    final users = context.read<UserRepository>();
+
+    try {
+      final todas = await questaoRepo.listarPorProfessor(usuario.id!);
+      final alunos = await users.listarAlunos();
+      final turmas = <String>{};
+      for (final u in alunos) {
+        if (u.turma != null && u.turma!.isNotEmpty) turmas.add(u.turma!);
+      }
+
+      if (mounted) {
+        setState(() {
+          _totalQuestoes = todas.length;
+          _totalAlunos = alunos.length;
+          _totalTurmas = turmas.length;
+          _questoesRecentes = todas.take(10).toList();
+        });
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sessao = Provider.of<SessionScope>(context);
+    final usuario = sessao.usuario;
+    if (usuario == null) return const SizedBox.shrink();
+    final primeiroNome = usuario.nome.split(' ').first;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: RefreshIndicator(
+          onRefresh: _carregar,
+          child: CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: _HeaderProfessor(primeiroNome: primeiroNome),
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatTile(
+                          icone: Icons.quiz,
+                          valor: '$_totalQuestoes',
+                          label: 'Questoes',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatTile(
+                          icone: Icons.group,
+                          valor: '$_totalAlunos',
+                          label: 'Alunos',
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _StatTile(
+                          icone: Icons.school,
+                          valor: '$_totalTurmas',
+                          label: 'Turmas',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SliverPadding(
+                padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Acoes Rapidas',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverGrid.count(
+                  crossAxisCount: 2,
+                  mainAxisSpacing: 12,
+                  crossAxisSpacing: 12,
+                  childAspectRatio: 1.5,
                   children: [
-                    Expanded(
-                      child: _StatTile(
-                        icone: Icons.quiz,
-                        label: 'Questoes',
-                        valor: '$_totalQuestoes',
+                    _AcaoRapida(
+                      icone: Icons.filter_alt_outlined,
+                      titulo: 'Selecionar Eixo',
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        Rotas.axisSelection,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatTile(
-                        icone: Icons.group,
-                        label: 'Alunos',
-                        valor: '$_totalAlunos',
+                    _AcaoRapida(
+                      icone: Icons.add_circle_outline,
+                      titulo: 'Cadastrar Questao',
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        Rotas.questionCreate,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _StatTile(
-                        icone: Icons.school,
-                        label: 'Turmas',
-                        valor: '$_totalTurmas',
+                    _AcaoRapida(
+                      icone: Icons.list_alt_outlined,
+                      titulo: 'Minhas Questoes',
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        Rotas.questionList,
+                        arguments: EixoBNCC.tecnologia,
                       ),
+                    ),
+                    _AcaoRapida(
+                      icone: Icons.bar_chart,
+                      titulo: 'Dashboard',
+                      onTap: () {
+                        // Trocar para aba Dashboard.
+                        final state = context
+                            .findAncestorStateOfType<_HomeTeacherScreenState>();
+                        state?._onTabSelecionada(2);
+                      },
                     ),
                   ],
                 ),
               ),
-            ),
-
-            // Acoes rapidas
-            const SliverPadding(
-              padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: Text(
-                  'Acoes Rapidas',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+              const SliverPadding(
+                padding: EdgeInsets.fromLTRB(20, 24, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'Questoes Recentes',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverGrid.count(
-                crossAxisCount: 2,
-                mainAxisSpacing: 12,
-                crossAxisSpacing: 12,
-                childAspectRatio: 1.4,
-                children: [
-                  _AcaoRapida(
-                    icone: Icons.filter_alt_outlined,
-                    titulo: 'Selecionar Eixo',
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      Rotas.axisSelection,
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
+                sliver: SliverList(
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: _QuestaoCard(q: _questoesRecentes[index]),
                     ),
-                  ),
-                  _AcaoRapida(
-                    icone: Icons.add_circle_outline,
-                    titulo: 'Cadastrar Questao',
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      Rotas.questionCreate,
-                    ),
-                  ),
-                  _AcaoRapida(
-                    icone: Icons.list_alt_outlined,
-                    titulo: 'Minhas Questoes',
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      Rotas.questionList,
-                      arguments: EixoBNCC.tecnologia,
-                    ),
-                  ),
-                  _AcaoRapida(
-                    icone: Icons.bar_chart,
-                    titulo: 'Dashboard',
-                    onTap: () {
-                      final s = context.read<SessionScope>();
-                      Navigator.pushNamed(
-                        context,
-                        Rotas.dashboard,
-                        arguments: {'professorId': s.usuario!.id},
-                      );
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            // Questoes Recentes
-            const SliverPadding(
-              padding: EdgeInsets.fromLTRB(20, 24, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: Text(
-                  'Questoes Recentes',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    childCount: _questoesRecentes.length,
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 100),
-              sliver: _questoesRecentes.isEmpty
-                  ? SliverToBoxAdapter(
-                      child: Container(
-                        padding: const EdgeInsets.all(24),
-                        alignment: Alignment.center,
-                        child: const Text(
-                          'Nenhuma questao cadastrada ainda',
-                          style: TextStyle(color: AppColors.textMuted),
-                        ),
-                      ),
-                    )
-                  : SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => Padding(
-                          padding: const EdgeInsets.only(bottom: 12),
-                          child: _QuestaoCard(q: _questoesRecentes[index]),
-                        ),
-                        childCount: _questoesRecentes.length,
-                      ),
-                    ),
-            ),
-          ],
+            ],
+          ),
         ),
-      ),
-      bottomNavigationBar: BottomNav(
-        itens: _itens,
-        ativo: 'home',
-        onSelecionar: _selecionar,
-        cor: AppColors.purple,
       ),
     );
   }
 }
 
 class _HeaderProfessor extends StatelessWidget {
-  const _HeaderProfessor({
-    required this.primeiroNome,
-    this.perfilUrl,
-  });
+  const _HeaderProfessor({required this.primeiroNome});
 
   final String primeiroNome;
-  final String? perfilUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -309,47 +442,38 @@ class _HeaderProfessor extends StatelessWidget {
         bottom: false,
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Ola,',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 14,
-                          ),
-                        ),
-                        Text(
-                          '${primeiroNome.toUpperCase()}.',
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Ola,',
+                      style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.9),
+                        fontSize: 14,
+                      ),
                     ),
-                  ),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white.withValues(alpha: 0.2),
+                    Text(
+                      '${primeiroNome.toUpperCase()}.',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.person,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+              ),
+              Container(
+                width: 48,
+                height: 4e8,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white.withValues(alpha: 0.2),
+                ),
+                child: const Icon(Icons.person, color: Colors.white, size: 28),
               ),
             ],
           ),
@@ -362,13 +486,13 @@ class _HeaderProfessor extends StatelessWidget {
 class _StatTile extends StatelessWidget {
   const _StatTile({
     required this.icone,
-    required this.label,
     required this.valor,
+    required this.label,
   });
 
   final IconData icone;
-  final String label;
   final String valor;
+  final String label;
 
   @override
   Widget build(BuildContext context) {
@@ -381,7 +505,6 @@ class _StatTile extends StatelessWidget {
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
-            offset: const Offset(0, 2),
           ),
         ],
       ),
@@ -441,7 +564,6 @@ class _AcaoRapida extends StatelessWidget {
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 6,
-                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -450,7 +572,7 @@ class _AcaoRapida extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.purpleLight,
                   borderRadius: BorderRadius.circular(10),
@@ -519,31 +641,20 @@ class _QuestaoCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w500,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        _Badge(
-                          label: _eixoLabel(q.eixo),
-                          cor: _eixoCor(q.eixo),
-                        ),
+                        _Badge(label: _eixoLabel(q.eixo), cor: _eixoCor(q.eixo)),
                         const SizedBox(width: 6),
-                        _Badge(
-                          label: _difLabel(q.dificuldade),
-                          cor: _difCor(q.dificuldade),
-                        ),
+                        _Badge(label: _difLabel(q.dificuldade), cor: _difCor(q.dificuldade)),
                       ],
                     ),
                   ],
                 ),
               ),
-              Icon(
-                Icons.edit_outlined,
-                size: 18,
-                color: AppColors.textMuted,
-              ),
+              const Icon(Icons.edit_outlined, size: 18, color: AppColors.textMuted),
             ],
           ),
         ),
@@ -619,5 +730,182 @@ class _Badge extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ============================================================================
+// ABA 2: QUESTOES - lista resumida por eixo
+// ============================================================================
+
+class _AbaQuestoesProfessor extends StatelessWidget {
+  const _AbaQuestoesProfessor();
+
+  @override
+  Widget build(BuildContext context) {
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Container(
+                decoration: const BoxDecoration(
+                  gradient: AppColors.headerGradient,
+                  borderRadius: BorderRadius.vertical(
+                    bottom: Radius.circular(32),
+                  ),
+                ),
+                child: SafeArea(
+                  bottom: false,
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                    child: const Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Minhas Questoes',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          'Selecione um eixo para gerenciar',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.all(20),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  _EixoBotao(
+                    icone: Icons.laptop_chromebook,
+                    titulo: 'Tecnologia e Computacao',
+                    cor: AppColors.purple,
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      Rotas.questionList,
+                      arguments: EixoBNCC.tecnologia,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _EixoBotao(
+                    icone: Icons.public,
+                    titulo: 'Cultura Digital',
+                    cor: Colors.blue,
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      Rotas.questionList,
+                      arguments: EixoBNCC.culturaDigital,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  _EixoBotao(
+                    icone: Icons.balance,
+                    titulo: 'Impacto Social e Etica',
+                    cor: Colors.green,
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      Rotas.questionList,
+                      arguments: EixoBNCC.impacto,
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Center(
+                    child: TextButton.icon(
+                      onPressed: () => Navigator.pushNamed(
+                        context,
+                        Rotas.questionCreate,
+                      ),
+                      icon: const Icon(Icons.add_circle_outline),
+                      label: const Text('Cadastrar Nova Questao'),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EixoBotao extends StatelessWidget {
+  const _EixoBotao({
+    required this.icone,
+    required this.titulo,
+    required this.cor,
+    required this.onTap,
+  });
+
+  final IconData icone;
+  final String titulo;
+  final Color cor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: cor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icone, color: cor, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  titulo,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.textMuted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// ABA 4: PERFIL (placeholder)
+// ============================================================================
+
+class _AbaPerfilProfessor extends StatelessWidget {
+  const _AbaPerfilProfessor();
+
+  @override
+  Widget build(BuildContext context) {
+    return const ProfileTeacherScreen();
   }
 }

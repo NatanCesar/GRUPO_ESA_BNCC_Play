@@ -6,11 +6,26 @@ import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/bottom_nav.dart';
 import '../../data/repositories/ranking_repository.dart';
 import '../../data/models/ranking.dart';
+import '../ranking/ranking_screen.dart';
+import '../sala/sala_screen.dart';
+import '../profile/profile_student_screen.dart';
 
-/// Home do aluno - card destaque de jogar + stats + grid de acoes.
+class _Aba {
+  const _Aba({
+    required this.id,
+    required this.icone,
+    required this.iconeAtivo,
+    required this.rotulo,
+  });
+  final String id;
+  final IconData icone;
+  final IconData iconeAtivo;
+  final String rotulo;
+}
+
+/// Home do aluno com 4 abas reais (PageView).
 class HomeStudentScreen extends StatefulWidget {
   const HomeStudentScreen({super.key});
 
@@ -19,17 +34,47 @@ class HomeStudentScreen extends StatefulWidget {
 }
 
 class _HomeStudentScreenState extends State<HomeStudentScreen> {
-  RankingEntry? _minhaEntrada;
-  int? _minhaPosicao;
-  bool _carregando = true;
+  int _indiceAtual = 0;
+  late PageController _pageController;
+
+  static const _abas = [
+    _Aba(
+      id: 'home',
+      icone: Icons.home_outlined,
+      iconeAtivo: Icons.home,
+      rotulo: 'Inicio',
+    ),
+    _Aba(
+      id: 'jogar',
+      icone: Icons.sports_esports_outlined,
+      iconeAtivo: Icons.sports_esports,
+      rotulo: 'Jogar',
+    ),
+    _Aba(
+      id: 'ranking',
+      icone: Icons.leaderboard_outlined,
+      iconeAtivo: Icons.leaderboard,
+      rotulo: 'Ranking',
+    ),
+    _Aba(
+      id: 'perfil',
+      icone: Icons.person_outline,
+      iconeAtivo: Icons.person,
+      rotulo: 'Perfil',
+    ),
+  ];
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _verificarSessao();
-      _carregarStats();
-    });
+    _pageController = PageController();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _verificarSessao());
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _verificarSessao() {
@@ -40,74 +85,170 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
     }
   }
 
-  Future<void> _carregarStats() async {
-    final sessao = context.read<SessionScope>();
-    final usuario = sessao.usuario;
-    if (usuario == null) return;
-
-    final repository = context.read<RankingRepository>();
-    try {
-      final entrada = await repository.porAluno(usuario.id!);
-      final pos = await repository.posicaoOrdinal(usuario.id!);
-      if (mounted) {
-        setState(() {
-          _minhaEntrada = entrada;
-          _minhaPosicao = pos;
-          _carregando = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) setState(() => _carregando = false);
-    }
-  }
-
-  static const _itens = [
-    ItemDeNav(id: 'home', icone: Icons.home, rotulo: 'Inicio'),
-    ItemDeNav(id: 'jogar', icone: Icons.sports_esports, rotulo: 'Jogar'),
-    ItemDeNav(id: 'ranking', icone: Icons.leaderboard, rotulo: 'Ranking'),
-    ItemDeNav(id: 'perfil', icone: Icons.account_circle, rotulo: 'Perfil'),
-  ];
-
-  void _selecionar(String id) {
-    final sessao = Provider.of<SessionScope>(context, listen: false);
-    final usuario = sessao.usuario;
-
-    if (id == 'perfil') {
-      Navigator.pushNamed(context, Rotas.profileStudent);
-      return;
-    }
-    if (id == 'jogar' && usuario != null) {
-      Navigator.pushNamed(
-        context,
-        Rotas.jogar,
-        arguments: {
-          'alunoId': usuario.id,
-          'apelido': usuario.usuario,
-        },
-      );
-      return;
-    }
-    if (id == 'ranking' && usuario != null) {
-      Navigator.pushNamed(
-        context,
-        Rotas.ranking,
-        arguments: {'alunoId': usuario.id},
-      );
-      return;
-    }
+  void _onTabSelecionada(int index) {
+    setState(() => _indiceAtual = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final sessao = Provider.of<SessionScope>(context);
     final usuario = sessao.usuario;
+    if (usuario == null) return const Scaffold(body: SizedBox.shrink());
 
-    if (usuario == null) {
-      return const Scaffold(body: SizedBox.shrink());
-    }
+    final telas = [
+      const _AbaHomeAluno(),
+      _AbaJogarAluno(usuario: usuario),
+      _AbaRankingAluno(usuarioId: usuario.id!),
+      const ProfileStudentScreen(),
+    ];
+
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (i) => setState(() => _indiceAtual = i),
+        physics: const NeverScrollableScrollPhysics(),
+        children: telas,
+      ),
+      bottomNavigationBar: _BottomNavAluno(
+        abas: _abas,
+        ativo: _indiceAtual,
+        onSelecionar: _onTabSelecionada,
+      ),
+    );
+  }
+}
+
+class _BottomNavAluno extends StatelessWidget {
+  const _BottomNavAluno({
+    required this.abas,
+    required this.ativo,
+    required this.onSelecionar,
+  });
+
+  final List<_Aba> abas;
+  final int ativo;
+  final ValueChanged<int> onSelecionar;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 64,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              for (var i = 0; i < abas.length; i++)
+                Expanded(
+                  child: _ItemNav(
+                    aba: abas[i],
+                    ativo: ativo == i,
+                    onTap: () => onSelecionar(i),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ItemNav extends StatelessWidget {
+  const _ItemNav({
+    required this.aba,
+    required this.ativo,
+    required this.onTap,
+  });
+
+  final _Aba aba;
+  final bool ativo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            ativo ? aba.iconeAtivo : aba.icone,
+            size: 24,
+            color: ativo ? AppColors.green : AppColors.textMuted,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            aba.rotulo,
+            style: TextStyle(
+              fontFamily: AppTheme.inter,
+              fontSize: 11,
+              fontWeight: ativo ? FontWeight.w600 : FontWeight.w400,
+              color: ativo ? AppColors.green : AppColors.textMuted,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// ABA 1: HOME (visao geral com card jogar + stats + grid)
+// ============================================================================
+
+class _AbaHomeAluno extends StatefulWidget {
+  const _AbaHomeAluno();
+
+  @override
+  State<_AbaHomeAluno> createState() => _AbaHomeAlunoState();
+}
+
+class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
+  RankingEntry? _minhaEntrada;
+  int? _minhaPosicao;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _carregar());
+  }
+
+  Future<void> _carregar() async {
+    final sessao = context.read<SessionScope>();
+    final usuario = sessao.usuario;
+    if (usuario == null) return;
+
+    final repo = context.read<RankingRepository>();
+    try {
+      final entrada = await repo.porAluno(usuario.id!);
+      final pos = await repo.posicaoOrdinal(usuario.id!);
+      if (mounted) {
+        setState(() {
+          _minhaEntrada = entrada;
+          _minhaPosicao = pos;
+        });
+      }
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sessao = Provider.of<SessionScope>(context);
+    final usuario = sessao.usuario;
+    if (usuario == null) return const SizedBox.shrink();
 
     final primeiroNome = usuario.nome.split(' ').first;
-
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
@@ -115,10 +256,9 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: RefreshIndicator(
-          onRefresh: _carregarStats,
+          onRefresh: _carregar,
           child: CustomScrollView(
             slivers: [
-              // Header
               SliverToBoxAdapter(
                 child: Container(
                   decoration: const BoxDecoration(
@@ -143,7 +283,8 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                                     Text(
                                       'Ola,',
                                       style: TextStyle(
-                                        color: Colors.white.withValues(alpha: 0.9),
+                                        color: Colors.white
+                                            .withValues(alpha: 0.9),
                                         fontSize: 14,
                                       ),
                                     ),
@@ -163,7 +304,8 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                                 height: 48,
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.2),
+                                  color: Colors.white
+                                      .withValues(alpha: 0.2),
                                 ),
                                 child: const Icon(
                                   Icons.person,
@@ -173,14 +315,14 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                               ),
                             ],
                           ),
-                          const SizedBox(height: 16),
-                          if (usuario.turma != null)
+                          if (usuario.turma != null) ...[
+                            const SizedBox(height: 12),
                             Row(
                               children: [
                                 const Icon(
                                   Icons.school,
-                                  color: Colors.white,
                                   size: 16,
+                                  color: Colors.white,
                                 ),
                                 const SizedBox(width: 6),
                                 Text(
@@ -192,17 +334,16 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                                 ),
                               ],
                             ),
+                          ],
                         ],
                       ),
                     ),
                   ),
                 ),
               ),
-
-              // Card destaque Jogar
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                  padding: const EdgeInsets.all(20),
                   child: _CardJogar(
                     onTap: () => Navigator.pushNamed(
                       context,
@@ -215,11 +356,9 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                   ),
                 ),
               ),
-
-              // Stats
               SliverToBoxAdapter(
                 child: Padding(
-                  padding: const EdgeInsets.all(20),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
                     children: [
                       Expanded(
@@ -252,17 +391,14 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                   ),
                 ),
               ),
-
-              // Acoes rapidas
               const SliverPadding(
-                padding: EdgeInsets.fromLTRB(20, 0, 20, 8),
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
                 sliver: SliverToBoxAdapter(
                   child: Text(
                     'Acoes Rapidas',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -273,49 +409,33 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                   crossAxisCount: 2,
                   mainAxisSpacing: 12,
                   crossAxisSpacing: 12,
-                  childAspectRatio: 1.4,
+                  childAspectRatio: 1.5,
                   children: [
                     _AcaoRapida(
                       icone: Icons.leaderboard,
                       titulo: 'Ver Ranking',
-                      onTap: () => Navigator.pushNamed(
-                        context,
-                        Rotas.ranking,
-                        arguments: {'alunoId': usuario.id},
-                      ),
+                      cor: AppColors.green,
+                      onTap: () {
+                        final state = context
+                            .findAncestorStateOfType<_HomeStudentScreenState>();
+                        state?._onTabSelecionada(2);
+                      },
                     ),
                     _AcaoRapida(
                       icone: Icons.group,
                       titulo: 'Sala Multiplayer',
-                      onTap: () => Navigator.pushNamed(context, Rotas.sala),
-                    ),
-                    _AcaoRapida(
-                      icone: Icons.history,
-                      titulo: 'Minhas Partidas',
-                      onTap: () {},
-                    ),
-                    _AcaoRapida(
-                      icone: Icons.school,
-                      titulo: 'Meu Perfil',
+                      cor: Colors.orange,
                       onTap: () => Navigator.pushNamed(
                         context,
-                        Rotas.profileStudent,
+                        Rotas.sala,
                       ),
                     ),
                   ],
                 ),
               ),
-
-              // Espaco inferior
               const SliverPadding(padding: EdgeInsets.only(bottom: 100)),
             ],
           ),
-        ),
-        bottomNavigationBar: BottomNav(
-          itens: _itens,
-          ativo: 'home',
-          onSelecionar: _selecionar,
-          cor: AppColors.green,
         ),
       ),
     );
@@ -324,7 +444,6 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
 
 class _CardJogar extends StatelessWidget {
   const _CardJogar({required this.onTap});
-
   final VoidCallback onTap;
 
   @override
@@ -376,10 +495,7 @@ class _CardJogar extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.arrow_forward,
-                color: Colors.white,
-              ),
+              const Icon(Icons.arrow_forward, color: Colors.white),
             ],
           ),
         ),
@@ -426,7 +542,6 @@ class _StatTile extends StatelessWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 2),
@@ -448,11 +563,13 @@ class _AcaoRapida extends StatelessWidget {
   const _AcaoRapida({
     required this.icone,
     required this.titulo,
+    required this.cor,
     required this.onTap,
   });
 
   final IconData icone;
   final String titulo;
+  final Color cor;
   final VoidCallback onTap;
 
   @override
@@ -479,12 +596,12 @@ class _AcaoRapida extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.green.withValues(alpha: 0.1),
+                  color: cor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(icone, color: AppColors.green, size: 20),
+                child: Icon(icone, color: cor, size: 20),
               ),
               const SizedBox(height: 12),
               Text(
@@ -492,7 +609,6 @@ class _AcaoRapida extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
                 ),
               ),
             ],
@@ -500,5 +616,103 @@ class _AcaoRapida extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+// ============================================================================
+// ABA 2: JOGAR - tela propria para selecao de jogo
+// ============================================================================
+
+class _AbaJogarAluno extends StatelessWidget {
+  const _AbaJogarAluno({required this.usuario});
+
+  final dynamic usuario;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      appBar: AppBar(
+        backgroundColor: AppColors.green,
+        foregroundColor: Colors.white,
+        title: const Text('Jogar'),
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Card destaque jogar agora
+            Material(
+              color: AppColors.green,
+              borderRadius: BorderRadius.circular(20),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(20),
+                onTap: () => Navigator.pushNamed(
+                  context,
+                  Rotas.jogar,
+                  arguments: {
+                    'alunoId': usuario.id,
+                    'apelido': usuario.usuario,
+                  },
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    children: [
+                      const Icon(
+                        Icons.sports_esports,
+                        color: Colors.white,
+                        size: 48,
+                      ),
+                      const SizedBox(height: 12),
+                      const Text(
+                        'Iniciar Partida',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '5 perguntas aleatorias',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Escolha por eixo',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 12),
+            // Cards para escolher eixo (visivel ao aluno futuramente)
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ============================================================================
+// ABA 3: RANKING
+// ============================================================================
+
+class _AbaRankingAluno extends StatelessWidget {
+  const _AbaRankingAluno({required this.usuarioId});
+
+  final int usuarioId;
+
+  @override
+  Widget build(BuildContext context) {
+    return RankingScreen(alunoId: usuarioId);
   }
 }
