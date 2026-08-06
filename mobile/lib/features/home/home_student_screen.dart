@@ -233,7 +233,7 @@ class _ItemNav extends StatelessWidget {
 // ============================================================================
 
 class _AbaHomeAluno extends StatefulWidget {
-  const _AbaHomeAluno();
+  const _AbaHomeAluno({super.key});
 
   @override
   State<_AbaHomeAluno> createState() => _AbaHomeAlunoState();
