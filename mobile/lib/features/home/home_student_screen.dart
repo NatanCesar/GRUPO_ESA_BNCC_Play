@@ -6,10 +6,12 @@ import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/widgets/bottom_nav.dart';
 import '../../core/widgets/gradient_header.dart';
+import '../ranking/ranking_screen.dart';
+import '../sala/sala_screen.dart';
+import '../profile/profile_student_screen.dart';
 
-/// Home do aluno com acesso ao jogo, ranking e perfil.
+/// Home do aluno com navegacao por abas reais.
 class HomeStudentScreen extends StatefulWidget {
   const HomeStudentScreen({super.key});
 
@@ -18,10 +20,20 @@ class HomeStudentScreen extends StatefulWidget {
 }
 
 class _HomeStudentScreenState extends State<HomeStudentScreen> {
+  int _indiceAtual = 0;
+  late PageController _pageController;
+
   @override
   void initState() {
     super.initState();
+    _pageController = PageController();
     WidgetsBinding.instance.addPostFrameCallback((_) => _verificarSessao());
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _verificarSessao() {
@@ -32,56 +44,13 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
     }
   }
 
-  static const _itens = [
-    ItemDeNav(id: 'home', icone: Icons.home, rotulo: 'Inicio'),
-    ItemDeNav(
-      id: 'jogar',
-      icone: Icons.sports_esports,
-      rotulo: 'Jogar',
-    ),
-    ItemDeNav(
-      id: 'ranking',
-      icone: Icons.leaderboard,
-      rotulo: 'Ranking',
-    ),
-    ItemDeNav(id: 'perfil', icone: Icons.account_circle, rotulo: 'Perfil'),
-  ];
-
-  void _selecionar(String id) {
-    final sessao = Provider.of<SessionScope>(context, listen: false);
-    final usuario = sessao.usuario;
-
-    if (id == 'perfil') {
-      Navigator.pushNamed(context, Rotas.profileStudent);
-      return;
-    }
-    if (id == 'home') return;
-
-    if (id == 'jogar') {
-      Navigator.pushNamed(
-        context,
-        Rotas.jogar,
-        arguments: {
-          'alunoId': usuario!.id,
-          'apelido': usuario.usuario,
-        },
-      );
-      return;
-    }
-
-    if (id == 'ranking') {
-      Navigator.pushNamed(
-        context,
-        Rotas.ranking,
-        arguments: {'alunoId': usuario!.id},
-      );
-      return;
-    }
-
-    if (id == 'sala') {
-      Navigator.pushNamed(context, Rotas.sala);
-      return;
-    }
+  void _onTabSelecionada(int index) {
+    setState(() => _indiceAtual = index);
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+    );
   }
 
   @override
@@ -93,6 +62,36 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
       return const Scaffold(body: SizedBox.shrink());
     }
 
+    final telas = [
+      _HomeTab(usuario: usuario),
+      const SizedBox(), // Placeholder - navegacao sera via botoes
+      RankingScreen(alunoId: usuario.id!),
+      const ProfileStudentScreen(),
+    ];
+
+    return Scaffold(
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) => setState(() => _indiceAtual = index),
+        physics: const NeverScrollableScrollPhysics(),
+        children: telas,
+      ),
+      bottomNavigationBar: _BottomNavAluno(
+        ativo: _indiceAtual,
+        onSelecionar: _onTabSelecionada,
+      ),
+    );
+  }
+}
+
+/// Conteudo da aba Home do aluno.
+class _HomeTab extends StatelessWidget {
+  const _HomeTab({required this.usuario});
+
+  final dynamic usuario;
+
+  @override
+  Widget build(BuildContext context) {
     final primeiroNome = usuario.nome.split(' ').first;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -122,35 +121,51 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // Card de jogar
-                    _CardAcao(
-                      icone: Icons.sports_esports,
-                      titulo: 'Jogar',
-                      subtitulo: 'Teste seus conhecimentos',
-                      cor: AppColors.green,
-                      onTap: () => _selecionar('jogar'),
+                    // Card principal de jogar
+                    _CardJogar(
+                      onTap: () => Navigator.pushNamed(
+                        context,
+                        Rotas.jogar,
+                        arguments: {
+                          'alunoId': usuario.id,
+                          'apelido': usuario.usuario,
+                        },
+                      ),
                     ),
                     const SizedBox(height: 16),
-                    // Card de ranking
-                    _CardAcao(
-                      icone: Icons.leaderboard,
-                      titulo: 'Ranking',
-                      subtitulo: 'Veja sua posicao',
-                      cor: AppColors.purple,
-                      onTap: () => _selecionar('ranking'),
-                    ),
-                    const SizedBox(height: 16),
-                    // Card de sala multiplayer
-                    _CardAcao(
-                      icone: Icons.group,
-                      titulo: 'Sala Multiplayer',
-                      subtitulo: 'Desafie seus colegas',
-                      cor: Colors.orange,
-                      onTap: () => _selecionar('sala'),
+
+                    // Cards secundarios
+                    Row(
+                      children: [
+                        Expanded(
+                          child: _CardSecundario(
+                            icone: Icons.leaderboard,
+                            titulo: 'Ranking',
+                            cor: AppColors.purple,
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              Rotas.ranking,
+                              arguments: {'alunoId': usuario.id},
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: _CardSecundario(
+                            icone: Icons.group,
+                            titulo: 'Sala',
+                            cor: Colors.orange,
+                            onTap: () => Navigator.pushNamed(
+                              context,
+                              Rotas.sala,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -158,29 +173,104 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
             ],
           ),
         ),
-        bottomNavigationBar: BottomNav(
-          itens: _itens,
-          ativo: 'home',
-          onSelecionar: _selecionar,
-          cor: AppColors.green,
+      ),
+    );
+  }
+}
+
+class _CardJogar extends StatelessWidget {
+  const _CardJogar({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.green,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.play_circle_fill,
+                      color: Colors.white,
+                      size: 32,
+                    ),
+                  ),
+                  const Spacer(),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        SizedBox(width: 4),
+                        Text(
+                          '+XP',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'Jogar',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Teste seus conhecimentos sobre a BNCC',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white.withValues(alpha: 0.9),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _CardAcao extends StatelessWidget {
-  const _CardAcao({
+class _CardSecundario extends StatelessWidget {
+  const _CardSecundario({
     required this.icone,
     required this.titulo,
-    required this.subtitulo,
     required this.cor,
     required this.onTap,
   });
 
   final IconData icone;
   final String titulo;
-  final String subtitulo;
   final Color cor;
   final VoidCallback onTap;
 
@@ -189,51 +279,124 @@ class _CardAcao extends StatelessWidget {
     return Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(16),
+      elevation: 2,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: cor.withValues(alpha: 0.3)),
-          ),
-          child: Row(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             children: [
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
                   color: cor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  shape: BoxShape.circle,
                 ),
                 child: Icon(icone, color: cor, size: 28),
               ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      titulo,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      subtitulo,
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 8),
+              Text(
+                titulo,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-              Icon(Icons.chevron_right, color: Colors.grey.shade400),
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _BottomNavAluno extends StatelessWidget {
+  const _BottomNavAluno({
+    required this.ativo,
+    required this.onSelecionar,
+  });
+
+  final int ativo;
+  final ValueChanged<int> onSelecionar;
+
+  static const _itens = [
+    (icone: Icons.home_outlined, iconeAtivo: Icons.home, rotulo: 'Inicio'),
+    (icone: Icons.sports_esports_outlined, iconeAtivo: Icons.sports_esports, rotulo: 'Jogar'),
+    (icone: Icons.leaderboard_outlined, iconeAtivo: Icons.leaderboard, rotulo: 'Ranking'),
+    (icone: Icons.person_outline, iconeAtivo: Icons.person, rotulo: 'Perfil'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.surface,
+        border: Border(top: BorderSide(color: AppColors.divider)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              for (var i = 0; i < _itens.length; i++)
+                Expanded(
+                  child: _ItemNav(
+                    icone: _itens[i].icone,
+                    iconeAtivo: _itens[i].iconeAtivo,
+                    rotulo: _itens[i].rotulo,
+                    ativo: ativo == i,
+                    onTap: () => onSelecionar(i),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ItemNav extends StatelessWidget {
+  const _ItemNav({
+    required this.icone,
+    required this.iconeAtivo,
+    required this.rotulo,
+    required this.ativo,
+    required this.onTap,
+  });
+
+  final IconData icone;
+  final IconData iconeAtivo;
+  final String rotulo;
+  final bool ativo;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            ativo ? iconeAtivo : icone,
+            size: 24,
+            color: ativo ? AppColors.green : AppColors.textMuted,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            rotulo,
+            style: TextStyle(
+              fontFamily: AppTheme.inter,
+              fontSize: 11,
+              fontWeight: ativo ? FontWeight.w600 : FontWeight.w400,
+              color: ativo ? AppColors.green : AppColors.textMuted,
+            ),
+          ),
+        ],
       ),
     );
   }
