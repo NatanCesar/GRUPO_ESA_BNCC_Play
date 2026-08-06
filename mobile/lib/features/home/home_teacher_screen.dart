@@ -122,17 +122,21 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
       const _AbaPerfilProfessor(),
     ];
 
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) => setState(() => _indiceAtual = index),
-        physics: const NeverScrollableScrollPhysics(),
-        children: telas,
-      ),
-      bottomNavigationBar: _BottomNav(
-        abas: _abas,
-        ativo: _indiceAtual,
-        onSelecionar: _onTabSelecionada,
+    return PopScope(
+      // Na home, voltar do sistema sai do app (nao leva para login).
+      canPop: false,
+      child: Scaffold(
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: (index) => setState(() => _indiceAtual = index),
+          physics: const NeverScrollableScrollPhysics(),
+          children: telas,
+        ),
+        bottomNavigationBar: _BottomNav(
+          abas: _abas,
+          ativo: _indiceAtual,
+          onSelecionar: _onTabSelecionada,
+        ),
       ),
     );
   }

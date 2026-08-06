@@ -106,17 +106,20 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
       _AbaPerfilAluno(usuario: usuario),
     ];
 
-    return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (i) => setState(() => _indiceAtual = i),
-        physics: const NeverScrollableScrollPhysics(),
-        children: telas,
-      ),
-      bottomNavigationBar: _BottomNavAluno(
-        abas: _abas,
-        ativo: _indiceAtual,
-        onSelecionar: _onTabSelecionada,
+    return PopScope(
+      canPop: false,
+      child: Scaffold(
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: (i) => setState(() => _indiceAtual = i),
+          physics: const NeverScrollableScrollPhysics(),
+          children: telas,
+        ),
+        bottomNavigationBar: _BottomNavAluno(
+          abas: _abas,
+          ativo: _indiceAtual,
+          onSelecionar: _onTabSelecionada,
+        ),
       ),
     );
   }
