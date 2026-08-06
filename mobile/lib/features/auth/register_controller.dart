@@ -38,7 +38,7 @@ class RegisterController extends ChangeNotifier {
       ..addAll({
         'nome': Validators.nome(nome),
         'email': Validators.email(email),
-        'usuario': Validators.usuario(usuario),
+        'usuário': Validators.usuario(usuario),
         'senha': Validators.senha(senha),
         if (papel == Papel.professor) 'escola': Validators.escola(escola),
         if (papel == Papel.aluno) 'turma': Validators.turma(turma),

@@ -145,7 +145,7 @@ class _EixoCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$quantidade ${quantidade == 1 ? 'questao' : 'questoes'}',
+                      '$quantidade ${quantidade == 1 ? 'questão' : 'questoes'}',
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.textMuted,

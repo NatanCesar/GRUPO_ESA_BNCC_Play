@@ -85,7 +85,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
       }
     } catch (_) {
       if (mounted) {
-        setState(() => _erroGeral = 'Erro ao carregar questao');
+        setState(() => _erroGeral = 'Erro ao carregar questão');
       }
     }
   }
@@ -191,12 +191,12 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
               const Icon(Icons.check_circle, size: 80, color: AppColors.green),
               const SizedBox(height: 24),
               Text(
-                editando ? 'Questao atualizada!' : 'Questao cadastrada!',
+                editando ? 'Questão atualizada!' : 'Questão cadastrada!',
                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
               ),
               const SizedBox(height: 32),
               AppButton(
-                label: 'Voltar para questoes',
+                label: 'Voltar para questões',
                 onPressed: () => Navigator.pop(context),
               ),
             ],
@@ -215,7 +215,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  editando ? 'Editar Questao' : 'Nova Questao',
+                  editando ? 'Editar Questão' : 'Nova Questão',
                   style: AppTheme.headerTitle,
                 ),
                 const SizedBox(height: 4),
@@ -368,7 +368,7 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
                     SizedBox(
                       width: double.infinity,
                       child: AppButton(
-                        label: editando ? 'Salvar Alteracoes' : 'Cadastrar Questao',
+                        label: editando ? 'Salvar Alterações' : 'Cadastrar Questão',
                         onPressed: _salvando ? null : _salvar,
                         loading: _salvando,
                       ),
@@ -445,7 +445,7 @@ class _OpcaoField extends StatelessWidget {
         Expanded(
           child: AppTextField(
             controller: controller,
-            label: 'Opcao $letra',
+            label: 'Opção $letra',
             hint: 'Alternativa $letra',
             errorText: error,
           ),

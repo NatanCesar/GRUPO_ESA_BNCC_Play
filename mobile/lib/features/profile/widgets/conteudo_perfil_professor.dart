@@ -50,7 +50,7 @@ class ConteudoPerfilProfessor extends StatelessWidget {
                       child: CartaoDeEstatistica(
                         icone: Icons.quiz,
                         valor: '0',
-                        rotulo: 'Questoes',
+                        rotulo: 'Questões',
                       ),
                     ),
                     SizedBox(width: 12),

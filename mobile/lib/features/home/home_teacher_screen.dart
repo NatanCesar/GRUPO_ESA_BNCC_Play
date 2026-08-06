@@ -60,7 +60,7 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
       id: 'questoes',
       icone: Icons.quiz_outlined,
       iconeAtivo: Icons.quiz,
-      rotulo: 'Questoes',
+      rotulo: 'Questões',
     ),
     _Aba(
       id: 'dashboard',
@@ -311,7 +311,7 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
                         child: _StatTile(
                           icone: Icons.quiz,
                           valor: '$_totalQuestoes',
-                          label: 'Questoes',
+                          label: 'Questões',
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -365,7 +365,7 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
                     ),
                     _AcaoRapida(
                       icone: Icons.add_circle_outline,
-                      titulo: 'Cadastrar Questao',
+                      titulo: 'Cadastrar Questão',
                       onTap: () => Navigator.pushNamed(
                         context,
                         Rotas.questionCreate,
@@ -373,7 +373,7 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
                     ),
                     _AcaoRapida(
                       icone: Icons.list_alt_outlined,
-                      titulo: 'Minhas Questoes',
+                      titulo: 'Minhas Questões',
                       onTap: () => Navigator.pushNamed(
                         context,
                         Rotas.questionList,
@@ -449,7 +449,7 @@ class _HeaderProfessor extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Ola,',
+                      'Olá,',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.9),
                         fontSize: 14,
@@ -687,11 +687,11 @@ class _QuestaoCard extends StatelessWidget {
   String _difLabel(Dificuldade d) {
     switch (d) {
       case Dificuldade.facil:
-        return 'Facil';
+        return 'Fácil';
       case Dificuldade.medio:
-        return 'Medio';
+        return 'Médio';
       case Dificuldade.dificil:
-        return 'Dificil';
+        return 'Difícil';
     }
   }
 
@@ -766,7 +766,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Minhas Questoes',
+                          'Minhas Questões',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -793,7 +793,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                 delegate: SliverChildListDelegate([
                   _EixoBotao(
                     icone: Icons.laptop_chromebook,
-                    titulo: 'Tecnologia e Computacao',
+                    titulo: 'Tecnologia e Computação',
                     cor: AppColors.purple,
                     onTap: () => Navigator.pushNamed(
                       context,
@@ -815,7 +815,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                   const SizedBox(height: 12),
                   _EixoBotao(
                     icone: Icons.balance,
-                    titulo: 'Impacto Social e Etica',
+                    titulo: 'Impacto Social e Ética',
                     cor: Colors.green,
                     onTap: () => Navigator.pushNamed(
                       context,

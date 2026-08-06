@@ -139,7 +139,7 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                       controller: _usuario,
                       hint: 'mariasilva',
                       icon: Icons.alternate_email,
-                      errorText: erros['usuario'],
+                      errorText: erros['usuário'],
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),

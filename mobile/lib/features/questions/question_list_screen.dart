@@ -70,7 +70,7 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
     final confirmado = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remover Questao'),
+        title: const Text('Remover Questão'),
         content: const Text('Tem certeza que deseja remover esta questao?'),
         actions: [
           TextButton(
@@ -94,7 +94,7 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Erro ao remover questao')),
+            const SnackBar(content: Text('Erro ao remover questão')),
           );
         }
       }
@@ -114,7 +114,7 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(eixo?.rotulo ?? 'Questoes', style: AppTheme.headerTitle),
+                Text(eixo?.rotulo ?? 'Questões', style: AppTheme.headerTitle),
                 const SizedBox(height: 4),
                 Text(_eixoFiltro?.rotulo ?? 'Todas', style: AppTheme.headerSubtitle),
               ],
@@ -143,7 +143,7 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
         },
         backgroundColor: AppColors.purple,
         icon: const Icon(Icons.add, color: Colors.white),
-        label: const Text('Nova Questao', style: TextStyle(color: Colors.white)),
+        label: const Text('Nova Questão', style: TextStyle(color: Colors.white)),
       ),
     );
   }

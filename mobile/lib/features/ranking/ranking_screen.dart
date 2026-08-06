@@ -231,7 +231,7 @@ class _RankingTile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
-                          'Voce',
+                          'Você',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 10,

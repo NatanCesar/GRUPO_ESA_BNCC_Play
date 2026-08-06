@@ -10,7 +10,7 @@ abstract final class Validators {
     final v = valor?.trim() ?? '';
     if (v.isEmpty) return 'Informe seu e-mail';
     if (v.length > 120) return 'E-mail muito longo';
-    if (!_email.hasMatch(v)) return 'E-mail invalido';
+    if (!_email.hasMatch(v)) return 'E-mail inválido';
     return null;
   }
 
@@ -33,12 +33,12 @@ abstract final class Validators {
 
   static String? usuario(String? valor) {
     final v = valor?.trim() ?? '';
-    if (v.isEmpty) return 'Informe seu nome de usuario';
+    if (v.isEmpty) return 'Informe seu nome de usuário';
     if (v.length < 3 || v.length > 30) {
-      return 'O nome de usuario precisa de 3 a 30 caracteres';
+      return 'O nome de usuário precisa de 3 a 30 caracteres';
     }
     if (!_usuario.hasMatch(v)) {
-      return 'Use apenas letras, numeros, ponto e sublinhado';
+      return 'Use apenas letras, números, ponto e sublinhado';
     }
     return null;
   }
@@ -63,15 +63,15 @@ abstract final class Validators {
     final v = valor?.trim() ?? '';
     if (v.isEmpty) return 'Informe o enunciado';
     if (v.length < 3) return 'Enunciado muito curto';
-    if (v.length > 500) return 'Enunciado muito longo (max 500 caracteres)';
+    if (v.length > 500) return 'Enunciado muito longo (máx 500 caracteres)';
     return null;
   }
 
-  /// Opcao de resposta: 1 a 200 caracteres.
+  /// Opção de resposta: 1 a 200 caracteres.
   static String? opcaoQuestao(String? valor) {
     final v = valor?.trim() ?? '';
-    if (v.isEmpty) return 'Informe a opcao';
-    if (v.length > 200) return 'Opcao muito longa (max 200 caracteres)';
+    if (v.isEmpty) return 'Informe a opção';
+    if (v.length > 200) return 'Opção muito longa (máx 200 caracteres)';
     return null;
   }
 }

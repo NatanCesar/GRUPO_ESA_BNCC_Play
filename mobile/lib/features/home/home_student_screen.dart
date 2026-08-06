@@ -280,7 +280,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Ola,',
+                                      'Olá,',
                                       style: TextStyle(
                                         color: Colors.white
                                             .withValues(alpha: 0.9),
