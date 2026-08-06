@@ -71,7 +71,7 @@ class GameController extends ChangeNotifier {
       );
 
       if (todas.isEmpty) {
-        _erro = 'Nenhuma questao disponivel';
+        _erro = 'Nenhuma questão disponível';
         _carregando = false;
         notifyListeners();
         return;

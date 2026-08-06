@@ -59,7 +59,7 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
-          _erro = 'Erro ao carregar questoes';
+          _erro = 'Erro ao carregar questões';
           _carregando = false;
         });
       }
@@ -165,12 +165,12 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
             const Icon(Icons.quiz_outlined, size: 64, color: AppColors.textHint),
             const SizedBox(height: 16),
             const Text(
-              'Nenhuma questao encontrada',
+              'Nenhuma questão encontrada',
               style: TextStyle(fontSize: 16, color: AppColors.textMuted),
             ),
             const SizedBox(height: 8),
             const Text(
-              'Cadastre sua primeira questao!',
+              'Cadastre sua primeira questão!',
               style: TextStyle(fontSize: 14, color: AppColors.textHint),
             ),
           ],
