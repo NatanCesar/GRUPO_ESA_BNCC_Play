@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/aviso_de_erro.dart';
@@ -13,33 +12,34 @@ import '../../core/widgets/gradient_header.dart';
 import '../../core/widgets/top_bar.dart';
 import '../../data/models/papel.dart';
 import '../../data/repositories/user_repository.dart';
-import 'register_controller.dart';
+import 'profile_controller.dart';
 
-/// Cadastro de professor. Cinco campos, nem um a mais: CT03 cobra
-/// minimizacao de dados.
-class RegisterTeacherScreen extends StatefulWidget {
-  const RegisterTeacherScreen({super.key});
+/// Edicao de cadastro, para professor e aluno.
+///
+/// O campo extra segue o papel do usuario logado: escola para professor,
+/// turma para aluno. Senha nao se altera por aqui.
+class EditProfileScreen extends StatefulWidget {
+  const EditProfileScreen({super.key});
 
   @override
-  State<RegisterTeacherScreen> createState() => _RegisterTeacherScreenState();
+  State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
 
-class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
+class _EditProfileScreenState extends State<EditProfileScreen> {
   final _nome = TextEditingController();
   final _email = TextEditingController();
   final _usuario = TextEditingController();
-  final _escola = TextEditingController();
-  final _senha = TextEditingController();
+  final _extra = TextEditingController();
 
-  late final RegisterController _controller;
+  late final ProfileController _controller;
+  bool _preenchido = false;
 
   @override
   void initState() {
     super.initState();
-    _controller = RegisterController(
+    _controller = ProfileController(
       usuarios: context.read<UserRepository>(),
       sessao: context.read<SessionScope>(),
-      papel: Papel.professor,
     )..addListener(_aoMudar);
   }
 
@@ -49,26 +49,52 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
   void dispose() {
     _controller.removeListener(_aoMudar);
     _controller.dispose();
-    for (final campo in [_nome, _email, _usuario, _escola, _senha]) {
+    for (final campo in [_nome, _email, _usuario, _extra]) {
       campo.dispose();
     }
     super.dispose();
   }
 
-  Future<void> _criarConta() async {
-    final novo = await _controller.cadastrar(
+  Future<void> _salvar() async {
+    final papel = context.read<SessionScope>().usuario?.papel;
+    final ok = await _controller.salvar(
       nome: _nome.text,
       email: _email.text,
       usuario: _usuario.text,
-      senha: _senha.text,
-      escola: _escola.text,
+      escola: papel == Papel.professor ? _extra.text : null,
+      turma: papel == Papel.aluno ? _extra.text : null,
     );
-    if (novo == null || !mounted) return;
-    Navigator.pushReplacementNamed(context, Rotas.homeTeacher);
+    if (!ok || !mounted) return;
+
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('Dados atualizados')));
   }
 
   @override
   Widget build(BuildContext context) {
+    final sessao = Provider.of<SessionScope>(context);
+    final usuario = sessao.usuario;
+
+    if (usuario == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        Navigator.pushNamedAndRemoveUntil(context, Rotas.login, (_) => false);
+      });
+      return const Scaffold(body: SizedBox.shrink());
+    }
+
+    // Preenche uma vez so: repetir a cada build apagaria o que o usuario
+    // digitou.
+    if (!_preenchido) {
+      _nome.text = usuario.nome;
+      _email.text = usuario.email;
+      _usuario.text = usuario.usuario;
+      _extra.text = usuario.escola ?? usuario.turma ?? '';
+      _preenchido = true;
+    }
+
+    final ehProfessor = usuario.papel == Papel.professor;
     final erros = _controller.erros;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
@@ -81,27 +107,12 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               GradientHeader(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TopBar(
-                      titulo: 'Cadastro Professor',
-                      onVoltar: () => Navigator.maybePop(context),
-                    ),
-                    const SizedBox(height: 8),
-                    const Row(
-                      children: [
-                        Text('👩‍🏫', style: TextStyle(fontSize: 34)),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            'Crie sua conta gratuita e comece a ensinar de forma gamificada',
-                            style: AppTheme.headerSubtitle,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
+                gradient: ehProfessor
+                    ? AppColors.headerGradient
+                    : AppColors.greenHeaderGradient,
+                child: TopBar(
+                  titulo: 'Editar Perfil',
+                  onVoltar: () => Navigator.maybePop(context),
                 ),
               ),
               Padding(
@@ -115,16 +126,14 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                     AppTextField(
                       label: 'Nome completo',
                       controller: _nome,
-                      hint: 'Maria Silva',
                       icon: Icons.person,
                       errorText: erros['nome'],
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     AppTextField(
-                      label: 'E-mail institucional',
+                      label: 'E-mail',
                       controller: _email,
-                      hint: 'maria@escola.edu.br',
                       icon: Icons.email,
                       errorText: erros['email'],
                       keyboardType: TextInputType.emailAddress,
@@ -134,30 +143,18 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                     AppTextField(
                       label: 'Nome de usuário',
                       controller: _usuario,
-                      hint: 'mariasilva',
                       icon: Icons.alternate_email,
                       errorText: erros['usuario'],
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 16),
                     AppTextField(
-                      label: 'Escola',
-                      controller: _escola,
-                      hint: 'E.E. Monteiro Lobato',
-                      icon: Icons.school,
-                      errorText: erros['escola'],
-                      textInputAction: TextInputAction.next,
-                    ),
-                    const SizedBox(height: 16),
-                    AppTextField(
-                      label: 'Senha',
-                      controller: _senha,
-                      hint: 'Mínimo 8 caracteres',
-                      icon: Icons.lock,
-                      errorText: erros['senha'],
-                      obscureText: true,
+                      label: ehProfessor ? 'Escola' : 'Turma',
+                      controller: _extra,
+                      icon: ehProfessor ? Icons.school : Icons.group,
+                      errorText: erros[ehProfessor ? 'escola' : 'turma'],
                       textInputAction: TextInputAction.done,
-                      onSubmitted: (_) => _criarConta(),
+                      onSubmitted: (_) => _salvar(),
                     ),
                     const SizedBox(height: 24),
                     if (_controller.erroGeral != null) ...[
@@ -165,24 +162,13 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                       const SizedBox(height: 16),
                     ],
                     AppButton(
-                      label: 'Criar Conta',
-                      icon: Icons.how_to_reg,
-                      onPressed: _criarConta,
+                      label: 'Salvar',
+                      icon: Icons.save,
+                      variant: ehProfessor
+                          ? AppButtonVariant.primary
+                          : AppButtonVariant.green,
+                      onPressed: _salvar,
                       loading: _controller.carregando,
-                    ),
-                    const SizedBox(height: 20),
-                    Wrap(
-                      alignment: WrapAlignment.center,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 4,
-                      children: [
-                        const Text('Já tem conta?', style: AppTheme.footerText),
-                        GestureDetector(
-                          onTap: () =>
-                              Navigator.pushNamed(context, Rotas.login),
-                          child: const Text('Entrar', style: AppTheme.footerLink),
-                        ),
-                      ],
                     ),
                   ],
                 ),

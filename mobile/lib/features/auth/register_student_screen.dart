@@ -8,6 +8,7 @@ import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
+import '../../core/widgets/aviso_de_erro.dart';
 import '../../core/widgets/gradient_header.dart';
 import '../../core/widgets/top_bar.dart';
 import '../../data/models/papel.dart';
@@ -79,7 +80,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               GradientHeader(
-                gradient: AppColors.headerGradientGreen,
+                gradient: AppColors.greenHeaderGradient,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -143,7 +144,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
                       label: 'Turma',
                       controller: _turma,
                       hint: '9º Ano A',
-                      icon: Icons.class_,
+                      icon: Icons.group,
                       errorText: erros['turma'],
                       textInputAction: TextInputAction.next,
                     ),
@@ -160,14 +161,14 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
                     ),
                     const SizedBox(height: 24),
                     if (_controller.erroGeral != null) ...[
-                      _AvisoDeErro(mensagem: _controller.erroGeral!),
+                      AvisoDeErro(mensagem: _controller.erroGeral!),
                       const SizedBox(height: 16),
                     ],
                     AppButton(
                       label: 'Criar Conta',
                       icon: Icons.how_to_reg,
                       onPressed: _criarConta,
-                      variant: AppButtonVariant.secondary,
+                      variant: AppButtonVariant.green,
                       loading: _controller.carregando,
                     ),
                     const SizedBox(height: 20),
@@ -195,31 +196,6 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-/// Caixa vermelha de erro da operacao, acima do botao de acao.
-class _AvisoDeErro extends StatelessWidget {
-  const _AvisoDeErro({required this.mensagem});
-
-  final String mensagem;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.dangerLight,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.error_outline, size: 18, color: AppColors.danger),
-          const SizedBox(width: 8),
-          Expanded(child: Text(mensagem, style: AppTheme.fieldError)),
-        ],
       ),
     );
   }
