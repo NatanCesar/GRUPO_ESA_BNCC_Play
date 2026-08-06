@@ -17,7 +17,7 @@ Future<void> pumpTela(WidgetTester tester) async {
       routes: {Rotas.login: (_) => const Scaffold(body: Text('tela de login'))},
     ),
   );
-  await tester.pump();
+  await tester.pumpAndSettle();
 }
 
 void main() {

@@ -8,9 +8,11 @@ import '../../core/widgets/app_button.dart';
 import '../../core/widgets/gradient_header.dart';
 import '../../core/widgets/top_bar.dart';
 
-/// Tela de recuperacao de senha — casca honesta.
+/// Casca da recuperacao de senha.
 ///
-/// Nao pede e-mail para nao simular um envio que nao acontece.
+/// O prototipo tem um fluxo de quatro passos, mas nenhum caso de teste o
+/// cobre e o envio de e-mail depende de servidor. Pedir o e-mail aqui
+/// simularia um envio que nao acontece, entao a tela apenas explica.
 class ForgotPasswordScreen extends StatelessWidget {
   const ForgotPasswordScreen({super.key});
 
@@ -21,70 +23,54 @@ class ForgotPasswordScreen extends StatelessWidget {
         statusBarColor: Colors.transparent,
       ),
       child: Scaffold(
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            GradientHeader(
-              child: TopBar(
-                titulo: 'Recuperar senha',
-                onVoltar: () => Navigator.maybePop(context),
+        body: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GradientHeader(
+                child: TopBar(
+                  titulo: 'Recuperar senha',
+                  onVoltar: () => Navigator.maybePop(context),
+                ),
               ),
-            ),
-            Expanded(
-              child: Padding(
+              Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
-                  vertical: 32,
+                  vertical: 40,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: AppColors.surface,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Column(
-                        children: [
-                          const Icon(
-                            Icons.mark_email_unread_outlined,
-                            size: 48,
-                            color: AppColors.purple,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            'Recuperar senha',
-                            style: AppTheme.headerTitle.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'A recuperação de senha por e-mail depende de servidor e chega numa próxima entrega.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: AppTheme.inter,
-                              fontSize: 14,
-                              color: AppColors.textMuted,
-                              height: 1.5,
-                            ),
-                          ),
-                        ],
+                    const Icon(
+                      Icons.mark_email_unread_outlined,
+                      size: 56,
+                      color: AppColors.purple,
+                    ),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'A recuperação de senha por e-mail depende de servidor e chega numa próxima entrega.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: AppTheme.inter,
+                        fontSize: 14,
+                        height: 1.5,
+                        color: AppColors.textMuted,
                       ),
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     AppButton(
                       label: 'Voltar ao login',
+                      icon: Icons.arrow_back,
+                      variant: AppButtonVariant.ghost,
                       onPressed: () =>
-                          Navigator.pushNamed(context, Rotas.login),
+                          Navigator.pushReplacementNamed(context, Rotas.login),
                     ),
                   ],
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
