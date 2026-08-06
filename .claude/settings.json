@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch *)",
+      "Bash(flutter --version)",
+      "Bash(flutter analyze *)",
+      "Bash(dart --version)",
+      "Bash(dart analyze *)",
+      "Bash(flutter pub *)",
+      "Read(//opt/**)",
+      "Read(//home/natan/**)",
+      "Read(//home/natan/snap/flutter/common/flutter/.dart_tool/**)",
+      "Read(//home/natan/snap/flutter/common/flutter/**)",
+      "Read(//home/natan/snap/flutter/common/flutter/bin/internal/**)",
+      "Bash(/home/natan/snap/flutter/common/flutter/bin/flutter --version)",
+      "Read(//home/natan/snap/flutter/common/flutter/bin/**)",
+      "Bash(/home/natan/snap/flutter/common/flutter/bin/dart --version)"
+    ]
+  }
+}

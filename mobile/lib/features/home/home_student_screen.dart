@@ -32,9 +32,12 @@ class HomeStudentScreen extends StatefulWidget {
   State<HomeStudentScreen> createState() => _HomeStudentScreenState();
 }
 
-class _HomeStudentScreenState extends State<HomeStudentScreen> {
+class _HomeStudentScreenState extends State<HomeStudentScreen>
+    with WidgetsBindingObserver {
   int _indiceAtual = 0;
   late PageController _pageController;
+  final GlobalKey<_AbaHomeAlunoState> _chaveAbaHome =
+      GlobalKey<_AbaHomeAlunoState>();
 
   static const _abas = [
     _Aba(
@@ -67,13 +70,22 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) => _verificarSessao());
   }
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState estado) {
+    if (estado == AppLifecycleState.resumed) {
+      _chaveAbaHome.currentState?.recarregar();
+    }
   }
 
   void _verificarSessao() {
@@ -85,12 +97,17 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
   }
 
   void _onTabSelecionada(int index) {
+    final voltandoParaInicio =
+        index == 0 && _indiceAtual != 0 && _pageController.hasClients;
     setState(() => _indiceAtual = index);
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
     );
+    if (voltandoParaInicio) {
+      _chaveAbaHome.currentState?.recarregar();
+    }
   }
 
   @override
@@ -100,7 +117,7 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
     if (usuario == null) return const Scaffold(body: SizedBox.shrink());
 
     final telas = [
-      const _AbaHomeAluno(),
+      _AbaHomeAluno(key: _chaveAbaHome),
       _AbaJogarAluno(usuario: usuario),
       _AbaRankingAluno(usuarioId: usuario.id!),
       _AbaPerfilAluno(usuario: usuario),
@@ -240,6 +257,29 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
     } catch (_) {}
   }
 
+  /// Recarrega os KPIs do aluno a partir do banco.
+  ///
+  /// Pode ser chamado a partir de fora da aba (ex.: quando o aluno volta
+  /// de uma partida, troca de aba, ou o app volta do background).
+  void recarregar() {
+    if (!mounted) return;
+    _carregar();
+  }
+
+  Future<void> _abrirJogo() async {
+    final sessao = context.read<SessionScope>();
+    final usuario = sessao.usuario;
+    if (usuario == null) return;
+    await Navigator.pushNamed(
+      context,
+      Rotas.jogar,
+      arguments: {'alunoId': usuario.id, 'apelido': usuario.usuario},
+    );
+    // Quando o aluno volta (independente de ter ido até o resultado),
+    // recarregamos os KPIs — a partida pode ter sido encerrada nesse meio.
+    if (mounted) _carregar();
+  }
+
   @override
   Widget build(BuildContext context) {
     final sessao = Provider.of<SessionScope>(context);
@@ -342,16 +382,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.all(20),
-                  child: _CardJogar(
-                    onTap: () => Navigator.pushNamed(
-                      context,
-                      Rotas.jogar,
-                      arguments: {
-                        'alunoId': usuario.id,
-                        'apelido': usuario.usuario,
-                      },
-                    ),
-                  ),
+                  child: _CardJogar(onTap: _abrirJogo),
                 ),
               ),
               SliverToBoxAdapter(
@@ -617,6 +648,27 @@ class _AbaJogarAluno extends StatelessWidget {
 
   final dynamic usuario;
 
+  Future<void> _abrirPartida(BuildContext context, {String? eixo}) async {
+    await Navigator.pushNamed(
+      context,
+      Rotas.jogar,
+      arguments: {
+        'alunoId': usuario.id,
+        'apelido': usuario.usuario,
+        if (eixo != null) 'eixo': eixo,
+      },
+    );
+    // Quando o aluno volta (com ou sem partida concluída), atualiza os
+    // KPIs da aba Início caso ela esteja montada.
+    if (context.mounted) {
+      context
+          .findAncestorStateOfType<_HomeStudentScreenState>()
+          ?._chaveAbaHome
+          .currentState
+          ?.recarregar();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -638,14 +690,7 @@ class _AbaJogarAluno extends StatelessWidget {
               borderRadius: BorderRadius.circular(20),
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
-                onTap: () => Navigator.pushNamed(
-                  context,
-                  Rotas.jogar,
-                  arguments: {
-                    'alunoId': usuario.id,
-                    'apelido': usuario.usuario,
-                  },
-                ),
+                onTap: () => _abrirPartida(context),
                 child: Padding(
                   padding: const EdgeInsets.all(24),
                   child: Column(
@@ -687,45 +732,21 @@ class _AbaJogarAluno extends StatelessWidget {
               icone: Icons.laptop_chromebook,
               titulo: 'Tecnologia e Computação',
               cor: Colors.purple,
-              onTap: () => Navigator.pushNamed(
-                context,
-                Rotas.jogar,
-                arguments: {
-                  'alunoId': usuario.id,
-                  'apelido': usuario.usuario,
-                  'eixo': 'tecnologia',
-                },
-              ),
+              onTap: () => _abrirPartida(context, eixo: 'tecnologia'),
             ),
             const SizedBox(height: 12),
             _EixoBotao(
               icone: Icons.public,
               titulo: 'Cultura Digital',
               cor: Colors.blue,
-              onTap: () => Navigator.pushNamed(
-                context,
-                Rotas.jogar,
-                arguments: {
-                  'alunoId': usuario.id,
-                  'apelido': usuario.usuario,
-                  'eixo': 'cultura',
-                },
-              ),
+              onTap: () => _abrirPartida(context, eixo: 'cultura'),
             ),
             const SizedBox(height: 12),
             _EixoBotao(
               icone: Icons.balance,
               titulo: 'Impacto Social e Ética',
               cor: Colors.green,
-              onTap: () => Navigator.pushNamed(
-                context,
-                Rotas.jogar,
-                arguments: {
-                  'alunoId': usuario.id,
-                  'apelido': usuario.usuario,
-                  'eixo': 'impacto',
-                },
-              ),
+              onTap: () => _abrirPartida(context, eixo: 'impacto'),
             ),
           ],
         ),
