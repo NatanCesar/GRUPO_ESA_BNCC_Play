@@ -7,6 +7,7 @@ import '../features/auth/register_teacher_screen.dart';
 import '../features/auth/register_type_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/dashboard/dashboard_screen.dart';
+import '../features/dashboard/relatorio_aluno_screen.dart';
 import '../features/game/game_screen.dart';
 import '../features/game/resultado_screen.dart';
 import '../features/home/home_student_screen.dart';
@@ -39,6 +40,7 @@ abstract final class Rotas {
   static const questionCreate = '/professor/questao/nova';
   static const questionEdit = '/professor/questao/editar';
   static const dashboard = '/professor/dashboard';
+  static const relatorioAluno = '/professor/relatorio';
   static const jogar = '/jogar';
   static const resultado = '/resultado';
   static const ranking = '/ranking';
@@ -73,6 +75,12 @@ abstract final class Rotas {
           final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
           return DashboardScreen(
             professorId: args?['professorId'] as int? ?? 0,
+          );
+        },
+        relatorioAluno: (ctx) {
+          final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
+          return RelatorioAlunoScreen(
+            alunoId: args?['alunoId'] as int? ?? 0,
           );
         },
       };

@@ -1,22 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:bncc_play_mobile/core/routes.dart';
+import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
+import 'package:bncc_play_mobile/data/models/papel.dart';
 import 'package:bncc_play_mobile/data/repositories/estatistica_repository.dart';
 import 'package:bncc_play_mobile/features/dashboard/dashboard_controller.dart';
 
 /// Tela de dashboard pedagogico do professor (CT17).
-class DashboardScreen extends StatelessWidget {
+///
+/// Inclui guarda de acesso: apenas professores podem acessar.
+class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key, required this.professorId});
 
   final int professorId;
 
   @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Verifica se o usuario logado e professor e corresponde ao ID.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _verificarAcesso());
+  }
+
+  void _verificarAcesso() {
+    final sessao = Provider.of<SessionScope>(context, listen: false);
+    final usuario = sessao.usuario;
+
+    if (usuario == null || usuario.papel != Papel.professor) {
+      // Aluno tentando acessar dashboard via deep link.
+      Navigator.pushReplacementNamed(context, Rotas.homeStudent);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Acesso restrito a professores.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (usuario.id != widget.professorId) {
+      // Professor tentando ver dashboard de outro professor.
+      Navigator.pushReplacementNamed(context, Rotas.homeTeacher);
+      return;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final sessao = Provider.of<SessionScope>(context);
+    final usuario = sessao.usuario;
+
+    if (usuario == null || usuario.papel != Papel.professor) {
+      return const Scaffold(body: SizedBox.shrink());
+    }
+
     return ChangeNotifierProvider(
       create: (_) => DashboardController(
         repository: EstatisticaRepository(banco: Provider.of(context)),
-        professorId: professorId,
+        professorId: widget.professorId,
       )..carregar(),
       child: const _DashboardBody(),
     );
@@ -335,35 +382,50 @@ class _AlunoTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          Navigator.pushNamed(
+            context,
+            Rotas.relatorioAluno,
+            arguments: {'alunoId': aluno.alunoId},
+          );
+        },
         borderRadius: BorderRadius.circular(8),
-      ),
-      child: Row(
-        children: [
-          Text(
-            aluno.nome,
-            style: const TextStyle(fontWeight: FontWeight.w500),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(8),
           ),
-          const Spacer(),
-          const Icon(Icons.star, color: Colors.amber, size: 16),
-          const SizedBox(width: 4),
-          Text(
-            '${aluno.pontuacao}',
-            style: const TextStyle(fontWeight: FontWeight.bold),
+          child: Row(
+            children: [
+              Text(
+                aluno.nome,
+                style: const TextStyle(fontWeight: FontWeight.w500),
+              ),
+              const Spacer(),
+              const Icon(Icons.star, color: Colors.amber, size: 16),
+              const SizedBox(width: 4),
+              Text(
+                '${aluno.pontuacao}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                '${aluno.taxa.toStringAsFixed(0)}%',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 12,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Icon(Icons.chevron_right, color: Colors.grey.shade400, size: 20),
+            ],
           ),
-          const SizedBox(width: 12),
-          Text(
-            '${aluno.taxa.toStringAsFixed(0)}%',
-            style: TextStyle(
-              color: Colors.grey.shade600,
-              fontSize: 12,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

@@ -1,6 +1,8 @@
 import 'package:path/path.dart' as p;
 import 'package:sqflite/sqflite.dart';
 
+import 'seed_questoes.dart';
+
 /// Banco local do app.
 ///
 /// A versao sobe a cada ciclo; `onUpgrade` acrescentara tabela sem apagar o
@@ -41,6 +43,14 @@ class AppDatabase {
         }
       },
     );
+
+    // Popula com seed se nao houver questoes.
+    final count = Sqflite.firstIntValue(
+      await banco.rawQuery('SELECT COUNT(*) FROM questoes'),
+    );
+    if (count == 0) {
+      await popularBancoSeed(AppDatabase._(banco));
+    }
 
     return AppDatabase._(banco);
   }
