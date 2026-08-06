@@ -33,8 +33,8 @@ abstract final class AppColors {
     colors: [purple, purpleDark],
   );
 
-  /// Gradiente do cabecalho verde para a tela de cadastro de aluno.
-  static const headerGradientGreen = LinearGradient(
+  /// Gradiente do cabecalho verde para a tela de cadastro e home do aluno.
+  static const greenHeaderGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [green, greenDark],
