@@ -5,6 +5,8 @@ import '../features/auth/register_teacher_screen.dart';
 import '../features/auth/splash_screen.dart';
 import '../features/home/home_student_screen.dart';
 import '../features/home/home_teacher_screen.dart';
+import '../features/profile/profile_student_screen.dart';
+import '../features/profile/profile_teacher_screen.dart';
 
 /// Nomes de rota do app.
 ///
@@ -29,5 +31,7 @@ abstract final class Rotas {
         registerTeacher: (_) => const RegisterTeacherScreen(),
         homeTeacher: (_) => const HomeTeacherScreen(),
         homeStudent: (_) => const HomeStudentScreen(),
+        profileTeacher: (_) => const ProfileTeacherScreen(),
+        profileStudent: (_) => const ProfileStudentScreen(),
       };
 }
