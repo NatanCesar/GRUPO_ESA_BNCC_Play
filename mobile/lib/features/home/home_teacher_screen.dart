@@ -60,12 +60,7 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
   static const _itens = [
     ItemDeNav(id: 'home', icone: Icons.home, rotulo: 'Inicio'),
     ItemDeNav(id: 'questoes', icone: Icons.quiz, rotulo: 'Questoes'),
-    ItemDeNav(
-      id: 'dashboard',
-      icone: Icons.bar_chart,
-      rotulo: 'Dashboard',
-      habilitado: false,
-    ),
+    ItemDeNav(id: 'dashboard', icone: Icons.bar_chart, rotulo: 'Dashboard'),
     ItemDeNav(id: 'perfil', icone: Icons.account_circle, rotulo: 'Perfil'),
   ];
 
@@ -78,13 +73,16 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
       Navigator.pushNamed(context, Rotas.axisSelection);
       return;
     }
-    if (id == 'home') return;
-
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        const SnackBar(content: Text('Disponivel na proxima entrega.')),
+    if (id == 'dashboard') {
+      final sessao = context.read<SessionScope>();
+      Navigator.pushNamed(
+        context,
+        Rotas.dashboard,
+        arguments: {'professorId': sessao.usuario!.id},
       );
+      return;
+    }
+    if (id == 'home') return;
   }
 
   @override

@@ -6,6 +6,7 @@ import '../features/auth/register_student_screen.dart';
 import '../features/auth/register_teacher_screen.dart';
 import '../features/auth/register_type_screen.dart';
 import '../features/auth/splash_screen.dart';
+import '../features/dashboard/dashboard_screen.dart';
 import '../features/game/game_screen.dart';
 import '../features/game/resultado_screen.dart';
 import '../features/home/home_student_screen.dart';
@@ -37,6 +38,7 @@ abstract final class Rotas {
   static const questionList = '/professor/questoes';
   static const questionCreate = '/professor/questao/nova';
   static const questionEdit = '/professor/questao/editar';
+  static const dashboard = '/professor/dashboard';
   static const jogar = '/jogar';
   static const resultado = '/resultado';
   static const ranking = '/ranking';
@@ -67,6 +69,12 @@ abstract final class Rotas {
           );
         },
         sala: (_) => const SalaScreen(),
+        dashboard: (ctx) {
+          final args = ModalRoute.of(ctx)!.settings.arguments as Map?;
+          return DashboardScreen(
+            professorId: args?['professorId'] as int? ?? 0,
+          );
+        },
       };
 
   /// Rota para a tela de jogo — passa argumentos via arguments.
