@@ -16,7 +16,7 @@ class ConteudoPerfilAluno extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sessao = context.read<SessionScope>();
+    final sessao = context.watch<SessionScope>();
     final usuario = sessao.usuario;
     if (usuario == null) return const SizedBox.shrink();
 

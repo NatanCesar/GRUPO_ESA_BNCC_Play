@@ -65,12 +65,10 @@ class GameRepository {
       iniciadaEm: agora,
     );
 
-    final id = await _banco.db.insert('partidas', {
-      ...partida.paraLinha(),
-      'eixo': eixo,
-      // Armazena IDs das questoes como texto separado por virgula
-      'questao_ids': escolhidas.map((q) => q.id).join(','),
-    });
+    final id = await _banco.db.insert(
+      'partidas',
+      partida.paraLinha(),
+    );
 
     return (await porId(id))!;
   }
