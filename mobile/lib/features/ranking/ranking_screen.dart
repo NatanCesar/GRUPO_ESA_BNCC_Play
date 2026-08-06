@@ -71,7 +71,7 @@ class _RankingScreenState extends State<RankingScreen>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        backgroundColor: AppColors.purple,
+        backgroundColor: AppColors.green,
         foregroundColor: Colors.white,
         title: const Text('Ranking'),
         bottom: TabBar(
@@ -137,7 +137,7 @@ class _RankingTab extends StatelessWidget {
   Widget build(BuildContext context) {
     if (carregando) {
       return const Center(
-        child: CircularProgressIndicator(color: AppColors.purple),
+        child: CircularProgressIndicator(color: AppColors.green),
       );
     }
 
@@ -197,11 +197,11 @@ class _RankingTile extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: isCurrentUser
-            ? AppColors.purple.withValues(alpha: 0.1)
+            ? AppColors.green.withValues(alpha: 0.1)
             : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: isCurrentUser
-            ? Border.all(color: AppColors.purple, width: 2)
+            ? Border.all(color: AppColors.green, width: 2)
             : null,
         boxShadow: [
           BoxShadow(
@@ -230,7 +230,7 @@ class _RankingTile extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
                         color: isCurrentUser
-                            ? AppColors.purple
+                            ? AppColors.green
                             : Colors.black87,
                       ),
                     ),
@@ -242,7 +242,7 @@ class _RankingTile extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppColors.purple,
+                          color: AppColors.green,
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: const Text(
@@ -279,7 +279,7 @@ class _RankingTile extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.purple,
+                      color: AppColors.green,
                     ),
                   ),
                 ],

@@ -460,14 +460,8 @@ class _HeaderProfessor extends StatelessWidget {
                   ],
                 ),
               ),
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.2),
-                ),
-                child: const Icon(Icons.person, color: Colors.white, size: 28),
+              _BotaoPerfil(
+                destino: Rotas.profileTeacher,
               ),
             ],
           ),
@@ -907,6 +901,36 @@ class _AbaPerfilProfessor extends StatelessWidget {
           top: false,
           bottom: false,
           child: ConteudoPerfilProfessor(),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botao circular com icone de pessoa no cabecalho.
+/// Toque leva o usuario a rota [destino] informada (perfil do aluno
+/// ou do professor, conforme a tela em que aparece).
+class _BotaoPerfil extends StatelessWidget {
+  const _BotaoPerfil({required this.destino});
+
+  final String destino;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => Navigator.pushNamed(context, destino),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
+          child: const Icon(Icons.person, color: Colors.white, size: 28),
         ),
       ),
     );

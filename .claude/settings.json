@@ -14,7 +14,10 @@
       "Read(//home/natan/snap/flutter/common/flutter/bin/internal/**)",
       "Bash(/home/natan/snap/flutter/common/flutter/bin/flutter --version)",
       "Read(//home/natan/snap/flutter/common/flutter/bin/**)",
-      "Bash(/home/natan/snap/flutter/common/flutter/bin/dart --version)"
+      "Bash(/home/natan/snap/flutter/common/flutter/bin/dart --version)",
+      "Bash(grep -n \"^class \\\\|^}$\" /home/natan/Documentos/code/GRUPO_ESA_BNCC_Play/mobile/lib/features/home/home_student_screen.dart)",
+      "Bash(command -v dart)",
+      "Bash(/snap/bin/dart --version)"
     ]
   }
 }

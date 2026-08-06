@@ -38,6 +38,8 @@ class _HomeStudentScreenState extends State<HomeStudentScreen>
   late PageController _pageController;
   final GlobalKey<_AbaHomeAlunoState> _chaveAbaHome =
       GlobalKey<_AbaHomeAlunoState>();
+  final GlobalKey<ConteudoPerfilAlunoState> _chaveAbaPerfil =
+      GlobalKey<ConteudoPerfilAlunoState>();
 
   static const _abas = [
     _Aba(
@@ -84,7 +86,7 @@ class _HomeStudentScreenState extends State<HomeStudentScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState estado) {
     if (estado == AppLifecycleState.resumed) {
-      _chaveAbaHome.currentState?.recarregar();
+      _recarregarAbasComKpi();
     }
   }
 
@@ -96,17 +98,25 @@ class _HomeStudentScreenState extends State<HomeStudentScreen>
     }
   }
 
+  /// Recarrega os KPIs em todas as abas que exibem dados do aluno.
+  void _recarregarAbasComKpi() {
+    _chaveAbaHome.currentState?.recarregar();
+    _chaveAbaPerfil.currentState?.recarregar();
+  }
+
   void _onTabSelecionada(int index) {
-    final voltandoParaInicio =
-        index == 0 && _indiceAtual != 0 && _pageController.hasClients;
+    final voltandoParaKpi =
+        (index == 0 || index == 3) &&
+        _indiceAtual != index &&
+        _pageController.hasClients;
     setState(() => _indiceAtual = index);
     _pageController.animateToPage(
       index,
       duration: const Duration(milliseconds: 200),
       curve: Curves.easeInOut,
     );
-    if (voltandoParaInicio) {
-      _chaveAbaHome.currentState?.recarregar();
+    if (voltandoParaKpi) {
+      _recarregarAbasComKpi();
     }
   }
 
@@ -120,7 +130,7 @@ class _HomeStudentScreenState extends State<HomeStudentScreen>
       _AbaHomeAluno(key: _chaveAbaHome),
       _AbaJogarAluno(usuario: usuario),
       _AbaRankingAluno(usuarioId: usuario.id!),
-      _AbaPerfilAluno(usuario: usuario),
+      _AbaPerfilAluno(usuario: usuario, key: _chaveAbaPerfil),
     ];
 
     return PopScope(
@@ -276,8 +286,13 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
       arguments: {'alunoId': usuario.id, 'apelido': usuario.usuario},
     );
     // Quando o aluno volta (independente de ter ido até o resultado),
-    // recarregamos os KPIs — a partida pode ter sido encerrada nesse meio.
-    if (mounted) _carregar();
+    // recarregamos os KPIs em todas as abas que os exibem — a partida
+    // pode ter sido encerrada nesse meio.
+    if (mounted) {
+      context
+          .findAncestorStateOfType<_HomeStudentScreenState>()
+          ?._recarregarAbasComKpi();
+    }
   }
 
   @override
@@ -338,18 +353,8 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                                   ],
                                 ),
                               ),
-                              Container(
-                                width: 48,
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                ),
-                                child: const Icon(
-                                  Icons.person,
-                                  color: Colors.white,
-                                  size: 28,
-                                ),
+                              _BotaoPerfil(
+                                destino: Rotas.profileStudent,
                               ),
                             ],
                           ),
@@ -659,13 +664,11 @@ class _AbaJogarAluno extends StatelessWidget {
       },
     );
     // Quando o aluno volta (com ou sem partida concluída), atualiza os
-    // KPIs da aba Início caso ela esteja montada.
+    // KPIs em todas as abas que os exibem.
     if (context.mounted) {
       context
           .findAncestorStateOfType<_HomeStudentScreenState>()
-          ?._chaveAbaHome
-          .currentState
-          ?.recarregar();
+          ?._recarregarAbasComKpi();
     }
   }
 
@@ -828,7 +831,7 @@ class _AbaRankingAluno extends StatelessWidget {
 // ============================================================================
 
 class _AbaPerfilAluno extends StatelessWidget {
-  const _AbaPerfilAluno({required this.usuario});
+  const _AbaPerfilAluno({required this.usuario, super.key});
 
   final dynamic usuario;
 
@@ -840,7 +843,43 @@ class _AbaPerfilAluno extends StatelessWidget {
       ),
       child: Container(
         color: AppColors.background,
-        child: const SingleChildScrollView(child: ConteudoPerfilAluno()),
+        child: SingleChildScrollView(
+          child: ConteudoPerfilAluno(key: key),
+        ),
+      ),
+    );
+  }
+}
+
+/// Botao circular com icone de pessoa no cabecalho.
+/// Toque leva o usuario a rota [destino] informada (perfil do aluno
+/// ou do professor, conforme a tela em que aparece).
+class _BotaoPerfil extends StatelessWidget {
+  const _BotaoPerfil({required this.destino});
+
+  final String destino;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      shape: const CircleBorder(),
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: () => Navigator.pushNamed(context, destino),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.2),
+          ),
+          child: const Icon(
+            Icons.person,
+            color: Colors.white,
+            size: 28,
+          ),
+        ),
       ),
     );
   }
