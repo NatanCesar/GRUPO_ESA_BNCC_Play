@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../features/auth/forgot_password_screen.dart';
 import '../features/auth/login_screen.dart';
 import '../features/auth/register_teacher_screen.dart';
 import '../features/auth/splash_screen.dart';
@@ -35,5 +36,6 @@ abstract final class Rotas {
         profileTeacher: (_) => const ProfileTeacherScreen(),
         profileStudent: (_) => const ProfileStudentScreen(),
         editProfile: (_) => const EditProfileScreen(),
+        forgotPassword: (_) => const ForgotPasswordScreen(),
       };
 }
