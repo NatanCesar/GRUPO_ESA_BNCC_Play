@@ -29,6 +29,12 @@ class _RankingScreenState extends State<RankingScreen>
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
     _tabController.addListener(_onTabChanged);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Provider.of deve ser chamado em didChangeDependencies, nao em initState.
     _repository = RankingRepository(banco: Provider.of(context));
     _carregarRanking();
   }

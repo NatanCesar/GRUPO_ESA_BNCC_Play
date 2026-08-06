@@ -696,8 +696,104 @@ class _AbaJogarAluno extends StatelessWidget {
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
-            // Cards para escolher eixo (visivel ao aluno futuramente)
+            _EixoBotao(
+              icone: Icons.laptop_chromebook,
+              titulo: 'Tecnologia e Computação',
+              cor: Colors.purple,
+              onTap: () => Navigator.pushNamed(
+                context,
+                Rotas.jogar,
+                arguments: {
+                  'alunoId': usuario.id,
+                  'apelido': usuario.usuario,
+                  'eixo': 'tecnologia',
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            _EixoBotao(
+              icone: Icons.public,
+              titulo: 'Cultura Digital',
+              cor: Colors.blue,
+              onTap: () => Navigator.pushNamed(
+                context,
+                Rotas.jogar,
+                arguments: {
+                  'alunoId': usuario.id,
+                  'apelido': usuario.usuario,
+                  'eixo': 'cultura',
+                },
+              ),
+            ),
+            const SizedBox(height: 12),
+            _EixoBotao(
+              icone: Icons.balance,
+              titulo: 'Impacto Social e Ética',
+              cor: Colors.green,
+              onTap: () => Navigator.pushNamed(
+                context,
+                Rotas.jogar,
+                arguments: {
+                  'alunoId': usuario.id,
+                  'apelido': usuario.usuario,
+                  'eixo': 'impacto',
+                },
+              ),
+            ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EixoBotao extends StatelessWidget {
+  const _EixoBotao({
+    required this.icone,
+    required this.titulo,
+    required this.cor,
+    required this.onTap,
+  });
+
+  final IconData icone;
+  final String titulo;
+  final Color cor;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: cor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icone, color: cor, size: 24),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  titulo,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.textMuted),
+            ],
+          ),
         ),
       ),
     );

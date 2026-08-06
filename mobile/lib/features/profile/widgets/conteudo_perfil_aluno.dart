@@ -20,21 +20,35 @@ class ConteudoPerfilAluno extends StatelessWidget {
     final usuario = sessao.usuario;
     if (usuario == null) return const SizedBox.shrink();
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 0, bottom: 20),
+    return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Column(
-            children: [
-              const AvatarDePerfil(emoji: 'sports_esports'),
-              const SizedBox(height: 8),
-              Text(usuario.nome, style: AppTheme.headerTitle),
-              const SizedBox(height: 4),
-              Text('@${usuario.usuario}', style: AppTheme.headerSubtitle),
-              const SizedBox(height: 8),
-              AppBadge(rotulo: usuario.papel.rotulo, cor: AppColors.purple),
-            ],
+          // Header com gradiente verde (tema do aluno)
+          Container(
+            decoration: const BoxDecoration(
+              gradient: AppColors.greenHeaderGradient,
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(32),
+              ),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: Column(
+                  children: [
+                    const AvatarDePerfil(emoji: 'sports_esports'),
+                    const SizedBox(height: 8),
+                    Text(usuario.nome, style: AppTheme.headerTitle),
+                    const SizedBox(height: 4),
+                    Text('@${usuario.usuario}', style: AppTheme.headerSubtitle),
+                    const SizedBox(height: 8),
+                    AppBadge(rotulo: usuario.papel.rotulo, cor: AppColors.purple),
+                  ],
+                ),
+              ),
+            ),
           ),
           const SizedBox(height: 24),
           Padding(
