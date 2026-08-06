@@ -14,6 +14,7 @@ import '../../data/models/dificuldade.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../questions/axis_selection_screen.dart';
 import '../questions/question_list_screen.dart';
+import '../profile/widgets/conteudo_perfil_professor.dart';
 
 /// Item de aba na barra inferior.
 class _Aba {
@@ -897,7 +898,7 @@ class _EixoBotao extends StatelessWidget {
 }
 
 // ============================================================================
-// ABA 4: PERFIL (placeholder inline, pois ProfileTeacherScreen ja tem Scaffold)
+// ABA 4: PERFIL - usa o mesmo conteudo que ProfileTeacherScreen
 // ============================================================================
 
 class _AbaPerfilProfessor extends StatelessWidget {
@@ -905,41 +906,18 @@ class _AbaPerfilProfessor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sessao = context.read<SessionScope>();
-    final usuario = sessao.usuario;
-    if (usuario == null) return const SizedBox.shrink();
-
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 96,
-              height: 96,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppColors.purpleLight,
-              ),
-              child: Icon(Icons.person, size: 48, color: AppColors.purple),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              usuario.nome,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              usuario.email,
-              style: TextStyle(color: AppColors.textMuted),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () => Navigator.pushNamed(context, Rotas.editProfile),
-              icon: const Icon(Icons.edit),
-              label: const Text('Editar Perfil'),
-            ),
-          ],
+    // ConteudoPerfilProfessor nao tem Scaffold proprio, ideal para usar
+    // dentro do PageView do pai.
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light.copyWith(
+        statusBarColor: Colors.transparent,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          top: false,
+          bottom: false,
+          child: ConteudoPerfilProfessor(),
         ),
       ),
     );
