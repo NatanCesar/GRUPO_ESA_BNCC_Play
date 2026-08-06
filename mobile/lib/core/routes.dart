@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../features/auth/login_screen.dart';
+import '../features/auth/register_teacher_screen.dart';
 import '../features/auth/splash_screen.dart';
 
 /// Nomes de rota do app.
@@ -23,5 +24,6 @@ abstract final class Rotas {
   static Map<String, WidgetBuilder> tabela() => <String, WidgetBuilder>{
         splash: (_) => const SplashScreen(),
         login: (_) => const LoginScreen(),
+        registerTeacher: (_) => const RegisterTeacherScreen(),
       };
 }

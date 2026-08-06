@@ -25,11 +25,18 @@ abstract final class AppColors {
   static const danger = Color(0xFFE53935);
   static const dangerLight = Color(0xFFFFEAEC);
 
-  /// Gradiente do cabecalho, equivalente a
+  /// Gradiente do cabecalho roxo, equivalente a
   /// `linear-gradient(135deg, PURPLE, #4a1fa8)`.
   static const headerGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [purple, purpleDark],
+  );
+
+  /// Gradiente do cabecalho verde para a tela de cadastro de aluno.
+  static const headerGradientGreen = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [green, greenDark],
   );
 }

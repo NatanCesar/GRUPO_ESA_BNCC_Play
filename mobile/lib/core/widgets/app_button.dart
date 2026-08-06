@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 
-enum AppButtonVariant { primary, ghost }
+enum AppButtonVariant { primary, secondary, ghost }
 
 /// Botao do prototipo (`Btn`): rotulo Poppins, icone opcional a esquerda e
 /// encolhimento para 95% enquanto pressionado.
@@ -36,9 +36,23 @@ class _AppButtonState extends State<AppButton> {
 
   @override
   Widget build(BuildContext context) {
+    final isSecondary = widget.variant == AppButtonVariant.secondary;
     final isPrimary = widget.variant == AppButtonVariant.primary;
-    final background = isPrimary ? AppColors.purple : AppColors.purpleLight;
-    final foreground = isPrimary ? Colors.white : AppColors.purple;
+    final isGhost = widget.variant == AppButtonVariant.ghost;
+
+    Color background;
+    Color foreground;
+
+    if (isSecondary) {
+      background = AppColors.green;
+      foreground = Colors.white;
+    } else if (isPrimary) {
+      background = AppColors.purple;
+      foreground = Colors.white;
+    } else {
+      background = AppColors.purpleLight;
+      foreground = AppColors.purple;
+    }
 
     return AnimatedScale(
       scale: _pressed ? 0.95 : 1,

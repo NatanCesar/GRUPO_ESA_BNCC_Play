@@ -95,6 +95,13 @@ abstract final class AppTheme {
     color: AppColors.purple,
   );
 
+  static const topBarTitle = TextStyle(
+    fontFamily: poppins,
+    fontWeight: FontWeight.w600,
+    fontSize: 18,
+    color: Colors.white,
+  );
+
   static const footerText = TextStyle(
     fontFamily: inter,
     fontSize: 14,
