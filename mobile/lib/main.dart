@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'core/routes.dart';
+import 'core/security/password_hasher.dart';
 import 'core/session/session_scope.dart';
 import 'core/theme/app_theme.dart';
 import 'data/db/app_database.dart';
@@ -25,11 +26,17 @@ class BnccPlayApp extends StatelessWidget {
       providers: [
         Provider<AppDatabase>.value(value: banco),
         Provider<UserRepository>(
-          create: (_) => UserRepository(banco: banco),
+          create: (_) => UserRepository(
+            banco: banco,
+            hasher: const PasswordHasher(),
+          ),
         ),
         ProxyProvider<UserRepository, AuthRepository>(
-          update: (_, usuarios, __) =>
-              AuthRepository(banco: banco, usuarios: usuarios),
+          update: (_, usuarios, __) => AuthRepository(
+            banco: banco,
+            usuarios: usuarios,
+            hasher: const PasswordHasher(),
+          ),
         ),
         ChangeNotifierProvider<SessionScope>(create: (_) => SessionScope()),
       ],

@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bncc_play_mobile/data/db/app_database.dart';
-import 'package:bncc_play_mobile/data/repositories/erros.dart';
+import 'package:bncc_play_mobile/data/errors.dart';
 import 'package:bncc_play_mobile/data/repositories/session_repository.dart';
 
 import '../support/db_de_teste.dart';

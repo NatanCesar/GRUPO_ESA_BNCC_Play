@@ -6,7 +6,7 @@ import 'package:bncc_play_mobile/core/validation/validators.dart';
 import 'package:bncc_play_mobile/data/db/app_database.dart';
 import 'package:bncc_play_mobile/data/models/app_user.dart';
 import 'package:bncc_play_mobile/data/models/papel.dart';
-import 'package:bncc_play_mobile/data/repositories/erros.dart';
+import 'package:bncc_play_mobile/data/errors.dart';
 
 /// Acesso a dados do usuario no banco local.
 ///
@@ -37,6 +37,9 @@ class UserRepository {
   }) async {
     final erros = <String>[];
 
+    if (Validators.nome(nome) != null) {
+      erros.add(Validators.nome(nome)!);
+    }
     if (Validators.email(email) != null) {
       erros.add(Validators.email(email)!);
     }

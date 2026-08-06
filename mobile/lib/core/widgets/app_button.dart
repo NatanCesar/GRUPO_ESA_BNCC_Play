@@ -14,12 +14,14 @@ class AppButton extends StatefulWidget {
     required this.onPressed,
     this.variant = AppButtonVariant.primary,
     this.icon,
+    this.loading = false,
   });
 
   final String label;
-  final VoidCallback onPressed;
+  final VoidCallback? onPressed;
   final AppButtonVariant variant;
   final IconData? icon;
+  final bool loading;
 
   @override
   State<AppButton> createState() => _AppButtonState();
@@ -47,21 +49,29 @@ class _AppButtonState extends State<AppButton> {
         borderRadius: BorderRadius.circular(14),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
-          onTap: widget.onPressed,
-          onTapDown: (_) => _setPressed(true),
-          onTapUp: (_) => _setPressed(false),
-          onTapCancel: () => _setPressed(false),
+          onTap: widget.loading ? null : widget.onPressed,
+          onTapDown: widget.loading ? null : (_) => _setPressed(true),
+          onTapUp: widget.loading ? null : (_) => _setPressed(false),
+          onTapCancel: widget.loading ? null : () => _setPressed(false),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                if (widget.icon != null) ...[
+                if (widget.loading) ...[
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      valueColor: AlwaysStoppedAnimation(foreground),
+                    ),
+                  ),
+                ] else if (widget.icon != null) ...[
                   Icon(widget.icon, size: 20, color: foreground),
-                  const SizedBox(width: 8),
                 ],
-                // Flexible para o rotulo quebrar linha em telefones estreitos
-                // em vez de estourar a largura do botao.
+                if (!widget.loading) const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     widget.label,

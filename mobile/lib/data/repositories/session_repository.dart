@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 
 import 'package:bncc_play_mobile/data/db/app_database.dart';
-import 'package:bncc_play_mobile/data/repositories/erros.dart';
+import 'package:bncc_play_mobile/data/errors.dart';
 
 /// Sessao ativa do app.
 ///

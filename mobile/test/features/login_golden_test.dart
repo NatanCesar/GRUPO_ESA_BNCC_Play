@@ -3,9 +3,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 
-import 'package:bncc_play_mobile/features/auth/login_screen.dart';
+import 'package:bncc_play_mobile/core/routes.dart';
+import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/core/theme/app_theme.dart';
+import 'package:bncc_play_mobile/data/models/papel.dart';
+import 'package:bncc_play_mobile/data/repositories/auth_repository.dart';
+import 'package:bncc_play_mobile/data/repositories/user_repository.dart';
+import 'package:bncc_play_mobile/features/auth/login_screen.dart';
+
+import '../support/fakes.dart';
+
+late AmbienteDeTeste ambiente;
 
 /// Registra as fontes do pubspec no ambiente de teste.
 ///
@@ -58,6 +68,8 @@ Future<void> _loadMaterialIcons() async {
 /// Regenerar com: flutter test test/features/login_golden_test.dart --update-goldens
 void main() {
   setUpAll(_loadAppFonts);
+  setUpAll(() async => ambiente = await ambienteDeTeste());
+  tearDownAll(() async => ambiente.banco.fechar());
 
   testWidgets('login bate com o golden', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -65,9 +77,23 @@ void main() {
     addTearDown(tester.view.reset);
 
     await tester.pumpWidget(
-      MaterialApp(theme: AppTheme.light, home: const LoginScreen()),
+      MultiProvider(
+        providers: [
+          Provider<UserRepository>.value(value: ambiente.usuarios),
+          Provider<AuthRepository>.value(value: ambiente.auth),
+          ChangeNotifierProvider<SessionScope>.value(value: ambiente.sessao),
+        ],
+        child: MaterialApp(
+          theme: AppTheme.light,
+          home: const LoginScreen(),
+          routes: {
+            Rotas.homeTeacher: (_) => const SizedBox(),
+            Rotas.homeStudent: (_) => const SizedBox(),
+          },
+        ),
+      ),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await expectLater(
       find.byType(LoginScreen),

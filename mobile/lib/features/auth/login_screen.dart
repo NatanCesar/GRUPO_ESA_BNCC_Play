@@ -1,16 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/routes.dart';
+import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/gradient_header.dart';
+import '../../data/models/papel.dart';
+import '../../data/repositories/auth_repository.dart';
+import 'login_controller.dart';
 
-/// Tela de login do prototipo Figma do BNCC Play.
-///
-/// Demo de uma tela: valida os campos localmente e avisa por SnackBar que os
-/// destinos ainda nao existem. Sem navegacao e sem chamadas de rede.
+/// Tela de login com autenticacao real.
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -19,65 +22,55 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _emailController = TextEditingController();
-  final _senhaController = TextEditingController();
-
-  String? _emailError;
-  String? _senhaError;
+  late final LoginController _controller;
+  final _emailCtrl = TextEditingController();
+  final _senhaCtrl = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _emailController.addListener(() => _clearErrorWhenTyping(isEmail: true));
-    _senhaController.addListener(() => _clearErrorWhenTyping(isEmail: false));
+    _controller = LoginController(
+      auth: context.read<AuthRepository>(),
+      sessao: context.read<SessionScope>(),
+    );
+    _controller.onChanged = _onControllerChanged;
+    _emailCtrl.addListener(_controller.limparErro);
+    _senhaCtrl.addListener(_controller.limparErro);
+  }
+
+  void _onControllerChanged() {
+    if (mounted) setState(() {});
   }
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _senhaController.dispose();
+    _emailCtrl.removeListener(_controller.limparErro);
+    _senhaCtrl.removeListener(_controller.limparErro);
+    _controller.onChanged = null;
+    _emailCtrl.dispose();
+    _senhaCtrl.dispose();
     super.dispose();
   }
 
-  /// Some com o erro assim que o campo deixa de estar vazio.
-  void _clearErrorWhenTyping({required bool isEmail}) {
-    final controller = isEmail ? _emailController : _senhaController;
-    final error = isEmail ? _emailError : _senhaError;
-    if (error == null || controller.text.trim().isEmpty) return;
+  Future<void> _entrar() async {
+    final usuario = await _controller.entrar(
+      email: _emailCtrl.text,
+      senha: _senhaCtrl.text,
+    );
+    if (usuario == null || !mounted) return;
 
-    setState(() {
-      if (isEmail) {
-        _emailError = null;
-      } else {
-        _senhaError = null;
-      }
-    });
-  }
+    final sessao = context.read<SessionScope>();
+    sessao.abrir(usuario);
 
-  void _entrar() {
-    final email = _emailController.text.trim();
-    final senha = _senhaController.text;
-
-    setState(() {
-      _emailError = email.isEmpty ? 'Informe seu e-mail' : null;
-      _senhaError = senha.isEmpty ? 'Informe sua senha' : null;
-    });
-
-    if (_emailError != null || _senhaError != null) return;
-
-    _avisar('Login em desenvolvimento.');
-  }
-
-  void _avisar(String mensagem) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(mensagem)));
+    final destino = usuario.papel == Papel.professor
+        ? Rotas.homeTeacher
+        : Rotas.homeStudent;
+    Navigator.pushReplacementNamed(context, destino);
   }
 
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // O cabecalho e escuro, entao os icones do sistema vao em claro.
       value: SystemUiOverlayStyle.light.copyWith(
         statusBarColor: Colors.transparent,
       ),
@@ -95,22 +88,51 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (_controller.erroGeral != null) ...[
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.dangerLight,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              size: 18,
+                              color: AppColors.danger,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                _controller.erroGeral!,
+                                style: AppTheme.fieldError,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                    ],
                     AppTextField(
                       label: 'E-mail',
-                      controller: _emailController,
+                      controller: _emailCtrl,
                       hint: 'seu@email.com',
                       icon: Icons.email,
-                      errorText: _emailError,
+                      errorText: _controller.erroEmail,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                     ),
                     const SizedBox(height: 20),
                     AppTextField(
                       label: 'Senha',
-                      controller: _senhaController,
+                      controller: _senhaCtrl,
                       hint: 'Sua senha',
                       icon: Icons.lock,
-                      errorText: _senhaError,
+                      errorText: _controller.erroSenha,
                       obscureText: true,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _entrar(),
@@ -120,7 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       alignment: Alignment.centerRight,
                       child: GestureDetector(
                         onTap: () =>
-                            _avisar('Recuperação de senha em desenvolvimento.'),
+                            Navigator.pushNamed(context, Rotas.forgotPassword),
                         child: const Text(
                           'Esqueci minha senha',
                           style: AppTheme.link,
@@ -131,22 +153,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     AppButton(
                       label: 'Entrar',
                       icon: Icons.login,
+                      loading: _controller.carregando,
                       onPressed: _entrar,
                     ),
-                    const SizedBox(height: 20),
-                    const _OuDivider(),
-                    const SizedBox(height: 20),
-                    AppButton(
-                      label: 'Entrar como Aluno',
-                      icon: Icons.school,
-                      variant: AppButtonVariant.ghost,
-                      onPressed: () =>
-                          _avisar('Acesso do aluno em desenvolvimento.'),
-                    ),
                     const SizedBox(height: 28),
-                    // Wrap em vez de Row: em telas estreitas ou com fonte do
-                    // sistema ampliada, o convite quebra em duas linhas em vez
-                    // de estourar a largura.
                     Wrap(
                       alignment: WrapAlignment.center,
                       crossAxisAlignment: WrapCrossAlignment.center,
@@ -157,7 +167,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: AppTheme.footerText,
                         ),
                         GestureDetector(
-                          onTap: () => _avisar('Cadastro em desenvolvimento.'),
+                          onTap: () =>
+                              Navigator.pushNamed(context, Rotas.registerType),
                           child: const Text(
                             'Criar conta',
                             style: AppTheme.footerLink,
@@ -213,31 +224,6 @@ class _Header extends StatelessWidget {
           const SizedBox(height: 24),
         ],
       ),
-    );
-  }
-}
-
-class _OuDivider extends StatelessWidget {
-  const _OuDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Row(
-      children: [
-        Expanded(child: Divider(color: AppColors.divider, height: 1)),
-        Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
-          child: Text(
-            'ou',
-            style: TextStyle(
-              fontFamily: AppTheme.inter,
-              fontSize: 13,
-              color: AppColors.textHint,
-            ),
-          ),
-        ),
-        Expanded(child: Divider(color: AppColors.divider, height: 1)),
-      ],
     );
   }
 }
