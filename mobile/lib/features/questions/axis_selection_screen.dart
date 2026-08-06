@@ -58,7 +58,7 @@ class _AxisSelectionScreenState extends State<AxisSelectionScreen> {
               children: [
                 Text('Selecione o Eixo', style: AppTheme.headerTitle),
                 const SizedBox(height: 4),
-                Text('BNCC Computacao', style: AppTheme.headerSubtitle),
+                Text('BNCC Computação', style: AppTheme.headerSubtitle),
               ],
             ),
           ),

@@ -394,7 +394,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                 padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    'Acoes Rapidas',
+                    'Ações Rápidas',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,

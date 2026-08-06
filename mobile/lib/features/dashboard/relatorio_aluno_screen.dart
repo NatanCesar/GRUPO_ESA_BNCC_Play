@@ -46,7 +46,7 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.purple,
         foregroundColor: Colors.white,
-        title: const Text('Relatorio de Desempenho'),
+        title: const Text('Relatório de Desempenho'),
       ),
       body: _buildBody(),
     );
@@ -108,7 +108,7 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
 
             // Historico de partidas
             _Secao(
-              titulo: 'Historico de Partidas',
+              titulo: 'Histórico de Partidas',
               child: Column(
                 children: _historico.take(20).map((p) => _PartidaTile(partida: p)).toList(),
               ),

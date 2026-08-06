@@ -71,7 +71,7 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: const Text('Remover Questão'),
-        content: const Text('Tem certeza que deseja remover esta questao?'),
+        content: const Text('Tem certeza que deseja remover esta questão?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),

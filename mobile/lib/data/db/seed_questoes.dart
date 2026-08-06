@@ -16,7 +16,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
   final questoesSeed = <_QuestaoSeed>[
     // ========== TECNOLOGIA E COMPUTACAO ==========
     _QuestaoSeed(
-      enunciado: 'O que e um algoritmo?',
+      enunciado: 'O que é um algoritmo?',
       opcaoA: 'Um tipo de linguagem de programacao',
       opcaoB: 'Uma sequencia logica de passos para resolver um problema',
       opcaoC: 'Um dispositivo eletronico',
@@ -36,7 +36,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.facil,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e a memoria RAM de um computador?',
+      enunciado: 'O que é a memoria RAM de um computador?',
       opcaoA: 'Um dispositivo de armazenamento permanente',
       opcaoB: 'Uma memoria volatil que armazena dados temporariamente',
       opcaoC: 'Um tipo de processador',
@@ -66,7 +66,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.dificil,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e a complexidade de tempo O(n) em um algoritmo?',
+      enunciado: 'O que é a complexidade de tempo O(n) em um algoritmo?',
       opcaoA: 'O algoritmo executa em tempo constante',
       opcaoB: 'O tempo de execucao cresce linearmente com a entrada',
       opcaoC: 'O algoritmo nunca termina',
@@ -86,7 +86,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.facil,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e um banco de dados relacional?',
+      enunciado: 'O que é um banco de dados relacional?',
       opcaoA: 'Um programa de edicao de texto',
       opcaoB: 'Um sistema que organiza dados em tabelas com relacoes entre elas',
       opcaoC: 'Um tipo de linguagem de programacao',
@@ -106,7 +106,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.facil,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e programacao orientada a objetos?',
+      enunciado: 'O que é programacao orientada a objetos?',
       opcaoA: 'Um estilo de programacao que usa apenas variaveis globais',
       opcaoB: 'Um paradigma que usa objetos e classes para organizar codigo',
       opcaoC: 'Um tipo de hardware',
@@ -118,7 +118,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
 
     // ========== CULTURA DIGITAL ==========
     _QuestaoSeed(
-      enunciado: 'O que e plagio na era digital?',
+      enunciado: 'O que é plagio na era digital?',
       opcaoA: 'Copiar o conteudo de outro autor sem dar credito',
       opcaoB: 'Compartilhar links em redes sociais',
       opcaoC: 'Criar um blog pessoal',
@@ -138,7 +138,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.medio,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e cyberbullying?',
+      enunciado: 'O que é cyberbullying?',
       opcaoA: 'Um tipo de jogo online',
       opcaoB: 'Bullying praticado через internet ou celular',
       opcaoC: 'Um programa de seguranca',
@@ -188,7 +188,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.medio,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e o direito ao esquecimento digital?',
+      enunciado: 'O que é o direito ao esquecimento digital?',
       opcaoA: 'Apagar todos os arquivos do computador',
       opcaoB: 'O direito de ter informacoes removidas da internet em certas circunstacias',
       opcaoC: 'Um tipo de backup',
@@ -208,7 +208,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.facil,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e huella de carbono digital?',
+      enunciado: 'O que é huella de carbono digital?',
       opcaoA: 'A impressao carbonica em documentos',
       opcaoB: 'O impacto ambiental do uso de tecnologia e internet',
       opcaoC: 'Um tipo de servidor',
@@ -220,7 +220,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
 
     // ========== IMPACTO SOCIAL E ETICA ==========
     _QuestaoSeed(
-      enunciado: 'O que e inclusao digital?',
+      enunciado: 'O que é inclusao digital?',
       opcaoA: 'Excluir pessoas do uso de tecnologia',
       opcaoB: 'Garantir que todos tenham acesso e habilidades para usar tecnologia',
       opcaoC: 'Um tipo de curso de programacao',
@@ -250,7 +250,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.medio,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e a vida privacao algoritmica?',
+      enunciado: 'O que é a vida privacao algoritmica?',
       opcaoA: 'Algoritmos que respeitam a privacidade dos usuarios',
       opcaoB: 'O uso de algoritmos que podem perpetuar vieses e discriminacao',
       opcaoC: 'Um tipo de criptografia',
@@ -270,7 +270,7 @@ Future<void> popularBancoSeed(AppDatabase banco) async {
       dificuldade: Dificuldade.medio,
     ),
     _QuestaoSeed(
-      enunciado: 'O que e a desigualdade digital?',
+      enunciado: 'O que é a desigualdade digital?',
       opcaoA: 'Todos terem acesso igual a tecnologia',
       opcaoB: 'A diferenca no acesso e uso de tecnologia entre grupos sociais',
       opcaoC: 'Um tipo de programacao',

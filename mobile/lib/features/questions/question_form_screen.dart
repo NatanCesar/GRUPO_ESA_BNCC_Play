@@ -97,16 +97,16 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
       erros['enunciado'] = 'Informe o enunciado';
     }
     if (_opcaoAController.text.trim().isEmpty) {
-      erros['opcaoA'] = 'Informe a opcao A';
+      erros['opcaoA'] = 'Informe a opção A';
     }
     if (_opcaoBController.text.trim().isEmpty) {
-      erros['opcaoB'] = 'Informe a opcao B';
+      erros['opcaoB'] = 'Informe a opção B';
     }
     if (_opcaoCController.text.trim().isEmpty) {
-      erros['opcaoC'] = 'Informe a opcao C';
+      erros['opcaoC'] = 'Informe a opção C';
     }
     if (_opcaoDController.text.trim().isEmpty) {
-      erros['opcaoD'] = 'Informe a opcao D';
+      erros['opcaoD'] = 'Informe a opção D';
     }
     if (_respostaCorreta == null) {
       erros['resposta'] = 'Selecione a resposta correta';

@@ -76,7 +76,7 @@ class ConteudoPerfilAluno extends StatelessWidget {
                 ItemDeMenu(
                   icone: Icons.person,
                   rotulo: 'Editar Perfil',
-                  detalhe: 'Nome, e-mail e usuario',
+                  detalhe: 'Nome, e-mail e usuário',
                   cor: AppColors.green,
                   fundoDoIcone: AppColors.greenLight,
                   onTap: () => Navigator.pushNamed(context, Rotas.editProfile),

@@ -338,7 +338,7 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
                 padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
                 sliver: SliverToBoxAdapter(
                   child: Text(
-                    'Acoes Rapidas',
+                    'Ações Rápidas',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -831,7 +831,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                         Rotas.questionCreate,
                       ),
                       icon: const Icon(Icons.add_circle_outline),
-                      label: const Text('Cadastrar Nova Questao'),
+                      label: const Text('Cadastrar Nova Questão'),
                     ),
                   ),
                 ]),

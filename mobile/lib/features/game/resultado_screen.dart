@@ -101,7 +101,7 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
                 _StatCard(
                   icon: Icons.emoji_events,
                   iconColor: AppColors.purple,
-                  label: 'Posicao no Ranking',
+                  label: 'Posição no Ranking',
                   valor: '#$_posicao',
                 ),
               ],

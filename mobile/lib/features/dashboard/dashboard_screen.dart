@@ -115,7 +115,7 @@ class _DashboardBody extends StatelessWidget {
 
     final stats = ctrl.estatisticas;
     if (stats == null) {
-      return const Center(child: Text('Sem dados disponiveis'));
+      return const Center(child: Text('Sem dados disponíveis'));
     }
 
     return RefreshIndicator(
@@ -154,7 +154,7 @@ class _DashboardBody extends StatelessWidget {
                   child: _StatCard(
                     icone: Icons.star,
                     valor: stats.mediaPontuacao.toStringAsFixed(0),
-                    label: 'Media XP',
+                    label: 'Média XP',
                     cor: Colors.amber,
                   ),
                 ),
