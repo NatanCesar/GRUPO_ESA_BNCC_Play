@@ -384,14 +384,14 @@ class _QuestionFormScreenState extends State<QuestionFormScreen> {
     );
   }
 
-  String _iconeEixo(EixoBNCC eixo) {
+  IconData _iconeEixo(EixoBNCC eixo) {
     switch (eixo) {
       case EixoBNCC.tecnologia:
-        return '💻';
+        return Icons.laptop_chromebook;
       case EixoBNCC.culturaDigital:
-        return '🌐';
+        return Icons.public;
       case EixoBNCC.impacto:
-        return '⚖️';
+        return Icons.balance;
     }
   }
 }
@@ -464,7 +464,7 @@ class _SelecaoChip extends StatelessWidget {
   });
 
   final String label;
-  final String icone;
+  final IconData icone;
   final bool selected;
   final VoidCallback onTap;
 
@@ -484,7 +484,11 @@ class _SelecaoChip extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(icone, style: const TextStyle(fontSize: 16)),
+            Icon(
+              icone,
+              size: 16,
+              color: selected ? Colors.white : AppColors.purple,
+            ),
             const SizedBox(width: 6),
             Text(
               label,
@@ -528,9 +532,10 @@ class _DificuldadeCard extends StatelessWidget {
         ),
         child: Column(
           children: [
-            Text(
+            Icon(
               _iconeDificuldade(),
-              style: const TextStyle(fontSize: 20),
+              size: 28,
+              color: selected ? Colors.white : _corDificuldade(),
             ),
             const SizedBox(height: 4),
             Text(
@@ -558,14 +563,14 @@ class _DificuldadeCard extends StatelessWidget {
     }
   }
 
-  String _iconeDificuldade() {
+  IconData _iconeDificuldade() {
     switch (dificuldade) {
       case Dificuldade.facil:
-        return '😊';
+        return Icons.sentiment_satisfied;
       case Dificuldade.medio:
-        return '😐';
+        return Icons.sentiment_neutral;
       case Dificuldade.dificil:
-        return '😰';
+        return Icons.mood_bad;
     }
   }
 }

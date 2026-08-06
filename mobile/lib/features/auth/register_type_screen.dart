@@ -48,7 +48,7 @@ class RegisterTypeScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     _CartaoDePerfil(
-                      emoji: '👩‍🏫',
+                      emoji: 'person',
                       titulo: 'Sou Professor(a)',
                       descricao:
                           'Cadastre questões, acompanhe turmas e visualize relatórios pedagógicos',
@@ -60,7 +60,7 @@ class RegisterTypeScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                     _CartaoDePerfil(
-                      emoji: '🎮',
+                      emoji: 'sports_esports',
                       titulo: 'Sou Aluno(a)',
                       descricao:
                           'Jogue, aprenda, suba no ranking e desafie seus colegas',
@@ -117,7 +117,7 @@ class _CartaoDePerfil extends StatelessWidget {
                   color: cor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Text(emoji, style: const TextStyle(fontSize: 30)),
+                child: Icon(_iconeDoEmoji(emoji), size: 30, color: cor),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -167,5 +167,16 @@ class _CartaoDePerfil extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  IconData _iconeDoEmoji(String nome) {
+    switch (nome) {
+      case 'person':
+        return Icons.person;
+      case 'sports_esports':
+        return Icons.sports_esports;
+      default:
+        return Icons.person;
+    }
   }
 }

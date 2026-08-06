@@ -123,6 +123,22 @@ class UserRepository {
     return AppUser.deLinha(linhas.single);
   }
 
+  /// Lista todos os usuarios cadastrados.
+  Future<List<AppUser>> buscarTodos() async {
+    final linhas = await _banco.db.query('users');
+    return linhas.map(AppUser.deLinha).toList();
+  }
+
+  /// Lista alunos cadastrados.
+  Future<List<AppUser>> listarAlunos() async {
+    final linhas = await _banco.db.query(
+      'users',
+      where: 'papel = ?',
+      whereArgs: ['aluno'],
+    );
+    return linhas.map(AppUser.deLinha).toList();
+  }
+
   /// Atualiza os dados de [usuario].
   ///
   /// [usuario] precisa de [AppUser.id] preenchido. Lança [ArgumentError]

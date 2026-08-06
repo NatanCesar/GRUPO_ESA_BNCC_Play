@@ -232,9 +232,20 @@ class _PartidaTile extends StatelessWidget {
               ),
               if (partida.streak > 0) ...[
                 const SizedBox(height: 4),
-                Text(
-                  '🔥 ${partida.streak}',
-                  style: const TextStyle(fontSize: 12),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      size: 14,
+                      color: Colors.deepOrange,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      '${partida.streak}',
+                      style: const TextStyle(fontSize: 12),
+                    ),
+                  ],
                 ),
               ],
             ],

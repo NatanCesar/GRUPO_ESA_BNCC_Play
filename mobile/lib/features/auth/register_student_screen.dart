@@ -91,7 +91,11 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
                     const SizedBox(height: 8),
                     const Row(
                       children: [
-                        Text('🎮', style: TextStyle(fontSize: 34)),
+                        Icon(
+                          Icons.school,
+                          size: 32,
+                          color: Colors.white,
+                        ),
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(

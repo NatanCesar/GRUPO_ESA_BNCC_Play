@@ -95,25 +95,25 @@ class SalaScreen extends StatelessWidget {
             const SizedBox(height: 12),
             _JogadorTile(
               nome: 'MariaSilva',
-              avatar: '👩‍🏫',
+              avatar: 'person',
               status: 'Pronto',
               isReady: true,
             ),
             _JogadorTile(
               nome: 'JoaoGames',
-              avatar: '🎮',
+              avatar: 'sports_esports',
               status: 'Jogando',
               isReady: true,
             ),
             _JogadorTile(
               nome: 'AnaEstuda',
-              avatar: '📚',
+              avatar: 'menu_book',
               status: 'Aguardando',
               isReady: false,
             ),
             _JogadorTile(
               nome: 'Pedrinho',
-              avatar: '🧑',
+              avatar: 'person',
               status: 'Aguardando',
               isReady: false,
             ),
@@ -170,7 +170,7 @@ class _JogadorTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Text(avatar, style: const TextStyle(fontSize: 28)),
+          Icon(_iconeDoAvatar(avatar), size: 28, color: AppColors.purple),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -199,5 +199,18 @@ class _JogadorTile extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  IconData _iconeDoAvatar(String nome) {
+    switch (nome) {
+      case 'person':
+        return Icons.person;
+      case 'sports_esports':
+        return Icons.sports_esports;
+      case 'menu_book':
+        return Icons.menu_book;
+      default:
+        return Icons.person;
+    }
   }
 }

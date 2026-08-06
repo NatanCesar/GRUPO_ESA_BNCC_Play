@@ -41,7 +41,7 @@ class ProfileTeacherScreen extends StatelessWidget {
                       onVoltar: () => Navigator.maybePop(context),
                     ),
                     const SizedBox(height: 8),
-                    const AvatarDePerfil(emoji: '👩‍🏫'),
+                    const AvatarDePerfil(emoji: 'person'),
                     const SizedBox(height: 8),
                     Text(usuario.nome, style: AppTheme.headerTitle),
                     const SizedBox(height: 4),

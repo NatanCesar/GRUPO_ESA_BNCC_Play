@@ -176,9 +176,19 @@ class _QuestaoCard extends StatelessWidget {
               ),
               if (ctrl.partida!.streak >= 3) ...[
                 const SizedBox(width: 12),
-                Text(
-                  '🔥 ${ctrl.partida!.streak}',
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                Row(
+                  children: [
+                    Icon(
+                      Icons.local_fire_department,
+                      size: 18,
+                      color: Colors.deepOrange,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${ctrl.partida!.streak}',
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ],
             ],

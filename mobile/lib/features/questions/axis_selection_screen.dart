@@ -123,9 +123,10 @@ class _EixoCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Center(
-                  child: Text(
+                  child: Icon(
                     _iconeEixo(eixo),
-                    style: const TextStyle(fontSize: 28),
+                    color: AppColors.purple,
+                    size: 28,
                   ),
                 ),
               ),
@@ -164,14 +165,14 @@ class _EixoCard extends StatelessWidget {
     );
   }
 
-  String _iconeEixo(EixoBNCC eixo) {
+  IconData _iconeEixo(EixoBNCC eixo) {
     switch (eixo) {
       case EixoBNCC.tecnologia:
-        return '💻';
+        return Icons.laptop_chromebook;
       case EixoBNCC.culturaDigital:
-        return '🌐';
+        return Icons.public;
       case EixoBNCC.impacto:
-        return '⚖️';
+        return Icons.balance;
     }
   }
 }

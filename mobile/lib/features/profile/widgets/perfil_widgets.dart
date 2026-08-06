@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
 
-/// Circulo translucido com o emoji do papel, dentro do cabecalho.
+/// Circulo translucido com icone do papel, dentro do cabecalho.
 class AvatarDePerfil extends StatelessWidget {
   const AvatarDePerfil({super.key, required this.emoji});
 
@@ -11,6 +11,17 @@ class AvatarDePerfil extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    IconData icone;
+    switch (emoji) {
+      case 'person':
+        icone = Icons.person;
+        break;
+      case 'sports_esports':
+        icone = Icons.sports_esports;
+        break;
+      default:
+        icone = Icons.person;
+    }
     return Container(
       width: 96,
       height: 96,
@@ -19,7 +30,7 @@ class AvatarDePerfil extends StatelessWidget {
         color: Colors.white.withValues(alpha: 0.18),
         shape: BoxShape.circle,
       ),
-      child: Text(emoji, style: const TextStyle(fontSize: 44)),
+      child: Icon(icone, size: 48, color: Colors.white),
     );
   }
 }

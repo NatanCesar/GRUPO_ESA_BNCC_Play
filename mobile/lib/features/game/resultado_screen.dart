@@ -52,10 +52,11 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
             children: [
               const SizedBox(height: 40),
 
-              // Trofeu ou emoji baseado no desempenho
-              Text(
-                _emojiDesempenho(p.acertoPercentual),
-                style: const TextStyle(fontSize: 80),
+              // Icone de acordo com o desempenho
+              Icon(
+                _iconeDesempenho(p.acertoPercentual),
+                size: 80,
+                color: _corDesempenho(p.acertoPercentual),
               ),
               const SizedBox(height: 16),
 
@@ -152,11 +153,18 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
     );
   }
 
-  String _emojiDesempenho(double percentual) {
-    if (percentual >= 80) return '🏆';
-    if (percentual >= 60) return '🎉';
-    if (percentual >= 40) return '💪';
-    return '📚';
+  IconData _iconeDesempenho(double percentual) {
+    if (percentual >= 80) return Icons.emoji_events;
+    if (percentual >= 60) return Icons.celebration;
+    if (percentual >= 40) return Icons.fitness_center;
+    return Icons.menu_book;
+  }
+
+  Color _corDesempenho(double percentual) {
+    if (percentual >= 80) return Colors.amber;
+    if (percentual >= 60) return Colors.green;
+    if (percentual >= 40) return Colors.blue;
+    return AppColors.purple;
   }
 }
 
