@@ -9,8 +9,6 @@ import '../../core/theme/app_theme.dart';
 import '../../data/repositories/ranking_repository.dart';
 import '../../data/models/ranking.dart';
 import '../ranking/ranking_screen.dart';
-import '../sala/sala_screen.dart';
-import '../profile/profile_student_screen.dart';
 
 class _Aba {
   const _Aba({
@@ -104,7 +102,7 @@ class _HomeStudentScreenState extends State<HomeStudentScreen> {
       const _AbaHomeAluno(),
       _AbaJogarAluno(usuario: usuario),
       _AbaRankingAluno(usuarioId: usuario.id!),
-      const ProfileStudentScreen(),
+      _AbaPerfilAluno(usuario: usuario),
     ];
 
     return Scaffold(
@@ -703,7 +701,7 @@ class _AbaJogarAluno extends StatelessWidget {
 }
 
 // ============================================================================
-// ABA 3: RANKING
+// ABA 3: RANKING (wrapper simples para evitar Scaffold duplo)
 // ============================================================================
 
 class _AbaRankingAluno extends StatelessWidget {
@@ -714,5 +712,53 @@ class _AbaRankingAluno extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return RankingScreen(alunoId: usuarioId);
+  }
+}
+
+// ============================================================================
+// ABA 4: PERFIL (placeholder inline)
+// ============================================================================
+
+class _AbaPerfilAluno extends StatelessWidget {
+  const _AbaPerfilAluno({required this.usuario});
+
+  final dynamic usuario;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.green.withValues(alpha: 0.15),
+              ),
+              child: Icon(Icons.person, size: 48, color: AppColors.green),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              usuario.nome,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              usuario.email,
+              style: TextStyle(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pushNamed(context, Rotas.editProfile),
+              icon: const Icon(Icons.edit),
+              label: const Text('Editar Perfil'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
