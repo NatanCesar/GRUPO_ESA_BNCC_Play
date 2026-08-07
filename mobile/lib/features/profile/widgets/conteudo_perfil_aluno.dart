@@ -101,7 +101,7 @@ class ConteudoPerfilAlunoState extends State<ConteudoPerfilAluno> {
             ),
           ),
         ),
-        const SizedBox(height: 24),
+        const SizedBox(height: 8),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: Column(

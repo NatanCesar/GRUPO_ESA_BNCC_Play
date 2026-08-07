@@ -45,24 +45,41 @@ class _RankingScreenState extends State<RankingScreen>
   }
 
   void _onTabChanged() {
-    if (!_tabController.indexIsChanging) {
-      _carregarRanking();
-    }
+    // Carrega sempre que o índice efetivamente muda. O listener do
+    // TabController dispara duas vezes durante uma transição de aba
+    // (no início com isChanging=true e no fim com isChanging=false);
+    // usamos _abaCarregada como guarda para evitar cargas duplicadas.
+    final novoIndice = _tabController.index;
+    if (novoIndice == _abaCarregada) return;
+    _abaCarregada = novoIndice;
+    _carregarRanking();
   }
 
+  /// Índice da aba cujo ranking ja foi carregado em `_ranking`.
+  int _abaCarregada = -1;
+
   Future<void> _carregarRanking() async {
+    // Marca a aba como carregada antes do await para que qualquer disparo
+    // adicional do listener durante a transição seja ignorado.
+    final indice = _tabController.index;
+    _abaCarregada = indice;
     setState(() => _carregando = true);
     try {
       const eixos = <String?>[null, 'tecnologia', 'cultura', 'impacto'];
-      final eixo = eixos[_tabController.index];
+      final eixo = eixos[indice];
       final lista = eixo == null
           ? await _repository.listarGeral(limite: 50)
           : await _repository.listarPorEixo(eixo, limite: 50);
+      // Só atualiza o estado se o usuário ainda está na mesma aba. Caso
+      // contrário, descarta o resultado para não sobrescrever o ranking
+      // de outra aba que tenha sido carregado em paralelo.
+      if (!mounted || indice != _tabController.index) return;
       setState(() {
         _ranking = lista;
         _carregando = false;
       });
     } catch (e) {
+      if (!mounted || indice != _tabController.index) return;
       setState(() => _carregando = false);
     }
   }
