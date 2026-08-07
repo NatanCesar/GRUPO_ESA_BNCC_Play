@@ -1,11 +1,11 @@
 {
-    "name": "bncc_play_mobile",
-    "short_name": "bncc_play_mobile",
+    "name": "BNCC Play",
+    "short_name": "BNCC Play",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#FFFFFF",
+    "theme_color": "#0068B8",
+    "description": "Aprenda e ensine Computação alinhada à BNCC.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

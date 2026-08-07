@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/theme/app_theme.dart';
+import 'package:bncc_play_mobile/core/widgets/app_logo.dart';
 import 'package:bncc_play_mobile/features/auth/splash_screen.dart';
 
 Future<void> pumpSplash(WidgetTester tester) async {
@@ -16,7 +17,8 @@ Future<void> pumpSplash(WidgetTester tester) async {
       home: const SplashScreen(),
       routes: {
         Rotas.login: (_) => const Scaffold(body: Text('tela de login')),
-        Rotas.registerType: (_) => const Scaffold(body: Text('escolha de perfil')),
+        Rotas.registerType: (_) =>
+            const Scaffold(body: Text('escolha de perfil')),
       },
     ),
   );
@@ -28,11 +30,8 @@ void main() {
     testWidgets('mostra a marca e a chamada', (tester) async {
       await pumpSplash(tester);
 
-      expect(find.text('BNCC Play'), findsOneWidget);
-      expect(
-        find.text('Aprenda computação jogando'),
-        findsOneWidget,
-      );
+      expect(find.byType(AppLogo), findsOneWidget);
+      expect(find.text('Aprenda computação jogando'), findsOneWidget);
     });
 
     testWidgets('mostra as duas acoes', (tester) async {

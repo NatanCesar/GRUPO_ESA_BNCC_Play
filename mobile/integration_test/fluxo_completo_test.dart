@@ -23,8 +23,9 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('cadastro, logout, login e alteracao de cadastro',
-      (tester) async {
+  testWidgets('cadastro, logout, login e alteracao de cadastro', (
+    tester,
+  ) async {
     await abrirApp(tester);
 
     // Splash -> escolha de perfil -> cadastro de professor
@@ -51,12 +52,15 @@ void main() {
 
     await tester.tap(find.text('Sair da Conta'));
     await tester.pumpAndSettle();
-    expect(find.text('BNCC Play'), findsOneWidget);
+    expect(find.byKey(const Key('splash-logo')), findsOneWidget);
 
     // Login com a conta recem-criada
     await tester.tap(find.text('Entrar'));
     await tester.pumpAndSettle();
-    await tester.enterText(find.byType(TextField).at(0), 'professor@escola.com');
+    await tester.enterText(
+      find.byType(TextField).at(0),
+      'professor@escola.com',
+    );
     await tester.enterText(find.byType(TextField).at(1), 'Professor@123');
     await tester.tap(find.widgetWithText(InkWell, 'Entrar').last);
     await tester.pumpAndSettle();

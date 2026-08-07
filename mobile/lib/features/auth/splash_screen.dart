@@ -5,6 +5,7 @@ import '../../core/routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_logo.dart';
 
 /// Porta de entrada do app: leva ao login ou ao cadastro.
 class SplashScreen extends StatelessWidget {
@@ -34,26 +35,25 @@ class SplashScreen extends StatelessWidget {
                   children: [
                     Center(
                       child: Container(
-                        width: 96,
-                        height: 96,
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(24),
-                        ),
-                        child: const Icon(
-                          Icons.sports_esports,
-                          size: 52,
                           color: Colors.white,
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.16),
+                              blurRadius: 24,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: const AppLogo(
+                          key: Key('splash-logo'),
+                          width: 190,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 24),
-                    Text(
-                      'BNCC Play',
-                      textAlign: TextAlign.center,
-                      style: AppTheme.headerTitle.copyWith(fontSize: 32),
-                    ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 20),
                     const Text(
                       'Aprenda computação jogando',
                       textAlign: TextAlign.center,

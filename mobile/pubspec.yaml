@@ -27,6 +27,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
 
+  assets:
+    - assets/images/logo.png
+    - assets/images/logo_mark.png
+
   fonts:
     - family: Poppins
       fonts:

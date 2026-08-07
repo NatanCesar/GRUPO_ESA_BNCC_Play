@@ -7,6 +7,7 @@ import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_button.dart';
+import '../../core/widgets/app_logo.dart';
 import '../../core/widgets/app_text_field.dart';
 import '../../core/widgets/gradient_header.dart';
 import '../../data/models/papel.dart';
@@ -197,17 +198,14 @@ class _Header extends StatelessWidget {
         children: [
           const SizedBox(height: 16),
           Container(
-            width: 64,
-            height: 64,
+            width: 88,
+            height: 72,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.18),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(
-              Icons.sports_esports,
-              size: 34,
-              color: Colors.white,
-            ),
+            child: const AppLogo.mark(key: Key('login-logo')),
           ),
           const SizedBox(height: 8),
           const Text(
