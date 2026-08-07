@@ -6,6 +6,7 @@ import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
+import '../../data/db/app_database.dart';
 import '../../data/repositories/ranking_repository.dart';
 import '../../data/models/ranking.dart';
 import '../ranking/ranking_screen.dart';
@@ -254,7 +255,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
     final usuario = sessao.usuario;
     if (usuario == null) return;
 
-    final repo = context.read<RankingRepository>();
+    final repo = RankingRepository(banco: context.read<AppDatabase>());
     try {
       final entrada = await repo.porAluno(usuario.id!);
       final pos = await repo.posicaoOrdinal(usuario.id!);

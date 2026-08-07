@@ -20,6 +20,7 @@ class AppTextField extends StatelessWidget {
     this.keyboardType,
     this.textInputAction,
     this.onSubmitted,
+    this.suffixIcon,
   });
 
   final String label;
@@ -31,6 +32,7 @@ class AppTextField extends StatelessWidget {
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
   final ValueChanged<String>? onSubmitted;
+  final Widget? suffixIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +82,10 @@ class AppTextField extends StatelessWidget {
               ),
               if (hasError)
                 const Icon(Icons.cancel, size: 18, color: AppColors.danger),
+              if (suffixIcon != null) ...[
+                if (hasError) const SizedBox(width: 8),
+                suffixIcon!,
+              ],
             ],
           ),
         ),

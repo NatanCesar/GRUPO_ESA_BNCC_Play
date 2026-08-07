@@ -5,6 +5,7 @@ import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/core/theme/app_theme.dart';
 import 'package:bncc_play_mobile/core/widgets/gradient_header.dart';
+import 'package:bncc_play_mobile/core/widgets/top_bar.dart';
 import 'package:bncc_play_mobile/core/widgets/aviso_de_erro.dart';
 import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/data/models/questao.dart';
@@ -129,11 +130,11 @@ class _QuestionListScreenState extends State<QuestionListScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _eixoFiltro?.rotulo ?? 'Questões',
-                  style: AppTheme.headerTitle,
+                TopBar(
+                  titulo: _eixoFiltro?.rotulo ?? 'Questões',
+                  onVoltar: () => Navigator.maybePop(context),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 8),
                 Text(
                   _eixoFiltro?.rotulo ?? 'Todas',
                   style: AppTheme.headerSubtitle,

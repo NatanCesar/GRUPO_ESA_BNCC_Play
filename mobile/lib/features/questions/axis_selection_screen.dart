@@ -5,6 +5,7 @@ import 'package:bncc_play_mobile/core/routes.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/core/theme/app_theme.dart';
 import 'package:bncc_play_mobile/core/widgets/gradient_header.dart';
+import 'package:bncc_play_mobile/core/widgets/top_bar.dart';
 import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/data/models/eixo_bncc.dart';
 import 'package:bncc_play_mobile/data/repositories/questao_repository.dart';
@@ -56,8 +57,11 @@ class _AxisSelectionScreenState extends State<AxisSelectionScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Selecione o Eixo', style: AppTheme.headerTitle),
-                const SizedBox(height: 4),
+                TopBar(
+                  titulo: 'Selecione o Eixo',
+                  onVoltar: () => Navigator.maybePop(context),
+                ),
+                const SizedBox(height: 8),
                 Text('BNCC Computação', style: AppTheme.headerSubtitle),
               ],
             ),

@@ -74,6 +74,10 @@ class _RankingScreenState extends State<RankingScreen>
         backgroundColor: AppColors.green,
         foregroundColor: Colors.white,
         title: const Text('Ranking'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         bottom: TabBar(
           controller: _tabController,
           indicatorColor: Colors.white,

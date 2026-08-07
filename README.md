@@ -51,21 +51,37 @@ Além disso, o projeto considera princípios de UX/UI para oferecer uma experiê
 
 ## Frontend
 
-* React
+* React 18
 * Vite
 * React Router DOM
 * Socket.IO Client
+* ESLint (com plugins `react`, `react-hooks`, `react-refresh`)
 
 ## Backend
 
 * Node.js
 * Express
 * Socket.IO
-* Prisma ORM
+* Prisma ORM (`@prisma/client`)
+* CORS
+* dotenv (variáveis de ambiente)
 
 ## Banco de Dados
 
-* PostgreSQL
+* PostgreSQL (backend web)
+* SQLite (mobile, via `sqflite`)
+
+## Mobile
+
+* Flutter (Dart SDK `^3.12.2`)
+* sqflite (persistência local)
+* path (manipulação de caminhos do banco)
+* Provider (gerenciamento de estado)
+* crypto (hash de senhas)
+* flutter_lints (análise estática)
+* sqflite_common_ffi (suporte a testes em desktop)
+
+
 
 ---
 
@@ -87,6 +103,16 @@ BNCC-Play/
 │   │   ├── socket/
 │   │   └── server.js
 │   └── package.json
+│
+├── mobile/
+│   ├── lib/
+│   ├── assets/
+│   ├── integration_test/
+│   ├── test/
+│   ├── android/
+│   ├── ios/
+│   ├── web/
+│   └── pubspec.yaml
 │
 └── README.md
 ```
@@ -111,11 +137,11 @@ O projeto considera princípios de UX/UI para garantir:
 * Sistema de pontuação e recompensas
 * Dashboard pedagógico
 * Relatórios de desempenho
-* Multiplayer em sala
+* Multiplayer real entre dispositivos (substituindo o gateway local simulado)
 * Integração com plataformas educacionais
 * Exportação de relatórios
 * Sistema de turmas
-* Autenticação de professores e alunos
+* Autenticação centralizada de professores e alunos (compartilhada entre web e mobile)
 
 ---
 
@@ -231,16 +257,142 @@ http://localhost:5173/BNCC-Play/
 
 ---
 
+# Mobile (Flutter)
+
+Aplicativo Flutter local voltado a professores e alunos, com banco SQLite local,
+sistema de partidas, ranking, dashboard e relatórios. O multiplayer desta versão
+é simulado por um gateway local substituível (`MultiplayerGateway`).
+
+## Pré-requisitos
+
+* Flutter SDK com Dart `^3.12.2` (verifique com `flutter --version`)
+* Android Studio (com Android SDK + emulador configurado) e/ou Xcode para iOS
+* Chrome ou outro navegador, caso queira rodar na web
+* Git
+
+> O arquivo [mobile/mise.toml](mobile/mise.toml) declara as ferramentas nativas
+> usadas no build (`cmake`, `ninja`, `clang`). Caso utilize `mise`, basta rodar
+> `mise install` dentro de `mobile/`.
+
+---
+
+## Acessar pasta
+
+```bash id="mobile-cd"
+cd mobile
+```
+
+## Instalar dependências
+
+```bash id="mobile-pub-get"
+flutter pub get
+```
+
+## Verificar ambiente
+
+Confirme se o Flutter detecta seus dispositivos:
+
+```bash id="mobile-devices"
+flutter doctor
+flutter devices
+```
+
+---
+
+## Executar aplicação
+
+Use o comando genérico abaixo escolhendo o device alvo com `-d`:
+
+```bash id="mobile-run"
+flutter run
+```
+
+Ou de forma explícita:
+
+```bash id="mobile-run-platform"
+# Android (emulador ou dispositivo físico conectado)
+flutter run -d android
+
+# iOS (somente macOS com Xcode configurado)
+flutter run -d ios
+
+# Web (recomenda-se Chrome)
+flutter run -d chrome
+```
+
+> No primeiro build Android/iOS o Flutter baixa dependências nativas e gera o
+> projeto Gradrodle/Pod — pode demorar alguns minutos.
+
+---
+
+## Build de release
+
+```bash id="mobile-build"
+# Android (APK)
+flutter build apk --release
+
+# Android (App Bundle para Play Store)
+flutter build appbundle --release
+
+# iOS
+flutter build ios --release
+
+# Web
+flutter build web --release
+```
+
+Os artefatos ficam em `mobile/build/`.
+
+---
+
+## Verificação (análise e testes)
+
+```bash id="mobile-check"
+flutter analyze
+flutter test
+```
+
+Para testes de integração:
+
+```bash id="mobile-integration"
+flutter test integration_test
+```
+
+---
+
 # Scripts Disponíveis
 
 ## Backend
 
 ```bash id="n4m9j5"
-npm run dev
-npm start
-npm run db:migrate
-npm run db:generate
-npm run db:studio
+npm run dev         # sobe o servidor com --watch (modo desenvolvimento)
+npm start           # sobe o servidor em modo produção
+npm run db:migrate  # aplica as migrations do Prisma
+npm run db:generate # gera o cliente do Prisma
+npm run db:studio   # abre o Prisma Studio
+```
+
+## Frontend
+
+```bash id="frontend-scripts"
+npm run dev      # inicia o Vite em modo desenvolvimento
+npm run build    # gera o bundle de produção em dist/
+npm run preview  # serve o build de produção localmente
+npm run lint     # roda o ESLint
+```
+
+## Mobile
+
+```bash id="mobile-scripts"
+flutter pub get           # instala dependências do pubspec.yaml
+flutter run               # executa no device/emulador padrão
+flutter analyze           # análise estática (flutter_lints)
+flutter test              # roda os testes unitários
+flutter test integration_test  # roda os testes de integração
+flutter build apk --release        # gera APK Android
+flutter build appbundle --release  # gera AAB para Play Store
+flutter build ios --release        # gera build iOS
+flutter build web --release        # gera build Web
 ```
 
 ---

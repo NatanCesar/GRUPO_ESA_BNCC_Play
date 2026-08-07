@@ -900,7 +900,9 @@ class _AbaPerfilProfessor extends StatelessWidget {
         body: SafeArea(
           top: false,
           bottom: false,
-          child: ConteudoPerfilProfessor(),
+          child: SingleChildScrollView(
+            child: ConteudoPerfilProfessor(),
+          ),
         ),
       ),
     );

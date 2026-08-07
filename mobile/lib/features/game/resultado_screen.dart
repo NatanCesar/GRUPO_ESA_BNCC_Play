@@ -57,7 +57,15 @@ class _ResultadoScreenState extends State<ResultadoScreen> {
           padding: const EdgeInsets.all(24),
           child: Column(
             children: [
-              const SizedBox(height: 40),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  icon: const Icon(Icons.arrow_back, color: AppColors.purple),
+                  tooltip: 'Voltar',
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+              const SizedBox(height: 16),
 
               // Icone de acordo com o desempenho
               Icon(

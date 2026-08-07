@@ -79,6 +79,10 @@ class _RelatorioAlunoScreenState extends State<RelatorioAlunoScreen> {
         backgroundColor: AppColors.purple,
         foregroundColor: Colors.white,
         title: const Text('Relatório de Desempenho'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: _buildBody(),
     );
