@@ -1,8 +1,8 @@
 /// Eixos tematicos da BNCC Computacao.
 enum EixoBNCC {
-  tecnologia('tecnologia', 'Tecnologia e Computação'),
+  tecnologia('tecnologia', 'Pensamento Computacional'),
   culturaDigital('cultura', 'Cultura Digital'),
-  impacto('impacto', 'Impacto Social e Ética');
+  impacto('impacto', 'Mundo Digital');
 
   const EixoBNCC(this.valor, this.rotulo);
 

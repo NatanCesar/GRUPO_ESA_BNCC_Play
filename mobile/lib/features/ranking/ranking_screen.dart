@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
+import 'package:bncc_play_mobile/data/models/eixo_bncc.dart';
 import 'package:bncc_play_mobile/data/models/ranking.dart';
 import 'package:bncc_play_mobile/data/repositories/ranking_repository.dart';
 
@@ -80,14 +81,15 @@ class _RankingScreenState extends State<RankingScreen>
         ),
         bottom: TabBar(
           controller: _tabController,
+          isScrollable: true,
           indicatorColor: Colors.white,
           labelColor: Colors.white,
           unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Geral'),
-            Tab(text: 'Tech'),
-            Tab(text: 'Cultura'),
-            Tab(text: 'Impacto'),
+          tabs: [
+            const Tab(text: 'Geral'),
+            Tab(text: EixoBNCC.tecnologia.rotulo),
+            Tab(text: EixoBNCC.culturaDigital.rotulo),
+            Tab(text: EixoBNCC.impacto.rotulo),
           ],
         ),
       ),
@@ -233,9 +235,7 @@ class _RankingTile extends StatelessWidget {
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: isCurrentUser
-                            ? AppColors.green
-                            : Colors.black87,
+                        color: isCurrentUser ? AppColors.green : Colors.black87,
                       ),
                     ),
                     if (isCurrentUser) ...[

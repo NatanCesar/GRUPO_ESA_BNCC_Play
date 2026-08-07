@@ -6,6 +6,7 @@ import 'package:bncc_play_mobile/core/session/session_scope.dart';
 import 'package:bncc_play_mobile/core/theme/app_colors.dart';
 import 'package:bncc_play_mobile/data/models/papel.dart';
 import 'package:bncc_play_mobile/data/models/estatistica.dart';
+import 'package:bncc_play_mobile/data/models/eixo_bncc.dart';
 import 'package:bncc_play_mobile/data/repositories/estatistica_repository.dart';
 import 'package:bncc_play_mobile/features/dashboard/dashboard_controller.dart';
 
@@ -184,19 +185,19 @@ class _DashboardBody extends StatelessWidget {
                 child: Column(
                   children: [
                     _BarraEixo(
-                      label: 'Tecnologia',
+                      label: EixoBNCC.tecnologia.rotulo,
                       valor: ctrl.alunosPorEixo['tecnologia'] ?? 0,
                       cor: AppColors.purple,
                     ),
                     const SizedBox(height: 8),
                     _BarraEixo(
-                      label: 'Cultura Digital',
+                      label: EixoBNCC.culturaDigital.rotulo,
                       valor: ctrl.alunosPorEixo['cultura'] ?? 0,
                       cor: Colors.blue,
                     ),
                     const SizedBox(height: 8),
                     _BarraEixo(
-                      label: 'Impacto',
+                      label: EixoBNCC.impacto.rotulo,
                       valor: ctrl.alunosPorEixo['impacto'] ?? 0,
                       cor: Colors.green,
                     ),

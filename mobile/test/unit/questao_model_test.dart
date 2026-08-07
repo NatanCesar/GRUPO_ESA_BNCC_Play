@@ -138,9 +138,9 @@ void main() {
     });
 
     test('rotulos legiveis', () {
-      expect(EixoBNCC.tecnologia.rotulo, isNotEmpty);
-      expect(EixoBNCC.culturaDigital.rotulo, isNotEmpty);
-      expect(EixoBNCC.impacto.rotulo, isNotEmpty);
+      expect(EixoBNCC.tecnologia.rotulo, 'Pensamento Computacional');
+      expect(EixoBNCC.culturaDigital.rotulo, 'Cultura Digital');
+      expect(EixoBNCC.impacto.rotulo, 'Mundo Digital');
     });
   });
 

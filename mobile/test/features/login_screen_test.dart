@@ -104,6 +104,24 @@ void main() {
       expect(senha.obscureText, isTrue);
     });
 
+    testWidgets('olho mostra e volta a esconder a senha', (tester) async {
+      await pumpLogin(tester);
+
+      expect(find.byTooltip('Mostrar senha'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('toggle-password-visibility')));
+      await tester.pump();
+
+      var senha = tester.widget<TextField>(find.byType(TextField).last);
+      expect(senha.obscureText, isFalse);
+      expect(find.byTooltip('Esconder senha'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('toggle-password-visibility')));
+      await tester.pump();
+
+      senha = tester.widget<TextField>(find.byType(TextField).last);
+      expect(senha.obscureText, isTrue);
+    });
+
     testWidgets('mostra as acoes', (tester) async {
       await pumpLogin(tester);
 

@@ -59,17 +59,17 @@ void main() {
       // Estado inicial: aba Geral (índice 0)
       print('Inicial: ${find.text('joaozinho').evaluate().length}');
 
-      await tester.tap(find.text('Tech'));
+      await tester.tap(find.text('Pensamento Computacional'));
       await tester.pumpAndSettle();
-      print('Tech: ${find.text('joaozinho').evaluate().length}');
+      print('Pensamento: ${find.text('joaozinho').evaluate().length}');
 
-      await tester.tap(find.text('Cultura'));
+      await tester.tap(find.text('Cultura Digital'));
       await tester.pumpAndSettle();
       print('Cultura: ${find.text('joaozinho').evaluate().length}');
 
-      await tester.tap(find.text('Impacto'));
+      await tester.tap(find.text('Mundo Digital'));
       await tester.pumpAndSettle();
-      print('Impacto: ${find.text('joaozinho').evaluate().length}');
+      print('Mundo Digital: ${find.text('joaozinho').evaluate().length}');
     },
   );
 }

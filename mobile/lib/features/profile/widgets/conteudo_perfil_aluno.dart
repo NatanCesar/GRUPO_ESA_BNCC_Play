@@ -45,8 +45,8 @@ class ConteudoPerfilAlunoState extends State<ConteudoPerfilAluno> {
     final usuario = sessao.usuario;
     if (usuario == null) return;
 
-    final repo = RankingRepository(banco: context.read<AppDatabase>());
     try {
+      final repo = RankingRepository(banco: context.read<AppDatabase>());
       final entrada = await repo.porAluno(usuario.id!);
       final pos = await repo.posicaoOrdinal(usuario.id!);
       if (!mounted) return;
@@ -81,9 +81,7 @@ class ConteudoPerfilAlunoState extends State<ConteudoPerfilAluno> {
         Container(
           decoration: const BoxDecoration(
             gradient: AppColors.greenHeaderGradient,
-            borderRadius: BorderRadius.vertical(
-              bottom: Radius.circular(32),
-            ),
+            borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
           ),
           child: SafeArea(
             bottom: false,
@@ -158,7 +156,10 @@ class ConteudoPerfilAlunoState extends State<ConteudoPerfilAluno> {
                 detalhe: usuario.turma ?? '',
                 cor: AppColors.green,
                 fundoDoIcone: AppColors.greenLight,
-                onTap: () {},
+                onTap: () async {
+                  await Navigator.pushNamed(context, Rotas.editProfile);
+                  if (mounted) _carregar();
+                },
               ),
               const SizedBox(height: 24),
               BotaoSair(

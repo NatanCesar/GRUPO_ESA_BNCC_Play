@@ -7,6 +7,7 @@ import '../../core/session/session_scope.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/db/app_database.dart';
+import '../../data/models/eixo_bncc.dart';
 import '../../data/repositories/ranking_repository.dart';
 import '../../data/models/ranking.dart';
 import '../ranking/ranking_screen.dart';
@@ -128,10 +129,13 @@ class _HomeStudentScreenState extends State<HomeStudentScreen>
     if (usuario == null) return const Scaffold(body: SizedBox.shrink());
 
     final telas = [
-      _AbaHomeAluno(key: _chaveAbaHome),
+      _AbaHomeAluno(
+        key: _chaveAbaHome,
+        onAbrirPerfil: () => _onTabSelecionada(3),
+      ),
       _AbaJogarAluno(usuario: usuario),
       _AbaRankingAluno(usuarioId: usuario.id!),
-      _AbaPerfilAluno(usuario: usuario, key: _chaveAbaPerfil),
+      _AbaPerfilAluno(chaveConteudo: _chaveAbaPerfil),
     ];
 
     return PopScope(
@@ -234,7 +238,9 @@ class _ItemNav extends StatelessWidget {
 // ============================================================================
 
 class _AbaHomeAluno extends StatefulWidget {
-  const _AbaHomeAluno({super.key});
+  const _AbaHomeAluno({super.key, required this.onAbrirPerfil});
+
+  final VoidCallback onAbrirPerfil;
 
   @override
   State<_AbaHomeAluno> createState() => _AbaHomeAlunoState();
@@ -255,8 +261,8 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
     final usuario = sessao.usuario;
     if (usuario == null) return;
 
-    final repo = RankingRepository(banco: context.read<AppDatabase>());
     try {
+      final repo = RankingRepository(banco: context.read<AppDatabase>());
       final entrada = await repo.porAluno(usuario.id!);
       final pos = await repo.posicaoOrdinal(usuario.id!);
       if (mounted) {
@@ -354,9 +360,7 @@ class _AbaHomeAlunoState extends State<_AbaHomeAluno> {
                                   ],
                                 ),
                               ),
-                              _BotaoPerfil(
-                                destino: Rotas.profileStudent,
-                              ),
+                              _BotaoPerfil(onTap: widget.onAbrirPerfil),
                             ],
                           ),
                           if (usuario.turma != null) ...[
@@ -607,7 +611,7 @@ class _AcaoRapida extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
@@ -622,14 +626,14 @@ class _AcaoRapida extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: cor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icone, color: cor, size: 20),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 titulo,
                 style: const TextStyle(
@@ -734,21 +738,21 @@ class _AbaJogarAluno extends StatelessWidget {
             const SizedBox(height: 12),
             _EixoBotao(
               icone: Icons.laptop_chromebook,
-              titulo: 'Tecnologia e Computação',
+              titulo: EixoBNCC.tecnologia.rotulo,
               cor: Colors.purple,
               onTap: () => _abrirPartida(context, eixo: 'tecnologia'),
             ),
             const SizedBox(height: 12),
             _EixoBotao(
               icone: Icons.public,
-              titulo: 'Cultura Digital',
+              titulo: EixoBNCC.culturaDigital.rotulo,
               cor: Colors.blue,
               onTap: () => _abrirPartida(context, eixo: 'cultura'),
             ),
             const SizedBox(height: 12),
             _EixoBotao(
               icone: Icons.balance,
-              titulo: 'Impacto Social e Ética',
+              titulo: EixoBNCC.impacto.rotulo,
               cor: Colors.green,
               onTap: () => _abrirPartida(context, eixo: 'impacto'),
             ),
@@ -832,9 +836,9 @@ class _AbaRankingAluno extends StatelessWidget {
 // ============================================================================
 
 class _AbaPerfilAluno extends StatelessWidget {
-  const _AbaPerfilAluno({required this.usuario, super.key});
+  const _AbaPerfilAluno({required this.chaveConteudo});
 
-  final dynamic usuario;
+  final GlobalKey<ConteudoPerfilAlunoState> chaveConteudo;
 
   @override
   Widget build(BuildContext context) {
@@ -845,7 +849,7 @@ class _AbaPerfilAluno extends StatelessWidget {
       child: Container(
         color: AppColors.background,
         child: SingleChildScrollView(
-          child: ConteudoPerfilAluno(key: key),
+          child: ConteudoPerfilAluno(key: chaveConteudo),
         ),
       ),
     );
@@ -853,32 +857,31 @@ class _AbaPerfilAluno extends StatelessWidget {
 }
 
 /// Botao circular com icone de pessoa no cabecalho.
-/// Toque leva o usuario a rota [destino] informada (perfil do aluno
-/// ou do professor, conforme a tela em que aparece).
+/// Toque abre a aba Perfil da Home.
 class _BotaoPerfil extends StatelessWidget {
-  const _BotaoPerfil({required this.destino});
+  const _BotaoPerfil({required this.onTap});
 
-  final String destino;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => Navigator.pushNamed(context, destino),
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.2),
-          ),
-          child: const Icon(
-            Icons.person,
-            color: Colors.white,
-            size: 28,
+    return Tooltip(
+      message: 'Abrir perfil',
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          key: const Key('home-profile-button'),
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 28),
           ),
         ),
       ),

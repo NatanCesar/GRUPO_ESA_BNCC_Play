@@ -86,7 +86,7 @@ class ConteudoPerfilProfessor extends StatelessWidget {
                 icone: Icons.school,
                 rotulo: 'Minha Escola',
                 detalhe: usuario.escola ?? '',
-                onTap: () {},
+                onTap: () => Navigator.pushNamed(context, Rotas.editProfile),
               ),
               const SizedBox(height: 24),
               BotaoSair(

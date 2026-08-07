@@ -139,16 +139,24 @@ class _LoginScreenState extends State<LoginScreen> {
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _entrar(),
                       suffixIcon: IconButton(
+                        key: const Key('toggle-password-visibility'),
                         icon: Icon(
                           _senhaVisivel
-                              ? Icons.visibility
-                              : Icons.visibility_off,
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                           size: 20,
                           color: AppColors.purple,
                         ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
                         onPressed: () =>
                             setState(() => _senhaVisivel = !_senhaVisivel),
-                        tooltip: _senhaVisivel ? 'Esconder senha' : 'Mostrar senha',
+                        tooltip: _senhaVisivel
+                            ? 'Esconder senha'
+                            : 'Mostrar senha',
                       ),
                     ),
                     const SizedBox(height: 20),

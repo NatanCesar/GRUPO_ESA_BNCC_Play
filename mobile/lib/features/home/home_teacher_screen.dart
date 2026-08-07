@@ -114,7 +114,7 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
     }
 
     final telas = [
-      const _AbaHomeProfessor(),
+      _AbaHomeProfessor(onAbrirPerfil: () => _onTabSelecionada(3)),
       const _AbaQuestoesProfessor(),
       const DashboardScreenPlaceholder(),
       const _AbaPerfilProfessor(),
@@ -234,7 +234,9 @@ class DashboardScreenPlaceholder extends StatelessWidget {
 // ============================================================================
 
 class _AbaHomeProfessor extends StatefulWidget {
-  const _AbaHomeProfessor();
+  const _AbaHomeProfessor({required this.onAbrirPerfil});
+
+  final VoidCallback onAbrirPerfil;
 
   @override
   State<_AbaHomeProfessor> createState() => _AbaHomeProfessorState();
@@ -258,10 +260,9 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
     final usuario = sessao.usuario;
     if (usuario == null) return;
 
-    final questaoRepo = context.read<QuestaoRepository>();
-    final users = context.read<UserRepository>();
-
     try {
+      final questaoRepo = context.read<QuestaoRepository>();
+      final users = context.read<UserRepository>();
       final todas = await questaoRepo.listarPorProfessor(usuario.id!);
       final alunos = await users.listarAlunos(professorId: usuario.id!);
       final turmas = <String>{};
@@ -298,7 +299,10 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
           child: CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
-                child: _HeaderProfessor(primeiroNome: primeiroNome),
+                child: _HeaderProfessor(
+                  primeiroNome: primeiroNome,
+                  onAbrirPerfil: widget.onAbrirPerfil,
+                ),
               ),
               SliverToBoxAdapter(
                 child: Padding(
@@ -421,9 +425,13 @@ class _AbaHomeProfessorState extends State<_AbaHomeProfessor> {
 }
 
 class _HeaderProfessor extends StatelessWidget {
-  const _HeaderProfessor({required this.primeiroNome});
+  const _HeaderProfessor({
+    required this.primeiroNome,
+    required this.onAbrirPerfil,
+  });
 
   final String primeiroNome;
+  final VoidCallback onAbrirPerfil;
 
   @override
   Widget build(BuildContext context) {
@@ -460,9 +468,7 @@ class _HeaderProfessor extends StatelessWidget {
                   ],
                 ),
               ),
-              _BotaoPerfil(
-                destino: Rotas.profileTeacher,
-              ),
+              _BotaoPerfil(onTap: onAbrirPerfil),
             ],
           ),
         ),
@@ -542,7 +548,7 @@ class _AcaoRapida extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
@@ -557,14 +563,14 @@ class _AcaoRapida extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: AppColors.purpleLight,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(icone, color: AppColors.purple, size: 20),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
               Text(
                 titulo,
                 style: const TextStyle(
@@ -655,14 +661,7 @@ class _QuestaoCard extends StatelessWidget {
   }
 
   String _eixoLabel(EixoBNCC eixo) {
-    switch (eixo) {
-      case EixoBNCC.tecnologia:
-        return 'Tecnologia';
-      case EixoBNCC.culturaDigital:
-        return 'Cultura';
-      case EixoBNCC.impacto:
-        return 'Impacto';
-    }
+    return eixo.rotulo;
   }
 
   Color _eixoCor(EixoBNCC eixo) {
@@ -778,7 +777,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                 delegate: SliverChildListDelegate([
                   _EixoBotao(
                     icone: Icons.laptop_chromebook,
-                    titulo: 'Tecnologia e Computação',
+                    titulo: EixoBNCC.tecnologia.rotulo,
                     cor: AppColors.purple,
                     onTap: () => Navigator.pushNamed(
                       context,
@@ -789,7 +788,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                   const SizedBox(height: 12),
                   _EixoBotao(
                     icone: Icons.public,
-                    titulo: 'Cultura Digital',
+                    titulo: EixoBNCC.culturaDigital.rotulo,
                     cor: Colors.blue,
                     onTap: () => Navigator.pushNamed(
                       context,
@@ -800,7 +799,7 @@ class _AbaQuestoesProfessor extends StatelessWidget {
                   const SizedBox(height: 12),
                   _EixoBotao(
                     icone: Icons.balance,
-                    titulo: 'Impacto Social e Ética',
+                    titulo: EixoBNCC.impacto.rotulo,
                     cor: Colors.green,
                     onTap: () => Navigator.pushNamed(
                       context,
@@ -900,9 +899,7 @@ class _AbaPerfilProfessor extends StatelessWidget {
         body: SafeArea(
           top: false,
           bottom: false,
-          child: SingleChildScrollView(
-            child: ConteudoPerfilProfessor(),
-          ),
+          child: SingleChildScrollView(child: ConteudoPerfilProfessor()),
         ),
       ),
     );
@@ -910,29 +907,32 @@ class _AbaPerfilProfessor extends StatelessWidget {
 }
 
 /// Botao circular com icone de pessoa no cabecalho.
-/// Toque leva o usuario a rota [destino] informada (perfil do aluno
-/// ou do professor, conforme a tela em que aparece).
+/// Toque abre a aba Perfil da Home.
 class _BotaoPerfil extends StatelessWidget {
-  const _BotaoPerfil({required this.destino});
+  const _BotaoPerfil({required this.onTap});
 
-  final String destino;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      shape: const CircleBorder(),
-      child: InkWell(
-        customBorder: const CircleBorder(),
-        onTap: () => Navigator.pushNamed(context, destino),
-        child: Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: Colors.white.withValues(alpha: 0.2),
+    return Tooltip(
+      message: 'Abrir perfil',
+      child: Material(
+        color: Colors.transparent,
+        shape: const CircleBorder(),
+        child: InkWell(
+          key: const Key('home-profile-button'),
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.white.withValues(alpha: 0.2),
+            ),
+            child: const Icon(Icons.person, color: Colors.white, size: 28),
           ),
-          child: const Icon(Icons.person, color: Colors.white, size: 28),
         ),
       ),
     );

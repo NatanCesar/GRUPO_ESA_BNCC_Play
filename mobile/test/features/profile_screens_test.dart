@@ -39,10 +39,11 @@ Future<void> pumpPerfil(WidgetTester tester, {required Papel papel}) async {
       value: sessao,
       child: MaterialApp(
         theme: AppTheme.light,
-        home: papel == Papel.professor
-            ? const ProfileTeacherScreen()
-            : const ProfileStudentScreen(),
+        initialRoute: '/perfil-teste',
         routes: {
+          '/perfil-teste': (_) => papel == Papel.professor
+              ? const ProfileTeacherScreen()
+              : const ProfileStudentScreen(),
           Rotas.editProfile: (_) => const Scaffold(body: Text('editar perfil')),
           Rotas.splash: (_) => const Scaffold(body: Text('tela inicial')),
         },
@@ -67,6 +68,15 @@ void main() {
 
       expect(find.text('Minha Escola'), findsOneWidget);
       expect(find.text('E.E. Monteiro Lobato'), findsOneWidget);
+    });
+
+    testWidgets('Minha Escola leva a edicao', (tester) async {
+      await pumpPerfil(tester, papel: Papel.professor);
+
+      await tester.tap(find.text('Minha Escola'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('editar perfil'), findsOneWidget);
     });
 
     testWidgets('estatisticas comecam zeradas no ciclo 1', (tester) async {
@@ -112,6 +122,15 @@ void main() {
       await pumpPerfil(tester, papel: Papel.aluno);
 
       expect(find.text('9 ano B'), findsOneWidget);
+    });
+
+    testWidgets('Minha Turma leva a edicao', (tester) async {
+      await pumpPerfil(tester, papel: Papel.aluno);
+
+      await tester.tap(find.text('Minha Turma'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('editar perfil'), findsOneWidget);
     });
 
     testWidgets('nao mostra o e-mail de outros usuarios', (tester) async {
