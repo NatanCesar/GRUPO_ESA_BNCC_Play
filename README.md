@@ -20,6 +20,26 @@ A proposta busca fortalecer competências como:
 
 Além disso, o projeto considera princípios de UX/UI para oferecer uma experiência simples, intuitiva e acessível em ambiente escolar.
 
+## Entrega final do aplicativo mobile
+
+O aplicativo foi desenvolvido em **Flutter**, como alternativa ao Kodular. O
+equivalente ao arquivo `.aia` é o código-fonte disponível na pasta
+[`mobile/`](mobile/), acompanhado do `pubspec.yaml` e dos projetos nativos. O
+APK é o artefato instalável para Android.
+
+[**Baixar BNCC Play para Android (APK)**](https://github.com/NatanCesar/GRUPO_ESA_BNCC_Play/releases/latest/download/bncc-play.apk)
+
+Escaneie o QR Code para abrir o download do APK no celular:
+
+<a href="https://github.com/NatanCesar/GRUPO_ESA_BNCC_Play/releases/latest/download/bncc-play.apk">
+  <img src="docs/qr-code-apk.png" alt="QR Code para baixar o APK do BNCC Play" width="240">
+</a>
+
+> No Android, pode ser necessário autorizar a instalação de aplicativos de
+> fontes desconhecidas para o navegador ou gerenciador de arquivos utilizado.
+> O código-fonte, instruções completas e a matriz do backlog estão no
+> [README do aplicativo mobile](mobile/README.md).
+
 ---
 
 # Objetivos
@@ -133,10 +153,6 @@ O projeto considera princípios de UX/UI para garantir:
 
 # Futuras Melhorias
 
-* Ranking de jogadores/alunos
-* Sistema de pontuação e recompensas
-* Dashboard pedagógico
-* Relatórios de desempenho
 * Multiplayer real entre dispositivos (substituindo o gateway local simulado)
 * Integração com plataformas educacionais
 * Exportação de relatórios
@@ -164,9 +180,9 @@ O projeto considera princípios de UX/UI para garantir:
 # Clonar o Repositório
 
 ```bash id="jlwmif"
-git clone https://github.com/NatanCesar/BNCC-Play.git
+git clone https://github.com/NatanCesar/GRUPO_ESA_BNCC_Play.git
 
-cd BNCC-Play
+cd GRUPO_ESA_BNCC_Play
 ```
 
 ---
@@ -265,9 +281,10 @@ sistema de partidas, ranking, dashboard e relatórios. O multiplayer desta vers�
 
 ## Pré-requisitos
 
-* Flutter SDK com Dart `^3.12.2` (verifique com `flutter --version`)
+* Flutter 3.44.2 com Dart 3.12.2, versões usadas para validar esta entrega
 * Android Studio (com Android SDK + emulador configurado) e/ou Xcode para iOS
 * Chrome ou outro navegador, caso queira rodar na web
+* Java 17 para o build Android
 * Git
 
 > O arquivo [mobile/mise.toml](mobile/mise.toml) declara as ferramentas nativas
@@ -321,7 +338,7 @@ flutter run -d chrome
 ```
 
 > No primeiro build Android/iOS o Flutter baixa dependências nativas e gera o
-> projeto Gradrodle/Pod — pode demorar alguns minutos.
+> projeto Gradle/Pod — pode demorar alguns minutos.
 
 ---
 
@@ -341,7 +358,9 @@ flutter build ios --release
 flutter build web --release
 ```
 
-Os artefatos ficam em `mobile/build/`.
+O APK é gerado em
+`mobile/build/app/outputs/flutter-apk/app-release.apk`. Os demais artefatos
+ficam em `mobile/build/`.
 
 ---
 
