@@ -67,7 +67,7 @@ class _LoginScreenState extends State<LoginScreen> {
     final destino = usuario.papel == Papel.professor
         ? Rotas.homeTeacher
         : Rotas.homeStudent;
-    Navigator.pushReplacementNamed(context, destino);
+    Navigator.pushNamedAndRemoveUntil(context, destino, (_) => false);
   }
 
   @override

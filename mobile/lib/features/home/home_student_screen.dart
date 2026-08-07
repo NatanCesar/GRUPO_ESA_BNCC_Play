@@ -134,12 +134,18 @@ class _HomeStudentScreenState extends State<HomeStudentScreen>
         onAbrirPerfil: () => _onTabSelecionada(3),
       ),
       _AbaJogarAluno(usuario: usuario),
-      _AbaRankingAluno(usuarioId: usuario.id!),
+      _AbaRankingAluno(
+        usuarioId: usuario.id!,
+        onVoltar: () => _onTabSelecionada(0),
+      ),
       _AbaPerfilAluno(chaveConteudo: _chaveAbaPerfil),
     ];
 
     return PopScope(
-      canPop: false,
+      canPop: _indiceAtual == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _indiceAtual != 0) _onTabSelecionada(0);
+      },
       child: Scaffold(
         body: PageView(
           controller: _pageController,
@@ -821,13 +827,14 @@ class _EixoBotao extends StatelessWidget {
 // ============================================================================
 
 class _AbaRankingAluno extends StatelessWidget {
-  const _AbaRankingAluno({required this.usuarioId});
+  const _AbaRankingAluno({required this.usuarioId, required this.onVoltar});
 
   final int usuarioId;
+  final VoidCallback onVoltar;
 
   @override
   Widget build(BuildContext context) {
-    return RankingScreen(alunoId: usuarioId);
+    return RankingScreen(alunoId: usuarioId, onVoltar: onVoltar);
   }
 }
 

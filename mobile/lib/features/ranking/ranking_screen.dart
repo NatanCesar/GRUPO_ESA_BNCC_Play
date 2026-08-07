@@ -8,9 +8,10 @@ import 'package:bncc_play_mobile/data/repositories/ranking_repository.dart';
 
 /// Tela de ranking de jogadores.
 class RankingScreen extends StatefulWidget {
-  const RankingScreen({super.key, required this.alunoId});
+  const RankingScreen({super.key, required this.alunoId, this.onVoltar});
 
   final int alunoId;
+  final VoidCallback? onVoltar;
 
   @override
   State<RankingScreen> createState() => _RankingScreenState();
@@ -94,7 +95,8 @@ class _RankingScreenState extends State<RankingScreen>
         title: const Text('Ranking'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          tooltip: 'Voltar',
+          onPressed: widget.onVoltar ?? () => Navigator.maybePop(context),
         ),
         bottom: TabBar(
           controller: _tabController,

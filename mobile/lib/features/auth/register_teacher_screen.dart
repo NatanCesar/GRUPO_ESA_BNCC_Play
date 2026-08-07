@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../core/routes.dart';
 import '../../core/session/session_scope.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_button.dart';
 import '../../core/widgets/app_text_field.dart';
@@ -29,6 +30,7 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
   final _usuario = TextEditingController();
   final _escola = TextEditingController();
   final _senha = TextEditingController();
+  bool _senhaVisivel = false;
 
   late final RegisterController _controller;
 
@@ -63,7 +65,7 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
       escola: _escola.text,
     );
     if (novo == null || !mounted) return;
-    Navigator.pushReplacementNamed(context, Rotas.homeTeacher);
+    Navigator.pushNamedAndRemoveUntil(context, Rotas.homeTeacher, (_) => false);
   }
 
   @override
@@ -90,11 +92,7 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                     const SizedBox(height: 8),
                     const Row(
                       children: [
-                        Icon(
-                          Icons.school,
-                          size: 32,
-                          color: Colors.white,
-                        ),
+                        Icon(Icons.school, size: 32, color: Colors.white),
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -158,9 +156,29 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                       hint: 'Mínimo 8 caracteres',
                       icon: Icons.lock,
                       errorText: erros['senha'],
-                      obscureText: true,
+                      obscureText: !_senhaVisivel,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _criarConta(),
+                      suffixIcon: IconButton(
+                        key: const Key('toggle-password-visibility'),
+                        icon: Icon(
+                          _senhaVisivel
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 20,
+                          color: AppColors.purple,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
+                        onPressed: () =>
+                            setState(() => _senhaVisivel = !_senhaVisivel),
+                        tooltip: _senhaVisivel
+                            ? 'Esconder senha'
+                            : 'Mostrar senha',
+                      ),
                     ),
                     const SizedBox(height: 24),
                     if (_controller.erroGeral != null) ...[
@@ -183,7 +201,10 @@ class _RegisterTeacherScreenState extends State<RegisterTeacherScreen> {
                         GestureDetector(
                           onTap: () =>
                               Navigator.pushNamed(context, Rotas.login),
-                          child: const Text('Entrar', style: AppTheme.footerLink),
+                          child: const Text(
+                            'Entrar',
+                            style: AppTheme.footerLink,
+                          ),
                         ),
                       ],
                     ),

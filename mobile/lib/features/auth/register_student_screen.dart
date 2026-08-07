@@ -29,6 +29,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
   final _usuario = TextEditingController();
   final _turma = TextEditingController();
   final _senha = TextEditingController();
+  bool _senhaVisivel = false;
 
   late final RegisterController _controller;
 
@@ -63,7 +64,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
       turma: _turma.text,
     );
     if (novo == null || !mounted) return;
-    Navigator.pushReplacementNamed(context, Rotas.homeStudent);
+    Navigator.pushNamedAndRemoveUntil(context, Rotas.homeStudent, (_) => false);
   }
 
   @override
@@ -91,11 +92,7 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
                     const SizedBox(height: 8),
                     const Row(
                       children: [
-                        Icon(
-                          Icons.school,
-                          size: 32,
-                          color: Colors.white,
-                        ),
+                        Icon(Icons.school, size: 32, color: Colors.white),
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
@@ -159,9 +156,29 @@ class _RegisterStudentScreenState extends State<RegisterStudentScreen> {
                       hint: 'Mínimo 8 caracteres',
                       icon: Icons.lock,
                       errorText: erros['senha'],
-                      obscureText: true,
+                      obscureText: !_senhaVisivel,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _criarConta(),
+                      suffixIcon: IconButton(
+                        key: const Key('toggle-password-visibility'),
+                        icon: Icon(
+                          _senhaVisivel
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 20,
+                          color: AppColors.purple,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints.tightFor(
+                          width: 40,
+                          height: 40,
+                        ),
+                        onPressed: () =>
+                            setState(() => _senhaVisivel = !_senhaVisivel),
+                        tooltip: _senhaVisivel
+                            ? 'Esconder senha'
+                            : 'Mostrar senha',
+                      ),
                     ),
                     const SizedBox(height: 24),
                     if (_controller.erroGeral != null) ...[

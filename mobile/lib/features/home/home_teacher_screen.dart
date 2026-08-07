@@ -116,13 +116,17 @@ class _HomeTeacherScreenState extends State<HomeTeacherScreen> {
     final telas = [
       _AbaHomeProfessor(onAbrirPerfil: () => _onTabSelecionada(3)),
       const _AbaQuestoesProfessor(),
-      const DashboardScreenPlaceholder(),
+      DashboardScreenPlaceholder(onVoltar: () => _onTabSelecionada(0)),
       const _AbaPerfilProfessor(),
     ];
 
     return PopScope(
-      // Na home, voltar do sistema sai do app (nao leva para login).
-      canPop: false,
+      // Em uma aba secundaria, voltar retorna ao Inicio. No Inicio, o
+      // sistema pode fechar o app porque a autenticacao limpa a pilha.
+      canPop: _indiceAtual == 0,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop && _indiceAtual != 0) _onTabSelecionada(0);
+      },
       child: Scaffold(
         body: PageView(
           controller: _pageController,
@@ -218,14 +222,16 @@ class _ItemNav extends StatelessWidget {
 
 /// Widget wrapper para DashboardScreen com guarda de acesso.
 class DashboardScreenPlaceholder extends StatelessWidget {
-  const DashboardScreenPlaceholder({super.key});
+  const DashboardScreenPlaceholder({super.key, required this.onVoltar});
+
+  final VoidCallback onVoltar;
 
   @override
   Widget build(BuildContext context) {
     final sessao = context.read<SessionScope>();
     final usuario = sessao.usuario;
     if (usuario == null) return const SizedBox.shrink();
-    return DashboardScreen(professorId: usuario.id!);
+    return DashboardScreen(professorId: usuario.id!, onVoltar: onVoltar);
   }
 }
 

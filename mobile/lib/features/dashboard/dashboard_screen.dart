@@ -14,9 +14,10 @@ import 'package:bncc_play_mobile/features/dashboard/dashboard_controller.dart';
 ///
 /// Inclui guarda de acesso: apenas professores podem acessar.
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key, required this.professorId});
+  const DashboardScreen({super.key, required this.professorId, this.onVoltar});
 
   final int professorId;
+  final VoidCallback? onVoltar;
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -67,13 +68,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
         repository: EstatisticaRepository(banco: Provider.of(context)),
         professorId: widget.professorId,
       )..carregar(),
-      child: const _DashboardBody(),
+      child: _DashboardBody(onVoltar: widget.onVoltar),
     );
   }
 }
 
 class _DashboardBody extends StatelessWidget {
-  const _DashboardBody();
+  const _DashboardBody({this.onVoltar});
+
+  final VoidCallback? onVoltar;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +90,8 @@ class _DashboardBody extends StatelessWidget {
         title: const Text('Dashboard'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          tooltip: 'Voltar',
+          onPressed: onVoltar ?? () => Navigator.maybePop(context),
         ),
       ),
       body: _buildBody(context, ctrl),

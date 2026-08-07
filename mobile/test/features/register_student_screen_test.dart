@@ -127,6 +127,24 @@ void main() {
       expect(find.text('Informe sua senha'), findsOneWidget);
     });
 
+    testWidgets('o olho mostra e volta a esconder a senha', (tester) async {
+      await pumpTela(tester);
+
+      expect(find.byTooltip('Mostrar senha'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('toggle-password-visibility')));
+      await tester.pump();
+
+      var senha = tester.widget<TextField>(find.byType(TextField).at(4));
+      expect(senha.obscureText, isFalse);
+      expect(find.byTooltip('Esconder senha'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('toggle-password-visibility')));
+      await tester.pump();
+
+      senha = tester.widget<TextField>(find.byType(TextField).at(4));
+      expect(senha.obscureText, isTrue);
+    });
+
     testWidgets('avisa quando o nome de usuario ja existe', (tester) async {
       await ambiente.usuarios.cadastrar(
         nome: 'Outro Joao',
