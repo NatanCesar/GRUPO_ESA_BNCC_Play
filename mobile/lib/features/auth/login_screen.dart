@@ -25,6 +25,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late final LoginController _controller;
   final _emailCtrl = TextEditingController();
   final _senhaCtrl = TextEditingController();
+  bool _senhaVisivel = false;
 
   @override
   void initState() {
@@ -133,9 +134,21 @@ class _LoginScreenState extends State<LoginScreen> {
                       hint: 'Sua senha',
                       icon: Icons.lock,
                       errorText: _controller.erroSenha,
-                      obscureText: true,
+                      obscureText: !_senhaVisivel,
                       textInputAction: TextInputAction.done,
                       onSubmitted: (_) => _entrar(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _senhaVisivel
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          size: 20,
+                          color: AppColors.purple,
+                        ),
+                        onPressed: () =>
+                            setState(() => _senhaVisivel = !_senhaVisivel),
+                        tooltip: _senhaVisivel ? 'Esconder senha' : 'Mostrar senha',
+                      ),
                     ),
                     const SizedBox(height: 20),
                     Align(

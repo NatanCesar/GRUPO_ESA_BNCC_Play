@@ -21,7 +21,8 @@
       "Bash(flutter build *)",
       "Bash(adb devices *)",
       "Bash(adb uninstall *)",
-      "Bash(gh issue *)"
+      "Bash(gh issue *)",
+      "Bash(flutter test *)"
     ]
   }
 }
